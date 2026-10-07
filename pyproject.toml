@@ -1,0 +1,11 @@
+[project]
+name = "comfyui-fotufilm"
+version = "0.1.0"
+description = "Fotufilm film simulation and float HDR video finishing nodes for ComfyUI"
+requires-python = ">=3.12"
+license = "GPL-3.0-only"
+readme = "README.md"
+
+[project.urls]
+Repository = "https://github.com/comfyrob/ComfyUI-Fotufilm"
+Issues = "https://github.com/comfyrob/ComfyUI-Fotufilm/issues"

@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+  "stock": "vision250d",
+  "format": "super35",
+  "medium": "screen",
+  "digitalReference": "graded-print",
+  "seed": 1,
+  "params": {
+    "ev": 0,
+    "temperature": 6504,
+    "tint": 0,
+    "highlights": 0,
+    "shadows": 0,
+    "saturation": 1,
+    "vibrance": 0,
+    "grain": 1,
+    "gradeShadowsWarmth": 0,
+    "gradeHighlightsWarmth": 0
+  },
+  "profile": {
+    "halation": 0,
+    "screenGrade": 2,
+    "screenExposure": 0
+  }
+}

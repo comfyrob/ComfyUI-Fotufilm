@@ -1,0 +1,10 @@
+{
+  "filename": "av-12.3.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "url": "https://files.pythonhosted.org/packages/27/08/220d5a1ae7e7830d66d041c71e607c1f5df2e3598b12fb406b0d7c2defa7/av-12.3.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "digests": {
+    "blake2b_256": "2708220d5a1ae7e7830d66d041c71e607c1f5df2e3598b12fb406b0d7c2defa7",
+    "md5": "211f2da8aec477ca8dfe02c90aa3cd47",
+    "sha256": "32f3eef56b2df289db6105f9fe2ebc9a8134a8adbd62190daeb8e22c4ff47794"
+  },
+  "size": 34746451
+}

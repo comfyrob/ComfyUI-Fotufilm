@@ -1,0 +1,182 @@
+{
+  "libcurl4t64": {
+    "Version": "8.5.0-2ubuntu10.15",
+    "Filename": "pool/main/c/curl/libcurl4t64_8.5.0-2ubuntu10.15_amd64.deb",
+    "SHA256": "02f8f39727a43d5a7057cba35cda866be00d929b91ea67ed02dd9d6402fa551c"
+  },
+  "libzstd1": {
+    "Version": "1.5.5+dfsg2-2build1.1",
+    "Filename": "pool/main/libz/libzstd/libzstd1_1.5.5+dfsg2-2build1.1_amd64.deb",
+    "SHA256": "dfcf25061e07aad7efd3f4f880ba5ad4d4d09ebe7fc8cc77ab6b8a161d6d4727"
+  },
+  "libssl3t64": {
+    "Version": "3.0.13-0ubuntu3.16",
+    "Filename": "pool/main/o/openssl/libssl3t64_3.0.13-0ubuntu3.16_amd64.deb",
+    "SHA256": "219f43b1cd836a4da550938db5fda93160d269d39a4edcf1f1ce698a470db797"
+  },
+  "libssh-4": {
+    "Version": "0.10.6-2ubuntu0.5",
+    "Filename": "pool/main/libs/libssh/libssh-4_0.10.6-2ubuntu0.5_amd64.deb",
+    "SHA256": "2448ce5f99e49721d12f8b227f2472dd08ed7a78184dd819fd03a42693024a16"
+  },
+  "libgssapi-krb5-2": {
+    "Version": "1.20.1-6ubuntu2.10",
+    "Filename": "pool/main/k/krb5/libgssapi-krb5-2_1.20.1-6ubuntu2.10_amd64.deb",
+    "SHA256": "0d4a0187bcdbbe3e6a10bfa574100087d12052d0d0ef28614fd6210021c587b2"
+  },
+  "libkrb5support0": {
+    "Version": "1.20.1-6ubuntu2.10",
+    "Filename": "pool/main/k/krb5/libkrb5support0_1.20.1-6ubuntu2.10_amd64.deb",
+    "SHA256": "9224ede3246a82a845ea97652ecfae57f88e8d8f520d8a186f9157167574fb34"
+  },
+  "libk5crypto3": {
+    "Version": "1.20.1-6ubuntu2.10",
+    "Filename": "pool/main/k/krb5/libk5crypto3_1.20.1-6ubuntu2.10_amd64.deb",
+    "SHA256": "273f7cc95a68d927d7f71c3e78b7717a16a8d86e646a206bae7bf797150ae9db"
+  },
+  "libcom-err2": {
+    "Version": "1.47.0-2.4~exp1ubuntu4.1",
+    "Filename": "pool/main/e/e2fsprogs/libcom-err2_1.47.0-2.4~exp1ubuntu4.1_amd64.deb",
+    "SHA256": "7ab24d3057dabf86db8f771ad6e43f073ed86b6b950d6e8ba22cb9fe6707bbc9"
+  },
+  "libkrb5-3": {
+    "Version": "1.20.1-6ubuntu2.10",
+    "Filename": "pool/main/k/krb5/libkrb5-3_1.20.1-6ubuntu2.10_amd64.deb",
+    "SHA256": "60b48c5a3233f1d8caba30d6573edc8e131911ab6d63adcd664f7cbe62708362"
+  },
+  "libkeyutils1": {
+    "Version": "1.6.3-3build1",
+    "Filename": "pool/main/k/keyutils/libkeyutils1_1.6.3-3build1_amd64.deb",
+    "SHA256": "0679f198b0128179e46cdf956fb2022c23c758664c00bc8efa0382d509683a8a"
+  },
+  "librtmp1": {
+    "Version": "2.4+20151223.gitfa8646d.1-2build7",
+    "Filename": "pool/main/r/rtmpdump/librtmp1_2.4+20151223.gitfa8646d.1-2build7_amd64.deb",
+    "SHA256": "967a39dbc14236d1580ede01d80fd78444668572e716734e1ac66c175052594e"
+  },
+  "libnettle8t64": {
+    "Version": "3.9.1-2.2build1.1",
+    "Filename": "pool/main/n/nettle/libnettle8t64_3.9.1-2.2build1.1_amd64.deb",
+    "SHA256": "6d97fbc1972633083f08f51ccab433606c97bbceb897c631c66495117ca3406f"
+  },
+  "libhogweed6t64": {
+    "Version": "3.9.1-2.2build1.1",
+    "Filename": "pool/main/n/nettle/libhogweed6t64_3.9.1-2.2build1.1_amd64.deb",
+    "SHA256": "a9b5f7e9d49ba9060e1c933567046fbc6feab6096799cbf550b7214dc9b0f49b"
+  },
+  "libgmp10": {
+    "Version": "2:6.3.0+dfsg-2ubuntu6.1",
+    "Filename": "pool/main/g/gmp/libgmp10_6.3.0+dfsg-2ubuntu6.1_amd64.deb",
+    "SHA256": "285f8a505dfa8e1b33f357a9d8d3477ad35bf18c0b34771a6df4c25923f3ae0d"
+  },
+  "libgnutls30t64": {
+    "Version": "3.8.3-1.1ubuntu3.6",
+    "Filename": "pool/main/g/gnutls28/libgnutls30t64_3.8.3-1.1ubuntu3.6_amd64.deb",
+    "SHA256": "b8944756260c5ea6b7fac019745f931f905aa7a4df0763676b1b25c911b692e2"
+  },
+  "libunistring5": {
+    "Version": "1.1-2build1.1",
+    "Filename": "pool/main/libu/libunistring/libunistring5_1.1-2build1.1_amd64.deb",
+    "SHA256": "203d7657b5f54633fba1a9c9b784d556ef83c9f6787b3185ba55a88e07b865a3"
+  },
+  "libtasn1-6": {
+    "Version": "4.19.0-3ubuntu0.24.04.2",
+    "Filename": "pool/main/libt/libtasn1-6/libtasn1-6_4.19.0-3ubuntu0.24.04.2_amd64.deb",
+    "SHA256": "f82c9ad142f952ea523bda5bfca7bb0802af3a50b8c0f0dd9ec18cdfa104bde7"
+  },
+  "libp11-kit0": {
+    "Version": "0.25.3-4ubuntu2.2",
+    "Filename": "pool/main/p/p11-kit/libp11-kit0_0.25.3-4ubuntu2.2_amd64.deb",
+    "SHA256": "e7c58aeac19d89f5f1492dfaa52b8623bcd56edc40983f5243ad56d94f477bf2"
+  },
+  "libffi8": {
+    "Version": "3.4.6-1build1",
+    "Filename": "pool/main/libf/libffi/libffi8_3.4.6-1build1_amd64.deb",
+    "SHA256": "637e6a7744de08cd331a41f4efd0d24e6ea9064843dea9d1c6ca87bdb5f038a2"
+  },
+  "libidn2-0": {
+    "Version": "2.3.7-2build1.1",
+    "Filename": "pool/main/libi/libidn2/libidn2-0_2.3.7-2build1.1_amd64.deb",
+    "SHA256": "46bfd10df095a23b65f58115de47a547c9a2d14627749bd0423ae78c14be77d3"
+  },
+  "libpsl5t64": {
+    "Version": "0.21.2-1.1build1",
+    "Filename": "pool/main/libp/libpsl/libpsl5t64_0.21.2-1.1build1_amd64.deb",
+    "SHA256": "a6c85d1303ae90b6a3209d73c4f047f82c27cdc963c48adfd95dd7abca64f039"
+  },
+  "libnghttp2-14": {
+    "Version": "1.59.0-1ubuntu0.4",
+    "Filename": "pool/main/n/nghttp2/libnghttp2-14_1.59.0-1ubuntu0.4_amd64.deb",
+    "SHA256": "73adcbb9df32cd7c9d46b1c7598bbbbcf249be705d62d966694cfc9976a15dfe"
+  },
+  "libldap2": {
+    "Version": "2.6.10+dfsg-0ubuntu0.24.04.1",
+    "Filename": "pool/main/o/openldap/libldap2_2.6.10+dfsg-0ubuntu0.24.04.1_amd64.deb",
+    "SHA256": "7f3f8e565401256f21d5aa562c9f92dbb63537b73aaea6283e4db5264f1598f4"
+  },
+  "libsasl2-2": {
+    "Version": "2.1.28+dfsg1-5ubuntu3.1",
+    "Filename": "pool/main/c/cyrus-sasl2/libsasl2-2_2.1.28+dfsg1-5ubuntu3.1_amd64.deb",
+    "SHA256": "eda097f98dcb3a08b9ce157d6191d140e4885c1cba47b683c94b8ca45e88f458"
+  },
+  "libsasl2-modules-db": {
+    "Version": "2.1.28+dfsg1-5ubuntu3.1",
+    "Filename": "pool/main/c/cyrus-sasl2/libsasl2-modules-db_2.1.28+dfsg1-5ubuntu3.1_amd64.deb",
+    "SHA256": "1f13548b1774cd9c70c50b8c3267204a101334a4d2f979338896ba5a4c6f81b8"
+  },
+  "libdb5.3t64": {
+    "Version": "5.3.28+dfsg2-7",
+    "Filename": "pool/main/d/db5.3/libdb5.3t64_5.3.28+dfsg2-7_amd64.deb",
+    "SHA256": "a78a25c8fad8fdd0b7bc6b297da5d5685579be1e57732aa47870830e4a13161e"
+  },
+  "libbrotli1": {
+    "Version": "1.1.0-2build2",
+    "Filename": "pool/main/b/brotli/libbrotli1_1.1.0-2build2_amd64.deb",
+    "SHA256": "74492419b8fda803774b8c9acef6afc5d2f9ff31782635aae212906adae7b277"
+  },
+  "libsharpyuv0": {
+    "Version": "1.3.2-0.4build3",
+    "Filename": "pool/main/libw/libwebp/libsharpyuv0_1.3.2-0.4build3_amd64.deb",
+    "SHA256": "4e1763494e5b9d34192313aa88e38201fc67b3f13ea96ca268d26401a3002791"
+  },
+  "libtiff6": {
+    "Version": "4.5.1+git230720-4ubuntu2.5",
+    "Filename": "pool/main/t/tiff/libtiff6_4.5.1+git230720-4ubuntu2.5_amd64.deb",
+    "SHA256": "564cdf59dda5e1a826c51b5868ee2785fffa26ee5a7bad95bc5e8c8224c931b8"
+  },
+  "libwebp7": {
+    "Version": "1.3.2-0.4build3",
+    "Filename": "pool/main/libw/libwebp/libwebp7_1.3.2-0.4build3_amd64.deb",
+    "SHA256": "c86f6439f0bbc531f7199794654231f3b29327d6585958511b958795d51c2484"
+  },
+  "liblzma5": {
+    "Version": "5.6.1+really5.4.5-1ubuntu0.3",
+    "Filename": "pool/main/x/xz-utils/liblzma5_5.6.1+really5.4.5-1ubuntu0.3_amd64.deb",
+    "SHA256": "d2eabd41ca77d2c2dd9d5d4ef478cccb64ffde6279c47cf4699a857d46785a52"
+  },
+  "liblerc4": {
+    "Version": "4.0.0+ds-4ubuntu2",
+    "Filename": "pool/main/l/lerc/liblerc4_4.0.0+ds-4ubuntu2_amd64.deb",
+    "SHA256": "f1b9dbfa28c56564f6b544f3757f5f3f4d549ce9962f39e897812c23b0a5d0e7"
+  },
+  "libjpeg8": {
+    "Version": "8c-2ubuntu11",
+    "Filename": "pool/main/libj/libjpeg8-empty/libjpeg8_8c-2ubuntu11_amd64.deb",
+    "SHA256": "4d6ed682972bddf62af158a06d68a0dda497e421423b7ca92fb450b3d9ceaac9"
+  },
+  "libjpeg-turbo8": {
+    "Version": "2.1.5-2ubuntu2",
+    "Filename": "pool/main/libj/libjpeg-turbo/libjpeg-turbo8_2.1.5-2ubuntu2_amd64.deb",
+    "SHA256": "f68b5b23bc8a1688fb787d2aed7e2cdf895a73022f6a5025e183162dac4500b2"
+  },
+  "libjbig0": {
+    "Version": "2.1-6.1ubuntu2",
+    "Filename": "pool/main/j/jbigkit/libjbig0_2.1-6.1ubuntu2_amd64.deb",
+    "SHA256": "074a760a86213a1286ad60f56394c90885cf45af070626a88c480d90b78c175a"
+  },
+  "libdeflate0": {
+    "Version": "1.19-1build1.1",
+    "Filename": "pool/main/libd/libdeflate/libdeflate0_1.19-1build1.1_amd64.deb",
+    "SHA256": "8e7dfa9e63a9b5058071b84da48bb2e30dea07de169e80fbc759fe0e68639269"
+  }
+}

@@ -1,0 +1,6 @@
+OpenEXR>=3.3,<4
+numpy>=1.25
+imageio-ffmpeg==0.6.0
+PySquashfsImage==0.9.0; sys_platform == "linux"
+pyelftools==0.33; sys_platform == "linux"
+zstandard==0.25.0; sys_platform == "linux"

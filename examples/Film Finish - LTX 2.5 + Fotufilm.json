@@ -1,0 +1,2704 @@
+{
+  "id": "a82698e0-b4b3-49a6-937e-ab2fc0727bbe",
+  "revision": 0,
+  "last_node_id": 4206132015266245,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 208137318105326,
+      "type": "RandomNoise",
+      "pos": [
+        2760,
+        360
+      ],
+      "size": [
+        385,
+        140
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            1421694924214423
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise",
+        "film_finish_source_id": "4832"
+      },
+      "widgets_values": [
+        42,
+        "fixed"
+      ]
+    },
+    {
+      "id": 4206132015266245,
+      "type": "CFGGuider",
+      "pos": [
+        2760,
+        630
+      ],
+      "size": [
+        385,
+        180
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1541436183767979
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 4100386714554991
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 364684362477521
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            236606082101233
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CFGGuider",
+        "film_finish_source_id": "4828"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 2629243286156502,
+      "type": "KSamplerSelect",
+      "pos": [
+        3200,
+        360
+      ],
+      "size": [
+        385,
+        110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            2900286264188252
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerSelect",
+        "film_finish_source_id": "4831"
+      },
+      "widgets_values": [
+        "euler"
+      ]
+    },
+    {
+      "id": 3361341782889222,
+      "type": "ManualSigmas",
+      "pos": [
+        3200,
+        630
+      ],
+      "size": [
+        400,
+        240
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            2801436504909265
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ManualSigmas",
+        "film_finish_source_id": "4984"
+      },
+      "widgets_values": [
+        "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+      ]
+    },
+    {
+      "id": 3068795723739698,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        2760,
+        1010
+      ],
+      "size": [
+        420,
+        225
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 1421694924214423
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 236606082101233
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 2900286264188252
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 2801436504909265
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 2786045548477495
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            2561622512136425
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "film_finish_source_id": "4829"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 663292463568756,
+      "type": "LTXVSeparateAVLatent",
+      "pos": [
+        3780,
+        360
+      ],
+      "size": [
+        420,
+        110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "av_latent",
+          "type": "LATENT",
+          "link": 2561622512136425
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            806995655832622
+          ]
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVSeparateAVLatent",
+        "film_finish_source_id": "4845"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1681716081761363,
+      "type": "LTXVCropGuides",
+      "pos": [
+        4260,
+        360
+      ],
+      "size": [
+        420,
+        155
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 1781109331043605
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3968820905094326
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 806995655832622
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": []
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": []
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            3553584211335263
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVCropGuides",
+        "film_finish_source_id": "5000"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 507579890429115,
+      "type": "VAEDecodeTiled",
+      "pos": [
+        3780,
+        640
+      ],
+      "size": [
+        420,
+        280
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 3553584211335263
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 700631105123321
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            334216239752290
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecodeTiled",
+        "film_finish_source_id": "5538"
+      },
+      "widgets_values": [
+        512,
+        64,
+        128,
+        32
+      ]
+    },
+    {
+      "id": 1303878523339175,
+      "type": "VAELoader",
+      "pos": [
+        570,
+        960
+      ],
+      "size": [
+        460,
+        135
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            4111452055376084
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "film_finish_source_id": "5600"
+      },
+      "widgets_values": [
+        "ltx-2.5-audio-vae-bf16.safetensors"
+      ]
+    },
+    {
+      "id": 1662421446783234,
+      "type": "VAELoader",
+      "pos": [
+        570,
+        650
+      ],
+      "size": [
+        460,
+        135
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            2004971831881960
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "film_finish_source_id": "5601"
+      },
+      "widgets_values": [
+        "ltx-2.5-video-vae-bf16.safetensors"
+      ]
+    },
+    {
+      "id": 2625548805057373,
+      "type": "UNETLoader",
+      "pos": [
+        570,
+        360
+      ],
+      "size": [
+        460,
+        165
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1167074758886142
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "film_finish_source_id": "5602"
+      },
+      "widgets_values": [
+        "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 2305924178829848,
+      "type": "LTXICLoRALoaderModelOnly",
+      "pos": [
+        1070,
+        360
+      ],
+      "size": [
+        460,
+        190
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1167074758886142
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            1541436183767979
+          ]
+        },
+        {
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "links": [
+            2102124435801151
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXICLoRALoaderModelOnly",
+        "film_finish_source_id": "5606"
+      },
+      "widgets_values": [
+        "ltx-2.5-22b-ic-lora-sdr-to-hdr-1.0.safetensors",
+        1
+      ]
+    },
+    {
+      "id": 1885835605168275,
+      "type": "LTXVLoadConditioning",
+      "pos": [
+        1070,
+        960
+      ],
+      "size": [
+        460,
+        165
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1281326140959372,
+            3524931479992426
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVLoadConditioning",
+        "film_finish_source_id": "9020"
+      },
+      "widgets_values": [
+        "ltx-2.5-22b-ic-lora-sdr-to-hdr-scene-emb.safetensors",
+        "cpu"
+      ]
+    },
+    {
+      "id": 2873915308447822,
+      "type": "LTXVHDRDecodePostprocess",
+      "pos": [
+        4260,
+        640
+      ],
+      "size": [
+        420,
+        360
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 334216239752290
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "",
+          "type": "IMAGE",
+          "links": [
+            1962886980454935
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVHDRDecodePostprocess",
+        "film_finish_source_id": "9012"
+      },
+      "widgets_values": [
+        "acescct",
+        0,
+        false,
+        "acescg",
+        "output/hdr_exr",
+        "frame",
+        true
+      ]
+    },
+    {
+      "id": 3856135713214468,
+      "type": "LTXVConditioning",
+      "pos": [
+        2180,
+        610
+      ],
+      "size": [
+        410,
+        165
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 1281326140959372
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3524931479992426
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "link": 1695175862083764,
+          "grow_id": 1695175862083764,
+          "widget": {
+            "name": "frame_rate"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            293587122795120
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            4053937290598833
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVConditioning",
+        "film_finish_source_id": "9021"
+      },
+      "widgets_values": [
+        25.0
+      ]
+    },
+    {
+      "id": 2429231254440455,
+      "type": "GetVideoComponents",
+      "pos": [
+        30,
+        730
+      ],
+      "size": [
+        390,
+        150
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 37052578405506
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            993386356147420,
+            643411535749755
+          ]
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            4465282823427531
+          ]
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "links": [
+            254840771652626,
+            175241190866636,
+            485195310167072,
+            1936409098405146
+          ]
+        },
+        {
+          "name": "bit_depth",
+          "type": "COMBO",
+          "links": []
+        },
+        {
+          "name": "color_space",
+          "type": "COMBO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GetVideoComponents",
+        "film_finish_source_id": "5105"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 815182055714869,
+      "type": "LTXVSDRToHDRWorkingSpace",
+      "pos": [
+        1690,
+        360
+      ],
+      "size": [
+        410,
+        140
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 993386356147420
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "IMAGE",
+          "links": [
+            1967160803524314
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVSDRToHDRWorkingSpace",
+        "film_finish_source_id": "9010"
+      },
+      "widgets_values": [
+        "srgb_gamma"
+      ]
+    },
+    {
+      "id": 3042515946266279,
+      "type": "LTXVVAEForceFloat32",
+      "pos": [
+        1070,
+        650
+      ],
+      "size": [
+        460,
+        100
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 2004971831881960
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "VAE",
+          "links": [
+            700631105123321,
+            872946090094179
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVVAEForceFloat32",
+        "film_finish_source_id": "9011"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 2035416096348897,
+      "type": "LTXVConcatAVLatent",
+      "pos": [
+        2180,
+        1490
+      ],
+      "size": [
+        410,
+        120
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "link": 797775825179602
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "link": 4239064921293731
+        }
+      ],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            2786045548477495
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVConcatAVLatent",
+        "film_finish_source_id": "4528"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 3495531663216668,
+      "type": "EmptyLTXVLatentVideo",
+      "pos": [
+        1690,
+        910
+      ],
+      "size": [
+        410,
+        230
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 2900324347870237,
+          "grow_id": 2900324347870237,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 2679525826676983,
+          "grow_id": 2679525826676983,
+          "widget": {
+            "name": "height"
+          }
+        },
+        {
+          "name": "length",
+          "type": "INT",
+          "link": 993600529145447,
+          "grow_id": 993600529145447,
+          "widget": {
+            "name": "length"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1873195885647481
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLTXVLatentVideo",
+        "film_finish_source_id": "3059"
+      },
+      "widgets_values": [
+        768,
+        512,
+        97,
+        1
+      ]
+    },
+    {
+      "id": 4107130497364466,
+      "type": "LTXAddVideoICLoRAGuide",
+      "pos": [
+        1690,
+        1490
+      ],
+      "size": [
+        440,
+        380
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 293587122795120
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 4053937290598833
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 872946090094179
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 1873195885647481
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3669752639720055
+        },
+        {
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "link": 2102124435801151,
+          "grow_id": 2102124435801151,
+          "widget": {
+            "name": "latent_downscale_factor"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            4100386714554991,
+            1781109331043605
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            364684362477521,
+            3968820905094326
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            797775825179602
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXAddVideoICLoRAGuide",
+        "film_finish_source_id": "5012"
+      },
+      "widgets_values": [
+        0,
+        1,
+        1.0,
+        "disabled",
+        false,
+        256,
+        64
+      ]
+    },
+    {
+      "id": 2334872338969572,
+      "type": "LTXVEmptyLatentAudio",
+      "pos": [
+        2180,
+        910
+      ],
+      "size": [
+        410,
+        200
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 4111452055376084
+        },
+        {
+          "name": "frames_number",
+          "type": "INT",
+          "link": 186839087192632,
+          "grow_id": 186839087192632,
+          "widget": {
+            "name": "frames_number"
+          }
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "link": 254840771652626,
+          "grow_id": 254840771652626,
+          "widget": {
+            "name": "frame_rate"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Latent",
+          "type": "LATENT",
+          "links": [
+            4239064921293731
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LTXVEmptyLatentAudio",
+        "film_finish_source_id": "9009"
+      },
+      "widgets_values": [
+        97,
+        25.0,
+        1
+      ]
+    },
+    {
+      "id": 2908950001115307,
+      "type": "LoadVideo",
+      "pos": [
+        30,
+        360
+      ],
+      "size": [
+        390,
+        290
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            37052578405506,
+            1180273305889565,
+            1173417548900078
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo",
+        "film_finish_source_id": "5106"
+      },
+      "widgets_values": [
+        "source.mp4"
+      ]
+    },
+    {
+      "id": 1714266439702642,
+      "type": "ComfyMathExpression",
+      "pos": [
+        1690,
+        610
+      ],
+      "size": [
+        410,
+        180
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "values",
+          "type": "COMFY_AUTOGROW_V3",
+          "link": null
+        },
+        {
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 175241190866636,
+          "grow_id": 175241190866636
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            1695175862083764
+          ]
+        },
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComfyMathExpression",
+        "film_finish_source_id": "9103"
+      },
+      "widgets_values": [
+        "a if a <= 30 else 30"
+      ]
+    },
+    {
+      "id": 3577605399617621,
+      "type": "FilmFinishHDRPad",
+      "pos": [
+        2180,
+        360
+      ],
+      "size": [
+        410,
+        150
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1967160803524314
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            3669752639720055
+          ]
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            2900324347870237
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            2679525826676983
+          ]
+        },
+        {
+          "name": "length",
+          "type": "INT",
+          "links": [
+            993600529145447,
+            186839087192632
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FilmFinishHDRPad",
+        "film_finish_source_id": "6000"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1578472274374596,
+      "type": "FilmFinishHDRRestore",
+      "pos": [
+        3780,
+        1130
+      ],
+      "size": [
+        420,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1962886980454935
+        },
+        {
+          "name": "reference",
+          "type": "IMAGE",
+          "link": 643411535749755
+        }
+      ],
+      "outputs": [
+        {
+          "name": "hdr_linear",
+          "type": "IMAGE",
+          "links": [
+            1716928423924690,
+            2048398712016832
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FilmFinishHDRRestore",
+        "film_finish_source_id": "6001"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 3139939765490514,
+      "type": "FilmFinishSaveHDRVideo",
+      "pos": [
+        4860,
+        360
+      ],
+      "size": [
+        660,
+        230
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1716928423924690
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 4465282823427531
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 485195310167072,
+          "grow_id": 485195310167072,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FilmFinishSaveHDRVideo",
+        "film_finish_source_id": "6002"
+      },
+      "widgets_values": [
+        24,
+        "film-finish-hdr/source",
+        "acescg"
+      ]
+    },
+    {
+      "id": 1539162593530005,
+      "type": "FilmFinishSaveHDRMaster",
+      "pos": [
+        4860,
+        750
+      ],
+      "size": [
+        660,
+        230
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2048398712016832
+        },
+        {
+          "name": "source",
+          "type": "VIDEO",
+          "link": 1180273305889565
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 1936409098405146,
+          "grow_id": 1936409098405146,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "FilmFinishSaveHDRMaster",
+        "film_finish_source_id": "6003"
+      },
+      "widgets_values": [
+        24,
+        "linear-acescg",
+        "film-finish-hdr/master"
+      ]
+    },
+    {
+      "id": 3522378545375509,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        30,
+        2230
+      ],
+      "size": [
+        670,
+        880
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            619420512504769,
+            3291210149095914
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PrimitiveStringMultiline",
+        "film_finish_source_id": "7000"
+      },
+      "widgets_values": [
+        "{\n  \"version\": 2,\n  \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\",\n  \"stock\": \"ektachromee100\",\n  \"format\": \"super35\",\n  \"medium\": \"screen\",\n  \"digitalReference\": \"reference-exposure\",\n  \"seed\": 1,\n  \"params\": {\n    \"ev\": 0,\n    \"temperature\": 6504,\n    \"tint\": 0,\n    \"highlights\": 0,\n    \"shadows\": 0,\n    \"saturation\": 1,\n    \"vibrance\": 0,\n    \"grain\": 1,\n    \"gradeShadowsWarmth\": 0,\n    \"gradeHighlightsWarmth\": 0\n  },\n  \"profile\": {\n    \"halation\": 0,\n    \"screenGrade\": 2,\n    \"screenExposure\": 0\n  }\n}"
+      ],
+      "title": "Complete Fotufilm recipe \u00b7 edit here"
+    },
+    {
+      "id": 3262757819519342,
+      "type": "PrimitiveString",
+      "pos": [
+        880,
+        2230
+      ],
+      "size": [
+        740,
+        120
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            529885916411865
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PrimitiveString",
+        "film_finish_source_id": "7001"
+      },
+      "widgets_values": [
+        "hdr-master.ffhdr.zip"
+      ],
+      "title": "Saved master \u00b7 filename under ComfyUI/input"
+    },
+    {
+      "id": 2176149409955772,
+      "type": "FotufilmDevelopHDRMaster",
+      "pos": [
+        880,
+        2450
+      ],
+      "size": [
+        740,
+        300
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 2,
+      "inputs": [
+        {
+          "name": "file",
+          "type": "STRING",
+          "link": 529885916411865,
+          "grow_id": 529885916411865,
+          "widget": {
+            "name": "file"
+          }
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 619420512504769,
+          "grow_id": 619420512504769,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmDevelopHDRMaster",
+        "film_finish_source_id": "7002"
+      },
+      "widgets_values": [
+        null,
+        null,
+        "mp4"
+      ],
+      "title": "Fotufilm \u00b7 Develop HDR master [muted until step 2]"
+    },
+    {
+      "id": 1905877980242921,
+      "type": "FotufilmDevelopVideo",
+      "pos": [
+        1800,
+        2230
+      ],
+      "size": [
+        670,
+        340
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 2,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1173417548900078
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 3291210149095914,
+          "grow_id": 3291210149095914,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        },
+        {
+          "name": "resolved_recipe",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmDevelopVideo",
+        "film_finish_source_id": "7003"
+      },
+      "widgets_values": [
+        null,
+        1,
+        "fixed",
+        "mp4"
+      ],
+      "title": "Fotufilm \u00b7 Original SDR control [optional / muted]"
+    },
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        0,
+        -140
+      ],
+      "size": [
+        1570,
+        320
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "LTX 2.5 \u2192 float HDR master \u2192 native Fotufilm \u2192 video delivery\n\nTOP ROW: reconstruct once (groups 01\u201306). BOTTOM ROW: reuse the saved master, adjust recipe, develop again (07\u201308). Group 09 is an optional original-SDR comparison using the same recipe.\n\nThis JSON opens a native graph. It does NOT redirect Desktop's Run button to ComfyAPI. Inspect locally; execute on your compatible GPU ComfyUI / Developer Platform build. No weights need to be installed on this Mac.\n\nDefault: HDR reconstruction outputs enabled; both Fotufilm output nodes muted. No job starts when you import."
+      ],
+      "title": "Film Finish \u00b7 native workflow lab",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "Note",
+      "pos": [
+        30,
+        1020
+      ],
+      "size": [
+        390,
+        390
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Choose your SDR clip in Load Video. Begin with a short clip; the app's 10s / 1280px limit is NOT enforced by this native graph.\n\nSource dimensions, frame count, FPS and audio are preserved. Padding is restored after inference. Noise seed 42 is fixed for comparison; recipe seed 1 controls grain independently.\n\nDo not change model filenames to a 2.3 checkpoint. These five model assets belong together."
+      ],
+      "title": "Input and reproducibility",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 3,
+      "type": "Note",
+      "pos": [
+        4860,
+        1070
+      ],
+      "size": [
+        660,
+        480
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Run groups 01\u201306 first. Save HDR Video creates an ungraded HLG viewing copy. Save HDR Master creates a .ffhdr.zip containing RGB32F ACEScg EXRs plus audio/timing and float browser proxies.\n\nFor stage 2, download/copy the ZIP into the execution machine's ComfyUI/input folder (or upload it as a ComfyAPI asset). Enter that input-relative filename in group 08.\n\nThe current master-save node has no output socket. This is an explicit file handoff, not a missing wire. Grade the EXRs, not the compressed HLG copy."
+      ],
+      "title": "Stage 1 outputs / handoff",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 4,
+      "type": "Note",
+      "pos": [
+        30,
+        3140
+      ],
+      "size": [
+        670,
+        380
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "stock / format / medium: film stock, film size, print or digital output.\nparams.ev / temperature / tint: input light and white balance.\nparams.highlights / shadows / saturation / vibrance: color grade.\nparams.grain / profile.halation: texture and highlight glow.\nprofile.screenGrade / screenExposure: screen/print response.\n\nThese are parameters of ONE physical Fotufilm develop, not multiple stacked film passes. Presets in this folder are interchangeable JSON recipes."
+      ],
+      "title": "Recipe map",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 5,
+      "type": "Note",
+      "pos": [
+        880,
+        2830
+      ],
+      "size": [
+        740,
+        500
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Mute groups 02\u201306 before grading. The LTX decode node in group 05 is itself an output node, so muting only the two save nodes is insufficient. Set the master filename, then unmute FotufilmDevelopHDRMaster in group 08. A grading-only JSON is included with these modes already set.\n\nRe-running the grade does not invoke LTX. Use mp4 first; change format to hlg for HDR delivery. The included Ektachrome E100 / screen / reference-exposure recipe supports HLG. Negative/print looks must export SDR.\n\nThe develop node already writes the result into ComfyUI/output. A second Save Video node is unnecessary. Direct ProRes assets in release 7 need the color-tag repair supplied by the app bridge; MP4 and HLG avoid that known limitation."
+      ],
+      "title": "Stage 2 \u00b7 reuse the master",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 6,
+      "type": "Note",
+      "pos": [
+        1800,
+        2660
+      ],
+      "size": [
+        670,
+        470
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Enable only when you want a film-treated original-SDR control. It uses the same recipe as group 08.\n\nMute groups 02\u201306 when comparing grades without reconstruction. Mute group 08 to render only this original-SDR branch. Unmuting both Fotufilm nodes renders both versions.\n\nFor the cleanest HDR investigation, set grain to 0 and leave exposure / highlights / shadows neutral. Change one parameter at a time. ComfyUI's ordinary canvas video preview is not a calibrated HDR monitor."
+      ],
+      "title": "Optional SDR control",
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      1541436183767979,
+      2305924178829848,
+      0,
+      4206132015266245,
+      0,
+      "MODEL"
+    ],
+    [
+      4100386714554991,
+      4107130497364466,
+      0,
+      4206132015266245,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      364684362477521,
+      4107130497364466,
+      1,
+      4206132015266245,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      1421694924214423,
+      208137318105326,
+      0,
+      3068795723739698,
+      0,
+      "NOISE"
+    ],
+    [
+      236606082101233,
+      4206132015266245,
+      0,
+      3068795723739698,
+      1,
+      "GUIDER"
+    ],
+    [
+      2900286264188252,
+      2629243286156502,
+      0,
+      3068795723739698,
+      2,
+      "SAMPLER"
+    ],
+    [
+      2801436504909265,
+      3361341782889222,
+      0,
+      3068795723739698,
+      3,
+      "SIGMAS"
+    ],
+    [
+      2786045548477495,
+      2035416096348897,
+      0,
+      3068795723739698,
+      4,
+      "LATENT"
+    ],
+    [
+      2561622512136425,
+      3068795723739698,
+      0,
+      663292463568756,
+      0,
+      "LATENT"
+    ],
+    [
+      1781109331043605,
+      4107130497364466,
+      0,
+      1681716081761363,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      3968820905094326,
+      4107130497364466,
+      1,
+      1681716081761363,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      806995655832622,
+      663292463568756,
+      0,
+      1681716081761363,
+      2,
+      "LATENT"
+    ],
+    [
+      3553584211335263,
+      1681716081761363,
+      2,
+      507579890429115,
+      0,
+      "LATENT"
+    ],
+    [
+      700631105123321,
+      3042515946266279,
+      0,
+      507579890429115,
+      1,
+      "VAE"
+    ],
+    [
+      1167074758886142,
+      2625548805057373,
+      0,
+      2305924178829848,
+      0,
+      "MODEL"
+    ],
+    [
+      334216239752290,
+      507579890429115,
+      0,
+      2873915308447822,
+      0,
+      "IMAGE"
+    ],
+    [
+      1281326140959372,
+      1885835605168275,
+      0,
+      3856135713214468,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      3524931479992426,
+      1885835605168275,
+      0,
+      3856135713214468,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      1695175862083764,
+      1714266439702642,
+      0,
+      3856135713214468,
+      2,
+      "FLOAT"
+    ],
+    [
+      37052578405506,
+      2908950001115307,
+      0,
+      2429231254440455,
+      0,
+      "VIDEO"
+    ],
+    [
+      993386356147420,
+      2429231254440455,
+      0,
+      815182055714869,
+      0,
+      "IMAGE"
+    ],
+    [
+      2004971831881960,
+      1662421446783234,
+      0,
+      3042515946266279,
+      0,
+      "VAE"
+    ],
+    [
+      797775825179602,
+      4107130497364466,
+      2,
+      2035416096348897,
+      0,
+      "LATENT"
+    ],
+    [
+      4239064921293731,
+      2334872338969572,
+      0,
+      2035416096348897,
+      1,
+      "LATENT"
+    ],
+    [
+      2900324347870237,
+      3577605399617621,
+      1,
+      3495531663216668,
+      0,
+      "INT"
+    ],
+    [
+      2679525826676983,
+      3577605399617621,
+      2,
+      3495531663216668,
+      1,
+      "INT"
+    ],
+    [
+      993600529145447,
+      3577605399617621,
+      3,
+      3495531663216668,
+      2,
+      "INT"
+    ],
+    [
+      293587122795120,
+      3856135713214468,
+      0,
+      4107130497364466,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      4053937290598833,
+      3856135713214468,
+      1,
+      4107130497364466,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      872946090094179,
+      3042515946266279,
+      0,
+      4107130497364466,
+      2,
+      "VAE"
+    ],
+    [
+      1873195885647481,
+      3495531663216668,
+      0,
+      4107130497364466,
+      3,
+      "LATENT"
+    ],
+    [
+      3669752639720055,
+      3577605399617621,
+      0,
+      4107130497364466,
+      4,
+      "IMAGE"
+    ],
+    [
+      2102124435801151,
+      2305924178829848,
+      1,
+      4107130497364466,
+      5,
+      "FLOAT"
+    ],
+    [
+      186839087192632,
+      3577605399617621,
+      3,
+      2334872338969572,
+      1,
+      "INT"
+    ],
+    [
+      254840771652626,
+      2429231254440455,
+      2,
+      2334872338969572,
+      2,
+      "FLOAT"
+    ],
+    [
+      4111452055376084,
+      1303878523339175,
+      0,
+      2334872338969572,
+      0,
+      "VAE"
+    ],
+    [
+      175241190866636,
+      2429231254440455,
+      2,
+      1714266439702642,
+      1,
+      "FLOAT"
+    ],
+    [
+      1967160803524314,
+      815182055714869,
+      0,
+      3577605399617621,
+      0,
+      "IMAGE"
+    ],
+    [
+      1962886980454935,
+      2873915308447822,
+      1,
+      1578472274374596,
+      0,
+      "IMAGE"
+    ],
+    [
+      643411535749755,
+      2429231254440455,
+      0,
+      1578472274374596,
+      1,
+      "IMAGE"
+    ],
+    [
+      1716928423924690,
+      1578472274374596,
+      0,
+      3139939765490514,
+      0,
+      "IMAGE"
+    ],
+    [
+      485195310167072,
+      2429231254440455,
+      2,
+      3139939765490514,
+      2,
+      "FLOAT"
+    ],
+    [
+      4465282823427531,
+      2429231254440455,
+      1,
+      3139939765490514,
+      1,
+      "AUDIO"
+    ],
+    [
+      2048398712016832,
+      1578472274374596,
+      0,
+      1539162593530005,
+      0,
+      "IMAGE"
+    ],
+    [
+      1180273305889565,
+      2908950001115307,
+      0,
+      1539162593530005,
+      1,
+      "VIDEO"
+    ],
+    [
+      1936409098405146,
+      2429231254440455,
+      2,
+      1539162593530005,
+      2,
+      "FLOAT"
+    ],
+    [
+      529885916411865,
+      3262757819519342,
+      0,
+      2176149409955772,
+      0,
+      "STRING"
+    ],
+    [
+      619420512504769,
+      3522378545375509,
+      0,
+      2176149409955772,
+      1,
+      "STRING"
+    ],
+    [
+      1173417548900078,
+      2908950001115307,
+      0,
+      1905877980242921,
+      0,
+      "VIDEO"
+    ],
+    [
+      3291210149095914,
+      3522378545375509,
+      0,
+      1905877980242921,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "01 \u00b7 Source video",
+      "bounding": [
+        0,
+        280,
+        450,
+        1180
+      ],
+      "color": "#3f789e",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "02 \u00b7 LTX 2.5 models",
+      "bounding": [
+        540,
+        280,
+        1030,
+        1140
+      ],
+      "color": "#67559b",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "03 \u00b7 SDR to ACES / conditioning",
+      "bounding": [
+        1660,
+        280,
+        960,
+        1710
+      ],
+      "color": "#3d7d79",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "04 \u00b7 Eight-step HDR reconstruction",
+      "bounding": [
+        2730,
+        280,
+        910,
+        1140
+      ],
+      "color": "#8d668e",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "05 \u00b7 Decode / restore full range",
+      "bounding": [
+        3750,
+        280,
+        970,
+        1140
+      ],
+      "color": "#926d40",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "06 \u00b7 Save HDR source + EXR master",
+      "bounding": [
+        4830,
+        280,
+        750,
+        1330
+      ],
+      "color": "#598052",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "07 \u00b7 Fotufilm look / grade / texture",
+      "bounding": [
+        0,
+        2120,
+        730,
+        1450
+      ],
+      "color": "#95753f",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "08 \u00b7 Develop saved HDR master",
+      "bounding": [
+        850,
+        2120,
+        800,
+        1270
+      ],
+      "color": "#598052",
+      "font_size": 26,
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "09 \u00b7 SDR comparison branch",
+      "bounding": [
+        1770,
+        2120,
+        730,
+        1270
+      ],
+      "color": "#3f789e",
+      "font_size": 26,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.34,
+      "offset": [
+        160,
+        300
+      ]
+    },
+    "film_finish": {
+      "version": 1,
+      "source_workflow": "ltx25-hdr.api.json",
+      "target_release": "a1552ea4-aecd-4e04-8bb8-f0fd72b4662a",
+      "handoff": "EXR bundle via ComfyUI input",
+      "prepared": true,
+      "executed_as_combined_graph": false
+    }
+  },
+  "version": 0.4,
+  "_applied_ops": [
+    "4a6729c6eb804f289571c7727115417d",
+    "89699abb111f4cf482c8285e8063f986",
+    "a5ceca0fd7814ac392d3f51de87346bd",
+    "5ba3d807468041e19d76e724e8bd204b",
+    "b74f7aa931514fcf83a3d77b42e96913",
+    "bf8a5e83888c432791756328ed905f6c",
+    "ddd64b6966e94be2a631f25ed884ceae",
+    "99144a57e9dc41f6a010079e29232873",
+    "ccb91fe2d472489981d8696135264994",
+    "da60e1527e124808a9e87825d78e036b",
+    "c07f9f0f1f734ce6867842027a848ecb",
+    "a53216c51e674a618bbf1cba6dc76389",
+    "0161a938cddb4f2ab2a035f119e33b87",
+    "a5de6e24a36e4c54a0a3bd50d1612a26",
+    "263a07e1babf4cb69f100e64377f6677",
+    "350465576d544998b8753f8c70aee817",
+    "f3f2d751718441f2b77f934a737aa704",
+    "e4e373a3dd1a4dc99182a74811c19a88",
+    "3216073c9cea4276b1b3a76f059ffdec",
+    "e6824be548a0483dbc6e743186fff411",
+    "70a92d250c1e497f9759e396f7605ab8",
+    "f01379388dc54f4eb991fc3d960b6668",
+    "d6e87d1c78b5413ab3f9e79d1c2823e8",
+    "694d2e8712494bada1b7fca03e5c8911",
+    "7f8e44845f4d4374a2166345ee3a99cd",
+    "3d1b85e8027b4608a056d1f940192886",
+    "441088f2efdc45588e68bd3f071975ad",
+    "667c05b189164e839b6a2c6d7031c174",
+    "22b514e743b547109dd183d50637068a",
+    "028d70b7c5124bac9ae5f2d80a543cd9",
+    "fdb058fa9ca84c85b98ee36fa6db240a",
+    "cee275721d3b49128ea1dbdc24478a01",
+    "2954c5f12e9c4f7c9fbc1694a0870479",
+    "ecacc91e584a4332b7c4f0e37b7ac4ac",
+    "dfd1c2ce71c1491982ec6acb0d5af545",
+    "5f1300f94566402da730db28d3e0fdee",
+    "839e51816faa4cdfb86bdc24335a80ec",
+    "2a2e11b7fd524bfd9ccbddc115ba2ebb",
+    "3ade0fe67de549569dbb672e1fa920f8",
+    "008e98352f1440ff886071e16d636b38",
+    "753a2a99fa47441e9abcf35833c2d736",
+    "105034d3268a450da1ef852346ead0ef",
+    "0048a2580c074782ae007c784140f4eb",
+    "1a1eea6bcebd4495876070fd7898243f",
+    "51997aa1e9de4214881b923a97d323fa",
+    "ed32326f727c4e5a88f0d4ece69eceda",
+    "1a5c710deb6b4592b10f669170eb620b",
+    "bf3d999da9184e67bd73bb8425727b2f",
+    "8a845f0a7e474f53ace26fa4cdf61e69",
+    "b473248d81a947c3a1d8d984fd81de91",
+    "deb9464adc6f44019499a1b8ff914d69",
+    "f66c5209a66a447ab42df1d869cdaa94",
+    "f1be4562ab0046b1ad0bd09074e2605d",
+    "d0cd9375dbe246dfa8e17237cc1b1b18",
+    "de02e7acaa3d4223b522099d63fc7203",
+    "a8983fe2dd7d45bb94d1ac342eed9286",
+    "07752b24a4bc480899ad18c04ef245a1",
+    "1cb63a6adedb4fb9aa996a3a3937c17f",
+    "0784d73f71e2454ea2a551a91f078732",
+    "d1510eef3de34a4995618d8b744cc024",
+    "f6dbff6da7ba47cea8d05ad53430b806",
+    "802338ff6817493a960f1c580cb56c1e",
+    "f8de69661b114647ae1d1da8b21a2b6d",
+    "bd189b03f27c47a3a8b95c6ab5f66f39",
+    "6d7449e607e349be9ac95e1bb6081aba",
+    "9dd2ef3b3d5b4e85a895b4c5151c084e",
+    "6a551fce079845a7901bb38da311b915",
+    "e34ca3c530ac487abf70c71ff5fbc21c",
+    "dbf389f678394c29aabdb39b96c3bf8b",
+    "a4f59407c94a405d83dea4652163c2eb",
+    "bd622d440e254ae4b6c3a7cba9d34954",
+    "da42f270049f449090789f652a309448",
+    "0edb3615747e4273bfb0f2b3e4f33f83",
+    "af8c561181cc4f4d8910879a0f91e44a",
+    "209de1d7bebf4cf9863d5ba6caa0a84a",
+    "a8afa4439fd94caba3a7d1e257f2e74d",
+    "1cd83861755746b9a67d4d37b85e2c10",
+    "22d57c6ae7e74ed384c09fe66997f0c2",
+    "ddd2660c9c4d41ce883de6c80f051489",
+    "5454537df57d44069aaa2e24dbd736b6",
+    "c95df03c6ee84e24a20859b1889dd541",
+    "9a1edd611a0442d69391b935e6863af8",
+    "0c3485361cf744e9b1e8395afec0dd44",
+    "fbff1306985244e2b6af40400bf0356a",
+    "c097ef733847482abed49f0394cd9adc",
+    "01b3114d80db4e9ea3851af344b11066",
+    "88bb4b9f87ef4337bbc35aa6c7988795",
+    "711474d067fe40a2b7f936d65278c6b6",
+    "a5e505517b7c449f8cdf9b5f8f4fa17a",
+    "e073837879ef4bf4991d0f533bd83c88",
+    "b66e0aa35f8e48398451519f88ca5439",
+    "cc961b960d9b4762b107fca49a623b19",
+    "0eb13f1241e242fd9cbb934f885795fe",
+    "d2cfa6768f454b0a803c57e86bef9bff",
+    "8bf47114cca74e1a86ceee24a64e6c3f",
+    "6da86d58405a4793812fe8324665af93",
+    "26ccfd971d084e058921c1d712f340fd",
+    "ebf0718645b447ec8376b93a5fdafaf2",
+    "891e19457ae84fda9e335ab6e8425322",
+    "7227f51f8e0d4430b335f929c00bfe94",
+    "e514aa1b88ea462984d1132478cd3fc7",
+    "52f8a3c0eb7a4887a48c99768d77d002",
+    "a9a610c7d8d648e883eba2736a843b3d",
+    "b04ee591b9d4401a8ace8bfdaed09b16",
+    "a8b9e21ee84a493e8711362053d0a463",
+    "571bc7d38af6420586579e84da256d49",
+    "d85355370a7f4b778259f326d76ec959",
+    "9f1fa24b725d460ba02cf233f322d8b0",
+    "36794aac159e41b2980bfca3e74b53c7",
+    "9af0388c6b65402b89f84fb1b5968339",
+    "6818e073d3014a01a7974c034da6a4ee",
+    "f113463a2ffd411d94ee665710ed2f95",
+    "3c8a5963da9541cc976ce24f09c7cdc3",
+    "425049f50b724ebd96e03d9a74fbee20",
+    "4963bb13f8f146b586be5e6eeec347a4",
+    "6bbb5ed34bd04b888168755d2c46e830",
+    "b02068ee618c46d6b58aa695200ccdf6",
+    "8cf29ceb81ee4da4bbae02b3177f5573",
+    "82e00f7537e34602bf4d3b29a5037d20",
+    "fbdf12e9ff744a30a52b1c6e874670a3",
+    "db2fbc3034294d8597446554681a1bbe",
+    "0546e5d730204e8695c1662f75abaea3",
+    "3db46dd02082410abb6ca55bbb34b2b9",
+    "c1630b3173bd4316ad652a12fd213056",
+    "bdf0f82dbb21407cb6d940148af2744b"
+  ],
+  "_widget_stamps": {
+    "[\"widget\", \"208137318105326\", \"noise_seed\"]": [
+      0,
+      "cli",
+      "2954c5f12e9c4f7c9fbc1694a0870479"
+    ],
+    "[\"widget\", \"4206132015266245\", \"cfg\"]": [
+      0,
+      "cli",
+      "ecacc91e584a4332b7c4f0e37b7ac4ac"
+    ],
+    "[\"input\", \"4206132015266245\", 0]": [
+      0,
+      "cli",
+      "dfd1c2ce71c1491982ec6acb0d5af545"
+    ],
+    "[\"input\", \"4206132015266245\", 1]": [
+      0,
+      "cli",
+      "5f1300f94566402da730db28d3e0fdee"
+    ],
+    "[\"input\", \"4206132015266245\", 2]": [
+      0,
+      "cli",
+      "839e51816faa4cdfb86bdc24335a80ec"
+    ],
+    "[\"widget\", \"2629243286156502\", \"sampler_name\"]": [
+      0,
+      "cli",
+      "2a2e11b7fd524bfd9ccbddc115ba2ebb"
+    ],
+    "[\"widget\", \"3361341782889222\", \"sigmas\"]": [
+      0,
+      "cli",
+      "3ade0fe67de549569dbb672e1fa920f8"
+    ],
+    "[\"input\", \"3068795723739698\", 0]": [
+      0,
+      "cli",
+      "008e98352f1440ff886071e16d636b38"
+    ],
+    "[\"input\", \"3068795723739698\", 1]": [
+      0,
+      "cli",
+      "753a2a99fa47441e9abcf35833c2d736"
+    ],
+    "[\"input\", \"3068795723739698\", 2]": [
+      0,
+      "cli",
+      "105034d3268a450da1ef852346ead0ef"
+    ],
+    "[\"input\", \"3068795723739698\", 3]": [
+      0,
+      "cli",
+      "0048a2580c074782ae007c784140f4eb"
+    ],
+    "[\"input\", \"3068795723739698\", 4]": [
+      0,
+      "cli",
+      "1a1eea6bcebd4495876070fd7898243f"
+    ],
+    "[\"input\", \"663292463568756\", 0]": [
+      0,
+      "cli",
+      "51997aa1e9de4214881b923a97d323fa"
+    ],
+    "[\"input\", \"1681716081761363\", 0]": [
+      0,
+      "cli",
+      "ed32326f727c4e5a88f0d4ece69eceda"
+    ],
+    "[\"input\", \"1681716081761363\", 1]": [
+      0,
+      "cli",
+      "1a5c710deb6b4592b10f669170eb620b"
+    ],
+    "[\"input\", \"1681716081761363\", 2]": [
+      0,
+      "cli",
+      "bf3d999da9184e67bd73bb8425727b2f"
+    ],
+    "[\"widget\", \"507579890429115\", \"tile_size\"]": [
+      0,
+      "cli",
+      "8a845f0a7e474f53ace26fa4cdf61e69"
+    ],
+    "[\"widget\", \"507579890429115\", \"overlap\"]": [
+      0,
+      "cli",
+      "b473248d81a947c3a1d8d984fd81de91"
+    ],
+    "[\"widget\", \"507579890429115\", \"temporal_size\"]": [
+      0,
+      "cli",
+      "deb9464adc6f44019499a1b8ff914d69"
+    ],
+    "[\"widget\", \"507579890429115\", \"temporal_overlap\"]": [
+      0,
+      "cli",
+      "f66c5209a66a447ab42df1d869cdaa94"
+    ],
+    "[\"input\", \"507579890429115\", 0]": [
+      0,
+      "cli",
+      "f1be4562ab0046b1ad0bd09074e2605d"
+    ],
+    "[\"input\", \"507579890429115\", 1]": [
+      0,
+      "cli",
+      "d0cd9375dbe246dfa8e17237cc1b1b18"
+    ],
+    "[\"widget\", \"1303878523339175\", \"vae_name\"]": [
+      0,
+      "cli",
+      "de02e7acaa3d4223b522099d63fc7203"
+    ],
+    "[\"widget\", \"1662421446783234\", \"vae_name\"]": [
+      0,
+      "cli",
+      "a8983fe2dd7d45bb94d1ac342eed9286"
+    ],
+    "[\"widget\", \"2625548805057373\", \"unet_name\"]": [
+      0,
+      "cli",
+      "07752b24a4bc480899ad18c04ef245a1"
+    ],
+    "[\"widget\", \"2625548805057373\", \"weight_dtype\"]": [
+      0,
+      "cli",
+      "1cb63a6adedb4fb9aa996a3a3937c17f"
+    ],
+    "[\"widget\", \"2305924178829848\", \"lora_name\"]": [
+      0,
+      "cli",
+      "0784d73f71e2454ea2a551a91f078732"
+    ],
+    "[\"widget\", \"2305924178829848\", \"strength_model\"]": [
+      0,
+      "cli",
+      "d1510eef3de34a4995618d8b744cc024"
+    ],
+    "[\"input\", \"2305924178829848\", 0]": [
+      0,
+      "cli",
+      "f6dbff6da7ba47cea8d05ad53430b806"
+    ],
+    "[\"widget\", \"1885835605168275\", \"file_name\"]": [
+      0,
+      "cli",
+      "802338ff6817493a960f1c580cb56c1e"
+    ],
+    "[\"widget\", \"1885835605168275\", \"device\"]": [
+      0,
+      "cli",
+      "f8de69661b114647ae1d1da8b21a2b6d"
+    ],
+    "[\"widget\", \"2873915308447822\", \"transfer\"]": [
+      0,
+      "cli",
+      "bd189b03f27c47a3a8b95c6ab5f66f39"
+    ],
+    "[\"widget\", \"2873915308447822\", \"exposure\"]": [
+      0,
+      "cli",
+      "6d7449e607e349be9ac95e1bb6081aba"
+    ],
+    "[\"widget\", \"2873915308447822\", \"save_exr\"]": [
+      0,
+      "cli",
+      "9dd2ef3b3d5b4e85a895b4c5151c084e"
+    ],
+    "[\"widget\", \"2873915308447822\", \"exr_color_space\"]": [
+      0,
+      "cli",
+      "6a551fce079845a7901bb38da311b915"
+    ],
+    "[\"widget\", \"2873915308447822\", \"output_dir\"]": [
+      0,
+      "cli",
+      "e34ca3c530ac487abf70c71ff5fbc21c"
+    ],
+    "[\"widget\", \"2873915308447822\", \"filename_prefix\"]": [
+      0,
+      "cli",
+      "dbf389f678394c29aabdb39b96c3bf8b"
+    ],
+    "[\"widget\", \"2873915308447822\", \"half_precision\"]": [
+      0,
+      "cli",
+      "a4f59407c94a405d83dea4652163c2eb"
+    ],
+    "[\"input\", \"2873915308447822\", 0]": [
+      0,
+      "cli",
+      "bd622d440e254ae4b6c3a7cba9d34954"
+    ],
+    "[\"input\", \"3856135713214468\", 0]": [
+      0,
+      "cli",
+      "da42f270049f449090789f652a309448"
+    ],
+    "[\"input\", \"3856135713214468\", 1]": [
+      0,
+      "cli",
+      "0edb3615747e4273bfb0f2b3e4f33f83"
+    ],
+    "[\"input\", \"2429231254440455\", 0]": [
+      0,
+      "cli",
+      "209de1d7bebf4cf9863d5ba6caa0a84a"
+    ],
+    "[\"widget\", \"815182055714869\", \"color_space\"]": [
+      0,
+      "cli",
+      "a8afa4439fd94caba3a7d1e257f2e74d"
+    ],
+    "[\"input\", \"815182055714869\", 0]": [
+      0,
+      "cli",
+      "1cd83861755746b9a67d4d37b85e2c10"
+    ],
+    "[\"input\", \"3042515946266279\", 0]": [
+      0,
+      "cli",
+      "22d57c6ae7e74ed384c09fe66997f0c2"
+    ],
+    "[\"input\", \"2035416096348897\", 0]": [
+      0,
+      "cli",
+      "ddd2660c9c4d41ce883de6c80f051489"
+    ],
+    "[\"input\", \"2035416096348897\", 1]": [
+      0,
+      "cli",
+      "5454537df57d44069aaa2e24dbd736b6"
+    ],
+    "[\"widget\", \"3495531663216668\", \"batch_size\"]": [
+      0,
+      "cli",
+      "c95df03c6ee84e24a20859b1889dd541"
+    ],
+    "[\"widget\", \"4107130497364466\", \"frame_idx\"]": [
+      0,
+      "cli",
+      "c097ef733847482abed49f0394cd9adc"
+    ],
+    "[\"widget\", \"4107130497364466\", \"strength\"]": [
+      0,
+      "cli",
+      "01b3114d80db4e9ea3851af344b11066"
+    ],
+    "[\"widget\", \"4107130497364466\", \"crop\"]": [
+      0,
+      "cli",
+      "88bb4b9f87ef4337bbc35aa6c7988795"
+    ],
+    "[\"widget\", \"4107130497364466\", \"use_tiled_encode\"]": [
+      0,
+      "cli",
+      "711474d067fe40a2b7f936d65278c6b6"
+    ],
+    "[\"widget\", \"4107130497364466\", \"tile_size\"]": [
+      0,
+      "cli",
+      "a5e505517b7c449f8cdf9b5f8f4fa17a"
+    ],
+    "[\"widget\", \"4107130497364466\", \"tile_overlap\"]": [
+      0,
+      "cli",
+      "e073837879ef4bf4991d0f533bd83c88"
+    ],
+    "[\"input\", \"4107130497364466\", 0]": [
+      0,
+      "cli",
+      "b66e0aa35f8e48398451519f88ca5439"
+    ],
+    "[\"input\", \"4107130497364466\", 1]": [
+      0,
+      "cli",
+      "cc961b960d9b4762b107fca49a623b19"
+    ],
+    "[\"input\", \"4107130497364466\", 2]": [
+      0,
+      "cli",
+      "0eb13f1241e242fd9cbb934f885795fe"
+    ],
+    "[\"input\", \"4107130497364466\", 3]": [
+      0,
+      "cli",
+      "d2cfa6768f454b0a803c57e86bef9bff"
+    ],
+    "[\"input\", \"4107130497364466\", 4]": [
+      0,
+      "cli",
+      "8bf47114cca74e1a86ceee24a64e6c3f"
+    ],
+    "[\"widget\", \"2334872338969572\", \"batch_size\"]": [
+      0,
+      "cli",
+      "26ccfd971d084e058921c1d712f340fd"
+    ],
+    "[\"input\", \"2334872338969572\", 0]": [
+      0,
+      "cli",
+      "7227f51f8e0d4430b335f929c00bfe94"
+    ],
+    "[\"widget\", \"2908950001115307\", \"file\"]": [
+      0,
+      "cli",
+      "e514aa1b88ea462984d1132478cd3fc7"
+    ],
+    "[\"widget\", \"1714266439702642\", \"expression\"]": [
+      0,
+      "cli",
+      "52f8a3c0eb7a4887a48c99768d77d002"
+    ],
+    "[\"input\", \"3577605399617621\", 0]": [
+      0,
+      "cli",
+      "b04ee591b9d4401a8ace8bfdaed09b16"
+    ],
+    "[\"input\", \"1578472274374596\", 0]": [
+      0,
+      "cli",
+      "a8b9e21ee84a493e8711362053d0a463"
+    ],
+    "[\"input\", \"1578472274374596\", 1]": [
+      0,
+      "cli",
+      "571bc7d38af6420586579e84da256d49"
+    ],
+    "[\"input\", \"3139939765490514\", 0]": [
+      0,
+      "cli",
+      "d85355370a7f4b778259f326d76ec959"
+    ],
+    "[\"input\", \"3139939765490514\", 1]": [
+      0,
+      "cli",
+      "36794aac159e41b2980bfca3e74b53c7"
+    ],
+    "[\"widget\", \"3139939765490514\", \"linear_primaries\"]": [
+      0,
+      "cli",
+      "9af0388c6b65402b89f84fb1b5968339"
+    ],
+    "[\"widget\", \"3139939765490514\", \"filename_prefix\"]": [
+      0,
+      "cli",
+      "6818e073d3014a01a7974c034da6a4ee"
+    ],
+    "[\"input\", \"1539162593530005\", 0]": [
+      0,
+      "cli",
+      "f113463a2ffd411d94ee665710ed2f95"
+    ],
+    "[\"input\", \"1539162593530005\", 1]": [
+      0,
+      "cli",
+      "3c8a5963da9541cc976ce24f09c7cdc3"
+    ],
+    "[\"widget\", \"1539162593530005\", \"color_space\"]": [
+      0,
+      "cli",
+      "4963bb13f8f146b586be5e6eeec347a4"
+    ],
+    "[\"widget\", \"1539162593530005\", \"filename_prefix\"]": [
+      0,
+      "cli",
+      "6bbb5ed34bd04b888168755d2c46e830"
+    ],
+    "[\"widget\", \"3522378545375509\", \"value\"]": [
+      0,
+      "cli",
+      "b02068ee618c46d6b58aa695200ccdf6"
+    ],
+    "[\"widget\", \"3262757819519342\", \"value\"]": [
+      0,
+      "cli",
+      "8cf29ceb81ee4da4bbae02b3177f5573"
+    ],
+    "[\"widget\", \"2176149409955772\", \"format\"]": [
+      0,
+      "cli",
+      "db2fbc3034294d8597446554681a1bbe"
+    ],
+    "[\"input\", \"1905877980242921\", 0]": [
+      0,
+      "cli",
+      "0546e5d730204e8695c1662f75abaea3"
+    ],
+    "[\"widget\", \"1905877980242921\", \"seed\"]": [
+      0,
+      "cli",
+      "c1630b3173bd4316ad652a12fd213056"
+    ],
+    "[\"widget\", \"1905877980242921\", \"format\"]": [
+      0,
+      "cli",
+      "bdf0f82dbb21407cb6d940148af2744b"
+    ]
+  }
+}

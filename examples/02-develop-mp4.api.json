@@ -1,0 +1,10 @@
+{
+  "1": {
+    "class_type": "FotufilmDevelopHDRMaster",
+    "inputs": {
+      "file": "hdr-master.ffhdr.zip",
+      "recipe_json": "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"ektachromee100\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"reference-exposure\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 1, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
+      "format": "mp4"
+    }
+  }
+}
