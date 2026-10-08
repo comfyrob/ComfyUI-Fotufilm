@@ -31,6 +31,7 @@ export function createStudio(options = {}) {
   let tab = 'looks', sourceMode = 'original', comparing = false, zoom = 1, rate = 1;
   let sources = {original: options.source || '', hdr: options.enhanced || ''};
   let rendered = options.rendered || '';
+  let renderedRecipe = options.renderedRecipe || null;
   let label = options.label || 'Your video';
   const fps = Math.max(1, options.fps || 24);
   let frameCallback = 0, raf = 0, thumbnailToken = 0, destroyed = false;
@@ -109,7 +110,7 @@ export function createStudio(options = {}) {
     }
     $$('input[data-section]').forEach(input=> {input.value=recipe[input.dataset.section][input.dataset.key]; updateSlider(input);});
     $('[data-control="digitalReference"]').value = recipe.digitalReference;
-    $('.ff-render-state').textContent = changed() ? 'Recipe edited · render preview not connected' : rendered ? 'Existing render · film controls do not update it yet' : 'Source playback · film rendering not connected';
+    $('.ff-render-state').textContent = renderedRecipe ? (sameRecipe(recipe,renderedRecipe)?'Rendered recipe · up to date':'Recipe changed · run workflow to update') : options.onRender ? 'Save your recipe, then run the workflow' : changed() ? 'Recipe edited · demo render unchanged' : rendered ? 'Existing render · interface preview' : 'Source playback';
     action('reset').disabled = !selectedLook || sameRecipe(recipe, lookRecipe(selectedLook));
   }
   function updateSlider(input) {
@@ -260,7 +261,12 @@ export function createStudio(options = {}) {
       case 'tab-customize':setTab('customize');break;
       case 'reset':if(selectedLook){recipe=lookRecipe(selectedLook,recipe.seed);updateRecipeUI();}break;
       case 'open-file':$('.ff-file-input').click();break;
-      case 'render':toast('This is the interface scaffold. Server preview rendering will be connected after your feedback.');break;
+      case 'render':
+        if(!options.onRender){toast('Interface preview only. Connect Develop and Return to Studio in your workflow to render.');break;}
+        target.disabled=true;
+        try{await options.onRender(clone(recipe),selectedLook);startingRecipe=clone(recipe);startingLook=selectedLook;toast('Workflow queued. The server will return its finished preview here.');}
+        catch(error){toast(`Could not queue workflow: ${error.message}`);}
+        finally{target.disabled=false;updateRecipeUI();}break;
       case 'cancel':if(options.onClose)options.onClose();else {recipe=clone(startingRecipe);selectedLook=startingLook;updateRecipeUI();toast('Unsaved recipe changes discarded.');}break;
       case 'save':options.onSave?.(clone(recipe),selectedLook);startingRecipe=clone(recipe);startingLook=selectedLook;updateRecipeUI();if(!options.onSave)toast('Recipe saved for this preview session.');break;
     }
@@ -276,5 +282,13 @@ export function createStudio(options = {}) {
     else if(event.key.toLowerCase()==='l')action('loop').click();
   });
   updateRecipeUI();setZoom(1);setSource('original',false);compare(false);
-  return {element:root, getRecipe:()=>clone(recipe), dispose(){destroyed=true;thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
+  if(options.onRender){
+    $('.ff-prototype').textContent='Workflow studio';action('render').removeAttribute('aria-disabled');
+    action('render').title='Save this recipe and run the connected workflow on your ComfyUI server. Uncached upstream stages run too.';
+    action('render').querySelector('span').textContent='Run workflow';
+    $('.ff-sidebar-footer p').textContent='Renders on your ComfyUI server. The finished preview returns here.';
+  }
+  return {element:root,getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,pause(){video.pause();before.pause();},
+    updateMedia(media){sources={original:media.source||'',hdr:media.enhanced||''};rendered=media.rendered||'';renderedRecipe=media.renderedRecipe||null;label=media.label||label;setSource(sourceMode==='hdr'&&sources.hdr?'hdr':'original');},
+    dispose(){destroyed=true;thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
 }

@@ -1,3 +1,5 @@
+> Superseded for current workflow wiring by [Nodes 2.0 Studio](nodes-2-studio.md). The downstream Return to Studio node now replaces the separate output viewer described below.
+
 # Fotufilm Studio: interface scaffold
 
 The canvas node is a compact monitor. **Open studio** expands it into a workspace inside ComfyUI; the viewer and transport stay visible while the recipe column scrolls. **Save to node** commits the recipe. Closing or Escape discards the draft, like Gear's grade panel.

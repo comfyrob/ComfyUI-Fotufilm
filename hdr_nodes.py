@@ -1,4 +1,5 @@
 import importlib
+from dataclasses import dataclass
 from pathlib import Path
 
 import folder_paths
@@ -6,6 +7,24 @@ import nodes
 import torch
 import torch.nn.functional as F
 from comfy_api.latest import InputImpl, io
+
+HDRMaster = io.Custom('FOTUFILM_HDR_MASTER')
+
+
+@dataclass(frozen=True)
+class HDRMasterFile:
+    path: str
+
+
+def resolve_master(file, master=None):
+    root = Path(folder_paths.get_output_directory() if master is not None else folder_paths.get_input_directory()).resolve()
+    if master is not None and not isinstance(master, HDRMasterFile):
+        raise ValueError('Connect the master output of Save HDR Master.')
+    source = Path(master.path) if master is not None else root / file
+    source = source.resolve()
+    if not source.is_relative_to(root) or source.suffix.lower() != '.zip' or not source.is_file():
+        raise ValueError('Choose an uploaded HDR master or connect Save HDR Master.')
+    return source
 
 
 class FilmFinishHDRPad(io.ComfyNode):
@@ -90,7 +109,7 @@ class FilmFinishSaveHDRMaster(io.ComfyNode):
             description='Preserves float EXR masters and generates float Rec.2020 browser proxies. The source video is retained for audio and playback timing only.',
             inputs=[io.Image.Input('images'), io.Video.Input('source'), io.Float.Input('fps', default=24, min=1, max=120),
                 io.Combo.Input('color_space', options=['linear-rec709', 'linear-acescg', 'linear-rec2020']),
-                io.String.Input('filename_prefix', default='film-finish-hdr/master')], outputs=[])
+                io.String.Input('filename_prefix', default='film-finish-hdr/master')], outputs=[HDRMaster.Output('master')])
 
     @classmethod
     def execute(cls, images, source, fps, color_space, filename_prefix):
@@ -113,25 +132,26 @@ class FilmFinishSaveHDRMaster(io.ComfyNode):
                 playback = str(path)
             write_master(images, fps, color_space, playback, Path(full) / filename,
                          comfy.model_management.throw_exception_if_processing_interrupted)
-        return io.NodeOutput(ui={'files': [{'filename': filename, 'subfolder': subfolder, 'type': 'output'}]})
+        return io.NodeOutput(HDRMasterFile(str(Path(full) / filename)),
+                             ui={'files': [{'filename': filename, 'subfolder': subfolder, 'type': 'output'}]})
 
 
 class FotufilmDevelopHDRMaster(io.ComfyNode):
     @classmethod
     def define_schema(cls):
         return io.Schema(node_id='FotufilmDevelopHDRMaster', category='Film Finish', is_output_node=True,
-            inputs=[io.String.Input('file'), io.String.Input('recipe_json', multiline=True),
-                io.Combo.Input('format', options=['mp4', 'prores422hq', 'hlg'])], outputs=[io.Video.Output('video')])
+            description='Develop a connected float EXR master in the same graph, or reuse an uploaded archive via file. A connected master takes precedence.',
+            inputs=[io.String.Input('file', default='', advanced=True), io.String.Input('recipe_json', multiline=True),
+                io.Combo.Input('format', options=['mp4', 'prores422hq', 'hlg']),
+                HDRMaster.Input('master', optional=True)], outputs=[io.Video.Output('video')])
 
     @classmethod
-    def execute(cls, file, recipe_json, format):
+    def execute(cls, file, recipe_json, format, master=None):
         import json
         import uuid
         import comfy.model_management
         from .master_export import export_master
-        source = Path(folder_paths.get_input_directory()).resolve() / file
-        if not source.resolve().is_relative_to(Path(folder_paths.get_input_directory()).resolve()) or source.suffix.lower() != '.zip':
-            raise ValueError('Choose an uploaded Film Finish HDR master.')
+        source = resolve_master(file, master)
         extension = 'mov' if format == 'prores422hq' else 'mp4'
         path = Path(folder_paths.get_output_directory()) / f'film-finish-{uuid.uuid4().hex}.{extension}'
         export_master(source, json.loads(recipe_json), format, path, comfy.model_management.throw_exception_if_processing_interrupted)

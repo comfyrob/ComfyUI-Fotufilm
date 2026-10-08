@@ -72,7 +72,7 @@ def write_master(images, fps, color_space, playback, destination, interrupt=lamb
         'playback': 'playback' + suffix})
     temporary = Path(destination).with_suffix('.part')
     try:
-        with tempfile.TemporaryDirectory(prefix='film-hdr-master-') as directory, zipfile.ZipFile(temporary, 'w', allowZip64=True) as bundle:
+        with tempfile.TemporaryDirectory(prefix='film-hdr-master-') as directory, zipfile.ZipFile(temporary, 'w', allowZip64=True, strict_timestamps=False) as bundle:
             for index, image in enumerate(images):
                 interrupt()
                 rgb = image.detach().cpu().float().numpy()
