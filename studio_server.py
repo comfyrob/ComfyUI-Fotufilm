@@ -1,32 +1,49 @@
 """Same-origin ComfyUI preview jobs. No workflow submission or model inference.
 
 Only existing Comfy input/output assets can be registered. Processing is
-serialized and cancellable between frames; a newer editor request supersedes
+serialized and preemptible between frames; a newer editor request supersedes
 its previous work. Cache files are bounded and live in Comfy's temp directory.
 """
 import asyncio
+import atexit
 import hashlib
 import json
 import threading
 import time
 import uuid
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import folder_paths
 from aiohttp import web
 
-from .finish_pipeline import Source, render_clip, render_still
+from .finish_pipeline import Source, hdr_eligible, render_clip_steps, render_still
+from .preview_runtime import PreviewRuntime
+from .preview_scheduler import PreviewScheduler
 from .recipe import validate_recipe
 
 ASSETS=OrderedDict()
 JOBS=OrderedDict()
 CLIENTS={}
-EXECUTOR=ThreadPoolExecutor(max_workers=1,thread_name_prefix='fotufilm-preview')
 LOCK=threading.RLock()
 LIMIT=2*1024**3
-PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('finish_pipeline.py','grading.py','master_export.py','native.py','vendor/gear_grading.py'))).hexdigest()
+PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','vendor/gear_grading.py'))).hexdigest()
+RUNTIME=None
+
+
+def preview_runtime():
+    global RUNTIME
+    if RUNTIME is None:RUNTIME=PreviewRuntime(cache_root()/'float-frames',PIPELINE_SIGNATURE)
+    return RUNTIME
+
+
+def close_runtime():
+    global RUNTIME
+    if RUNTIME is not None:RUNTIME.close();RUNTIME=None
+
+
+EXECUTOR=PreviewScheduler(cleanup=close_runtime)
+atexit.register(EXECUTOR.shutdown,wait=False)
 
 
 def descriptor(path):
@@ -85,6 +102,8 @@ def cache_root():
 
 
 def prune_cache(protect=()):
+    protect=set(protect)
+    for job in list(JOBS.values()):protect.update(job.get('_paths',()))
     files=sorted(cache_root().glob('*'),key=lambda p:p.stat().st_mtime)
     size=sum(p.stat().st_size for p in files if p.is_file())
     for path in files:
@@ -94,45 +113,66 @@ def prune_cache(protect=()):
 
 
 def execute_job(job,asset,recipe,mode,edge,index,format_id):
+    steps=execute_job_steps(job,asset,recipe,mode,edge,index,format_id)
+    try:
+        while True:next(steps)
+    except StopIteration:pass
+    finally:steps.close()
+
+
+def execute_job_steps(job,asset,recipe,mode,edge,index,format_id):
     def interrupt():
         if job['cancel'].is_set():raise InterruptedError('Superseded or cancelled.')
     def progress(value):job['progress']=value
     try:
         interrupt();job['status']='running';started=time.monotonic()
+        job['queueSeconds']=round(started-job.get('submitted',started),3)
         source=asset['source'];root=cache_root()
         key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],recipe,mode,edge,index if mode=='frame' else 0,format_id],sort_keys=True).encode()).hexdigest()
         extension='.png' if mode=='frame' else '.mov' if format_id=='prores422hq' else '.mp4'
         destination=root/(key+extension)
         before_path=root/(key+'-before'+extension)
+        if mode=='frame':
+            before_key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],edge,index,hdr_eligible(recipe),'before-frame']).encode()).hexdigest()
+            before_path=root/(before_key+'.png')
         if mode=='export':destination=Path(folder_paths.get_output_directory())/f'fotufilm-{uuid.uuid4().hex}{extension}'
+        job['_paths']={str(destination),str(before_path)}
+        runtime=preview_runtime()
         scale=min(1,edge/max(source.info['width'],source.info['height'])) if mode!='export' else 1
         width,height=[max(1,round(source.info[k]*scale)) for k in ('width','height')]
         if mode!='frame':width+=width%2;height+=height%2
         info={'cached':destination.is_file(),'width':width,'height':height}
         if mode=='frame':
             if not destination.is_file() or not before_path.is_file():
-                info.update(render_still(source,recipe,destination,before_path,index,edge))
+                info.update(render_still(source,recipe,destination,before_path,index,edge,
+                                         runtime=runtime,fingerprint=asset['fingerprint'],reuse_before=True))
             interrupt()
             result={'after':descriptor(destination),'before':descriptor(before_path),'frame':index}
         else:
             # Bounded automatic playback previews; exports retain the complete source.
             count=min(source.info['frames'],max(1,round(source.info['fps']*20))) if mode=='clip' else None
-            if not destination.is_file():info.update(render_clip(source,recipe,destination,format_id,edge if mode=='clip' else None,count=count,interrupt=interrupt,progress=progress))
+            if not destination.is_file():
+                info.update((yield from render_clip_steps(source,recipe,destination,format_id,edge if mode=='clip' else None,
+                    count=count,interrupt=interrupt,progress=progress,runtime=runtime,fingerprint=asset['fingerprint'])))
             interrupt()
             result={'after':descriptor(destination),'frames':count or source.info['frames'],'fps':source.info['fps']}
             if mode=='clip':
                 # Film eligibility determines only the terminal SDR shoulder.
                 before_key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],edge,recipe['stock'],recipe['medium'],recipe['digitalReference'],'before']).encode()).hexdigest()
                 before_path=root/(before_key+'.mp4')
-                if not before_path.is_file():render_clip(source,recipe,before_path,'mp4',edge,count=count,before=True,interrupt=interrupt)
+                job['_paths'].add(str(before_path))
+                if not before_path.is_file():
+                    yield from render_clip_steps(source,recipe,before_path,'mp4',edge,count=count,before=True,interrupt=interrupt,
+                                                  runtime=runtime,fingerprint=asset['fingerprint'])
                 result['before']=descriptor(before_path)
         interrupt()
-        result.update(info,seconds=round(time.monotonic()-started,3),recipe=recipe,source=source.info,mode=mode)
+        result.update(info,seconds=round(time.monotonic()-started,3),queueSeconds=job['queueSeconds'],recipe=recipe,source=source.info,mode=mode)
         job.update(status='complete',result=result,progress=1)
         prune_cache({str(destination),str(before_path)})
     except InterruptedError:job['status']='cancelled'
     except Exception as error:job.update(status='error',error=str(error))
     finally:
+        job.pop('_paths',None)
         job['finished']=time.monotonic()
 
 
@@ -177,14 +217,15 @@ def install_routes():
                 if previous and mode!='export':cancel_job(previous)
                 if sum(j['status'] in ('queued','running') and not j['cancel'].is_set() for j in JOBS.values())>=8:
                     raise ValueError('Preview queue is busy. Try again shortly.')
-                job={'id':uuid.uuid4().hex,'status':'queued','progress':0,'cancel':threading.Event()}
+                job={'id':uuid.uuid4().hex,'status':'queued','progress':0,'cancel':threading.Event(),'submitted':time.monotonic()}
                 JOBS[job['id']]=job
                 if mode!='export':CLIENTS[client]=job['id']
                 for old in list(JOBS):
                     if len(JOBS)<=128:break
                     if JOBS[old]['status'] not in ('queued','running'):JOBS.pop(old)
                 while len(CLIENTS)>128:CLIENTS.pop(next(iter(CLIENTS)))
-                job['future']=EXECUTOR.submit(execute_job,job,asset,recipe,mode,edge,index,format_id)
+                priority=(30 if value.get('channel')=='looks' else 0) if mode=='frame' else 10 if mode=='clip' else 20
+                job['future']=EXECUTOR.submit(priority,execute_job_steps,job,asset,recipe,mode,edge,index,format_id)
             return web.json_response({'job':job['id']})
         except (ValueError,KeyError,TypeError) as error:return web.json_response({'error':str(error)},status=400)
 
@@ -192,7 +233,7 @@ def install_routes():
     async def status(request):
         job=JOBS.get(request.match_info['id'])
         if not job:return web.json_response({'error':'Preview job expired.'},status=404)
-        return web.json_response({k:v for k,v in job.items() if k not in ('cancel','finished','future')})
+        return web.json_response({k:v for k,v in job.items() if k not in ('cancel','finished','future','submitted','_paths')})
 
     @routes.post('/fotufilm/jobs/{id}/cancel')
     async def cancel(request):

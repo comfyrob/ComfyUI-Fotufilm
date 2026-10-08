@@ -58,7 +58,11 @@ def convert(rgb, source, destination):
 def apply_grade(rgb, settings, space):
     if settings == neutral_grade(): return rgb
     numpy_input=isinstance(rgb,np.ndarray)
-    tensor=torch.from_numpy(np.ascontiguousarray(rgb)) if numpy_input else rgb
+    # Cached float buffers are immutable; never hand Torch a non-writable array.
+    if numpy_input:
+        array=np.ascontiguousarray(rgb)
+        tensor=torch.from_numpy(array if array.flags.writeable else array.copy())
+    else: tensor=rgb
     c=convert(tensor.float(),space,'linear-acescg')
     p=gear.RenderParams(**settings)
     c=c*(2.0**p.exposure)

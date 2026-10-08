@@ -12,7 +12,7 @@ export function createPreviewClient(api) {
     register:file=>request('source',file),
     async render(asset,recipe,{mode='frame',frame=0,edge=960,format='mp4',signal,onProgress,channel='main'}={}){
       if(closed||signal?.aborted)throw new DOMException('Cancelled','AbortError');
-      const {job}=await request('preview',{asset,recipe,mode,frame,edge,format,client:`${client}:${channel}`});
+      const {job}=await request('preview',{asset,recipe,mode,frame,edge,format,channel,client:`${client}:${channel}`});
       if(signal?.aborted||closed){await cancel(job);throw new DOMException('Cancelled','AbortError');}
       jobs.add(job);const abort=()=>cancel(job);signal?.addEventListener('abort',abort,{once:true});
       try{
@@ -21,7 +21,7 @@ export function createPreviewClient(api) {
           if(state.status==='complete')return {...state.result,after:fileURL(state.result.after),before:fileURL(state.result.before)};
           if(state.status==='error')throw new Error(state.error);
           if(state.status==='cancelled')throw new DOMException('Superseded','AbortError');
-          await new Promise(resolve=>setTimeout(resolve,250));
+          await new Promise(resolve=>setTimeout(resolve,mode==='frame'&&channel!=='looks'?80:250));
         }
         throw new DOMException('Cancelled','AbortError');
       }finally{jobs.delete(job);signal?.removeEventListener('abort',abort);if(closed||signal?.aborted)await cancel(job);}

@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+import time
 from fractions import Fraction
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from .hdr_master import PRIMARIES, read_manifest
 from .native import Engine
 from .recipe import render_request, validate_recipe
 from .runtime_paths import stocks_path
+from .preview_runtime import SourceCursor, digest, render_stats
 
 
 def resize_float(rgb, edge):
@@ -90,50 +92,85 @@ def hdr_eligible(recipe):
 
 
 class Finisher:
-    def __init__(self,recipe,directory):
+    def __init__(self,recipe,directory,runtime=None):
         self.recipe=validate_recipe(recipe)
         self.grading=validate_grading(self.recipe.get('grading'))
-        self.engine=Engine()
+        self.runtime=runtime
+        self._engine=None
         self.path=Path(directory)/'working.exr'
         self.request=render_request(self.recipe,self.recipe.get('seed') or 0,edge=None)
+        self.film_signature=digest([self.request,self.grading['balance']])
         self.hdr=hdr_eligible(self.recipe)
 
-    def frame(self,rgb,index):
+    @property
+    def engine(self):
+        if self.runtime is not None:return self.runtime.engine
+        if self._engine is None:self._engine=Engine()
+        return self._engine
+
+    def develop(self,rgb,index):
         rgb=apply_grade(rgb,self.grading['balance'],'linear-rec2020')
         OpenEXR.File({'chromaticities':PRIMARIES['linear-rec2020']},
             {c:np.ascontiguousarray(rgb[:,:,i]) for i,c in enumerate('RGB')}).write(str(self.path))
         self.request['edit']['seed']=((self.recipe.get('seed') or 0)+index*0x7f4a7c15)&0xffffffff
-        rgb=self.engine.render_float(str(self.path),rgb.shape[1],rgb.shape[0],self.request)
+        return self.engine.render_float(str(self.path),rgb.shape[1],rgb.shape[0],self.request)
+
+    def finish(self,rgb):
         return apply_grade(rgb,self.grading['finish'],'linear-p3')
 
-    def close(self):self.engine.close()
+    def frame(self,rgb,index):
+        return self.finish(self.develop(rgb,index))
+
+    def close(self):
+        if self._engine is not None:self._engine.close();self._engine=None
 
 
-def render_still(source,recipe,destination,before_path,index=0,edge=960):
+def render_still(source,recipe,destination,before_path,index=0,edge=960,*,runtime=None,fingerprint=None,reuse_before=False):
     from .master_export import delivery
+    started=time.monotonic();stats=render_stats()
     with tempfile.TemporaryDirectory(prefix='fotufilm-still-') as directory:
-        finisher=Finisher(recipe,directory)
+        finisher=Finisher(recipe,directory,runtime)
+        cursor=SourceCursor(source,edge)
         try:
-            index,rgb=next(source.frames(index,1,edge))
-            result=finisher.frame(rgb,index)
+            before_cached=reuse_before and Path(before_path).is_file()
+            if runtime is not None:
+                rgb=None if before_cached else runtime.source_frame(cursor,fingerprint,index,stats)
+                result=runtime.finished_frame(cursor,fingerprint,index,finisher,stats,source_rgb=rgb)
+            else:
+                rgb=cursor.read(index)
+                result=finisher.frame(rgb,index)
+            processed=time.monotonic()
             knee=.7 if finisher.hdr else 1
-            Image.fromarray((delivery(result,False,knee)/257).round().astype('uint8')).save(destination)
-            Image.fromarray((delivery(convert(rgb,'linear-rec2020','linear-p3'),False,knee)/257).round().astype('uint8')).save(before_path)
-            return {'width':rgb.shape[1],'height':rgb.shape[0],'frame':index,'hdrEligible':finisher.hdr}
-        finally:finisher.close()
+            # PNG compression effort changes byte size, never pixel precision.
+            Image.fromarray((delivery(result,False,knee)/257).round().astype('uint8')).save(destination,compress_level=1)
+            if not before_cached:
+                Image.fromarray((delivery(convert(rgb,'linear-rec2020','linear-p3'),False,knee)/257).round().astype('uint8')).save(before_path,compress_level=1)
+            return {'width':result.shape[1],'height':result.shape[0],'frame':index,'hdrEligible':finisher.hdr,
+                    'processingSeconds':round(processed-started,4),'displaySeconds':round(time.monotonic()-processed,4),**stats}
+        finally:cursor.close();finisher.close()
 
 
 def render_clip(source,recipe,destination,format_id='mp4',edge=None,start=0,count=None,
-                interrupt=lambda:None,progress=lambda value:None,before=False):
+                interrupt=lambda:None,progress=lambda value:None,before=False,*,runtime=None,fingerprint=None):
+    steps=render_clip_steps(source,recipe,destination,format_id,edge,start,count,interrupt,progress,before,
+                            runtime=runtime,fingerprint=fingerprint)
+    try:
+        while True:next(steps)
+    except StopIteration as done:return done.value
+    finally:steps.close()
+
+
+def render_clip_steps(source,recipe,destination,format_id='mp4',edge=None,start=0,count=None,
+                interrupt=lambda:None,progress=lambda value:None,before=False,*,runtime=None,fingerprint=None):
     from .master_export import delivery
     hdr=format_id=='hlg'
     if format_id not in ('mp4','prores422hq','hlg'):raise ValueError('Unsupported export format.')
-    process=None;finisher=None
+    process=None;finisher=None;cursor=SourceCursor(source,edge);stats=render_stats()
     with tempfile.TemporaryDirectory(prefix='fotufilm-finish-') as directory:
         directory=Path(directory)
         try:
             eligible=hdr_eligible(recipe)
-            if not before:finisher=Finisher(recipe,directory)
+            if not before:finisher=Finisher(recipe,directory,runtime)
             if hdr and not eligible:raise ValueError('HDR delivery requires direct-view slide film with Reference exposure.')
             fps=Fraction(source.info['fps']).limit_denominator(100000)
             scale=min(1,(edge or max(source.info['width'],source.info['height']))/max(source.info['width'],source.info['height']))
@@ -154,22 +191,35 @@ def render_clip(source,recipe,destination,format_id='mp4',edge=None,start=0,coun
             with (directory/'encode.log').open('w+b') as log:
                 process=subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=log)
                 rendered=0
-                for index,rgb in source.frames(start,total,edge):
+                for index in range(start,start+total):
                     interrupt()
-                    output=convert(rgb,'linear-rec2020','linear-p3') if before else finisher.frame(rgb,index)
+                    if runtime is not None:
+                        output=(convert(runtime.source_frame(cursor,fingerprint,index,stats),'linear-rec2020','linear-p3') if before
+                                else runtime.finished_frame(cursor,fingerprint,index,finisher,stats))
+                    else:
+                        rgb=cursor.read(index)
+                        output=convert(rgb,'linear-rec2020','linear-p3') if before else finisher.frame(rgb,index)
                     if not np.isfinite(output).all():raise ValueError('Non-finite rendered pixels.')
                     output=np.pad(output,((0,height-output.shape[0]),(0,width-output.shape[1]),(0,0)),mode='edge')
                     process.stdin.write(delivery(output,hdr,.7 if eligible else 1).tobytes())
                     rendered+=1;progress(rendered/total)
+                    yield
                 process.stdin.close()
-                if process.wait(timeout=300):
+                deadline=time.monotonic()+300
+                while process.poll() is None:
+                    interrupt()
+                    if time.monotonic()>deadline:raise TimeoutError('Video encoding timed out.')
+                    time.sleep(.01)
+                    yield
+                if process.returncode:
                     log.seek(0);raise RuntimeError('Encoding failed: '+log.read(1000).decode(errors='replace'))
                 if rendered!=total:raise ValueError('Source ended before its reported frame count.')
             Path(destination).with_suffix('.recipe.json').write_text(json.dumps(recipe,indent=2))
-            return {'frames':rendered,'fps':float(fps),'width':width,'height':height,'start':start/float(fps),'hdrEligible':eligible}
+            return {'frames':rendered,'fps':float(fps),'width':width,'height':height,'start':start/float(fps),'hdrEligible':eligible,**stats}
         except BaseException:
             if process and process.poll() is None:process.kill();process.wait()
             Path(destination).unlink(missing_ok=True)
             raise
         finally:
+            cursor.close()
             if finisher:finisher.close()

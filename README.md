@@ -45,6 +45,8 @@ An existing **Load Video** file appears immediately, without executing the graph
 
 Editing **Looks**, **Film** or **Grade** automatically requests a native frame preview, then renders a cached playback clip. This uses the real Fotufilm engine on the ComfyUI server, independent of the graph queue. New edits cancel outdated work between frames. No LTX job is submitted by changing a slider. Preview quality is **960px / 1440px long edge**, capped at source resolution; automatic clips cover the first 20 seconds. Final exports cover the full source.
 
+Studio keeps a native engine warm and saves developed float32 frames before the finishing grade. **Finish look** changes reuse those frames; balance, stock, texture, grain seed, source, frame or resolution changes invalidate the affected film results. A single worker lets interactive frames interrupt playback/export work at frame boundaries and resumes without skipping frames. PNG previews use faster lossless compression. Resolution, grain, float precision and video encoding quality are unchanged. See [preview performance measurements](docs/preview-performance.md).
+
 **Grade → Balance input** grades the float source before Fotufilm. **Grade → Finish look** refines Fotufilm's linear P3 output. The controls use pinned Gear ACEScct math, adapted for wide-gamut float buffers: exposure, warmth/tint, contrast, highlights/shadows, saturation/vibrance, and lift/gamma/gain/offset wheels. There is one terminal display conversion, not a tone map before film simulation. See [Gear attribution and adaptation](vendor/README.md).
 
 Looks are complete recipes. Choosing a different film keeps the look name and marks it **Modified**. Look cards are actual first-frame film renders, generated in the background. Playback supports looping, frame steps, scrubbing, zoom/pan and a draggable before/after divider. The enlarged Studio and inline node share one editor implementation.
@@ -73,7 +75,7 @@ Use **Film Finish - Studio + LTX 2.5 HDR - Modal INT8.json** for the INT8 transf
 
 Recipes in `examples/*.recipe.json` select film, print/scan, exposure and texture. HDR delivery currently requires a direct-view slide-film recipe with **Reference exposure**, such as the supplied Ektachrome recipe. Negative/print recipes produce an SDR finish even when the input is HDR. An SDR node thumbnail does not display the full float range; use the HLG video or EXR master in a color-managed HDR viewer.
 
-The pack includes same-origin `/fotufilm/` preview/export routes on your existing ComfyUI server. It does not launch another server or install the standalone Film Finish app or deployment credentials. Routes inherit the host's access boundary. Preview jobs are serialized, cancellable and cached in a bounded 2 GiB temporary cache; exports are saved in the normal output directory.
+The pack includes same-origin `/fotufilm/` preview/export routes on your existing ComfyUI server. It does not launch another server or install the standalone Film Finish app or deployment credentials. Routes inherit the host's access boundary. Preview jobs are serialized, prioritized and cancellable. Encoded previews have a 2 GiB temporary cache; lossless float intermediates have a separate 4 GiB disk / 192 MiB RAM budget, excluding native-engine buffers and active renders. Evicted frames are recomputed. Exports are saved in the normal output directory.
 
 ## Container image integration
 

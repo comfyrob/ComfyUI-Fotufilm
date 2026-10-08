@@ -35,7 +35,7 @@ export function createStudio(options = {}) {
   let label = options.label || 'Your video';
   let fps = Math.max(1, options.fps || 24);
   let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=960, gradeStage='balance', stillReady=false;
-  let activeRenderedSource=sourceMode, previewClipKey='', lookController=null, clipController=null, stillFrame=-1, swappingMedia=false;
+  let activeRenderedSource=sourceMode, previewClipKey='', pendingClipKey='', lookController=null, clipController=null, stillFrame=-1, swappingMedia=false;
   let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), lookTimer=0, exporting=false;
   const history=[clone(recipe)]; let historyTimer=0;
   let frameCallback = 0, raf = 0, thumbnailToken = 0, destroyed = false;
@@ -138,23 +138,31 @@ export function createStudio(options = {}) {
         stillReady=true;stillFrame=frame;showStill(video.paused&&Math.abs(video.currentTime*fps-frame)<1);updateScope(afterImage);renderedRecipe=snapshot;
         action('compare').disabled=false;$('.ff-stage-left').textContent='Before grade & film';$('.ff-stage-right').textContent='After · Gear + Fotufilm';
         $('.ff-display').textContent=currentAsset.info.hdr?'HDR master → SDR display preview':'SDR source → film preview';
-        setStatus(`Frame ready · ${still.seconds}s${still.cached?' · cached':''}`);
-        if(previewClipKey!==key){
-          clipController?.abort();clipController=new AbortController();const clipSignal=clipController.signal;previewClipKey=key;
-          setStatus('Frame ready · updating playback…');
-          const clip=await options.preview.render(currentAsset.asset,snapshot,{mode:'clip',edge:previewEdge,signal:clipSignal,channel:'playback',onProgress:state=>{if(!clipSignal.aborted)setStatus(`Updating playback · ${Math.round(state.progress*100)}%`);}});
-          if(destroyed||clipSignal.aborted)return;
-          const time=video.currentTime,playing=!video.paused,wasComparing=comparing;
-          rendered=clip.after;activeRenderedSource=sourceMode;previewClipKey=key;
-          swappingMedia=true;
-          const restore=()=>{video.currentTime=Math.min(time,Math.max(0,video.duration-.001));before.currentTime=video.currentTime;if(playing)video.play().catch(()=>{});compare(wasComparing);swappingMedia=false;video.style.visibility='';for(const name of ['play','back','next','loop','audio','fullscreen'])action(name).disabled=false;};
-          video.addEventListener('loadedmetadata',restore,{once:true,signal:abort.signal});
-          video.src=clip.after;before.src=clip.before;video.load();before.load();
-          makeThumbnails(clip.after);lookTimer=setTimeout(scheduleLookPreviews,1500);
-          setStatus(`Preview ready · ${clip.width||currentAsset.info.width}px · ${clip.frames} frames${clip.frames<currentAsset.info.frames?' · first 20s':''}`);
-        }
-      }catch(error){if(error.name!=='AbortError'){previewClipKey='';setStatus(`Preview: ${error.message}`);}}
-    },force?120:250);
+        setStatus(`Frame ready · ${still.seconds}s${still.cached?' · cached':still.filmCacheHits?' · film reused':''}`);
+        if(previewClipKey!==key&&(pendingClipKey!==key||clipController?.signal.aborted))updatePlayback(key,currentAsset,snapshot);
+      }catch(error){if(error.name!=='AbortError')setStatus(`Preview: ${error.message}`);}
+    },100);
+  }
+  async function updatePlayback(key,currentAsset,snapshot){
+    clipController?.abort();clipController=new AbortController();const controller=clipController,clipSignal=controller.signal,edge=previewEdge;
+    pendingClipKey=key;
+    try{
+      // Let the current frame settle before spending work on every frame of the clip.
+      await new Promise(resolve=>setTimeout(resolve,400));
+      if(destroyed||clipSignal.aborted)return;
+      setStatus('Frame ready · updating playback…');
+      const clip=await options.preview.render(currentAsset.asset,snapshot,{mode:'clip',edge,signal:clipSignal,channel:'playback',onProgress:state=>{if(!clipSignal.aborted)setStatus(`Updating playback · ${Math.round(state.progress*100)}%`);}});
+      if(destroyed||clipSignal.aborted)return;
+      const time=video.currentTime,playing=!video.paused,wasComparing=comparing;
+      rendered=clip.after;activeRenderedSource=sourceMode;previewClipKey=key;
+      swappingMedia=true;
+      const restore=()=>{video.currentTime=Math.min(time,Math.max(0,video.duration-.001));before.currentTime=video.currentTime;if(playing)video.play().catch(()=>{});compare(wasComparing);swappingMedia=false;video.style.visibility='';for(const name of ['play','back','next','loop','audio','fullscreen'])action(name).disabled=false;};
+      video.addEventListener('loadedmetadata',restore,{once:true,signal:abort.signal});
+      video.src=clip.after;before.src=clip.before;video.load();before.load();
+      makeThumbnails(clip.after);lookTimer=setTimeout(scheduleLookPreviews,1500);
+      setStatus(`Preview ready · ${clip.width||currentAsset.info.width}px · ${clip.frames} frames${clip.frames<currentAsset.info.frames?' · first 20s':''}`);
+    }catch(error){if(error.name!=='AbortError'&&!clipSignal.aborted)setStatus(`Playback: ${error.message}`);}
+    finally{if(clipController===controller)pendingClipKey='';}
   }
   async function scheduleLookPreviews(){
     if(!options.preview||!asset||destroyed)return;
