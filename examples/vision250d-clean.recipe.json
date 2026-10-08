@@ -14,7 +14,7 @@
     "shadows": 0,
     "saturation": 1,
     "vibrance": 0,
-    "grain": 1,
+    "grain": 0.55,
     "gradeShadowsWarmth": 0,
     "gradeHighlightsWarmth": 0
   },

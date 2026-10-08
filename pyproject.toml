@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-fotufilm"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fotufilm film simulation and float HDR video finishing nodes for ComfyUI"
 requires-python = ">=3.12"
 license = "GPL-3.0-only"

@@ -957,7 +957,7 @@
               "film_finish_source_id": "5602"
             },
             "widgets_values": [
-              "ltx-2.5-22b-distilled-transformer-bf16.safetensors",
+              "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
               "default"
             ]
           },
@@ -1003,7 +1003,7 @@
               "film_finish_source_id": "5606"
             },
             "widgets_values": [
-              "ltx-2.5-22b-ic-lora-sdr-to-hdr-1.0.safetensors",
+              "ltx25/ltx-2.5-22b-ic-lora-sdr-to-hdr-1.0.safetensors",
               1
             ]
           },

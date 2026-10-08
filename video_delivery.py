@@ -6,7 +6,7 @@ import av
 
 def repair_prores_tags(path, graph, result_node):
     node = graph.get(result_node, {})
-    classes = {'FotufilmDevelopHDRMaster': 1, 'FotufilmDevelopVideo': 12}
+    classes = {'FotufilmDevelopHDRMaster': 1, 'FotufilmDevelopVideo': 1}
     primaries = classes.get(node.get('class_type'))
     if primaries is None or node.get('inputs', {}).get('format') != 'prores422hq':
         return

@@ -1,4 +1,4 @@
-"""Lightweight video/recipe handoff for the ComfyUI studio scaffold."""
+"""Video, float-master and recipe handoff for the native ComfyUI Studio."""
 import json
 import shutil
 import uuid
@@ -9,6 +9,7 @@ import folder_paths
 from comfy_api.latest import Input, io
 
 from .recipe import validate_recipe
+from .hdr_nodes import HDRMaster, resolve_master
 
 DEFAULT_RECIPE = (Path(__file__).parent / 'examples/vision250d-clean.recipe.json').read_text()
 StudioContext = io.Custom('FOTUFILM_STUDIO')
@@ -24,7 +25,7 @@ def preview_file(video, label):
     source = video.get_stream_source()
     suffix = Path(source).suffix.lower() if isinstance(source, str) else '.mp4'
     if suffix not in ('.mp4', '.webm', '.mov', '.m4v'):
-        raise ValueError('Use MP4, WebM or MOV for video preview. Float EXR preview is not connected in this scaffold.')
+        raise ValueError('Use MP4, WebM or MOV for video preview. Connect float EXR archives through the master input.')
     if isinstance(source, str):
         path = Path(source).resolve()
         for kind, directory in [('output', folder_paths.get_output_directory()), ('input', folder_paths.get_input_directory()), ('temp', folder_paths.get_temp_directory())]:
@@ -57,24 +58,28 @@ class FotufilmStudio(io.ComfyNode):
     def define_schema(cls):
         return io.Schema(
             node_id='FotufilmStudio', display_name='Fotufilm · Studio', category='Film Finish',
-            description='Expandable video and film recipe editor. Connect recipe_json to a Develop node and studio to Return to Studio downstream. The finished preview returns without a graph cycle.',
+            description='Interactive Gear grading and Fotufilm finishing. Connect the float master after HDR reconstruction. Existing source files preview without running LTX. Previews update automatically; the graph exports the saved recipe.',
             is_output_node=True,
             inputs=[io.Video.Input('video'), io.String.Input('recipe_json', multiline=True, default=DEFAULT_RECIPE),
                     io.Float.Input('fps', default=24, min=1, max=120, advanced=True),
-                    io.Video.Input('rendered_preview', optional=True), io.Video.Input('enhanced_source', optional=True)],
-            outputs=[io.Video.Output('source_video'), io.String.Output('recipe_json'), StudioContext.Output('studio')],
+                    io.Video.Input('rendered_preview', optional=True), io.Video.Input('enhanced_source', optional=True),
+                    HDRMaster.Input('master', optional=True)],
+            outputs=[io.Video.Output('source_video'), io.String.Output('recipe_json'), StudioContext.Output('studio'), HDRMaster.Output('master')],
         )
 
     @classmethod
-    def execute(cls, video: Input.Video, recipe_json: str, fps: float, rendered_preview=None, enhanced_source=None):
+    def execute(cls, video: Input.Video, recipe_json: str, fps: float, rendered_preview=None, enhanced_source=None, master=None):
         recipe = validate_recipe(json.loads(recipe_json))
         session = StudioSession(uuid.uuid4().hex, recipe)
         files = {'source': preview_file(video, 'Original video')}
+        if master is not None:
+            from .studio_server import descriptor
+            files['master'] = descriptor(resolve_master('', master))
         if rendered_preview is not None:
             files['rendered'] = preview_file(rendered_preview, 'Existing Fotufilm render')
         if enhanced_source is not None:
             files['enhanced'] = preview_file(enhanced_source, 'Enhanced HDR source')
-        return io.NodeOutput(video, json.dumps(recipe), session,
+        return io.NodeOutput(video, json.dumps(recipe), session, master,
                              ui={'fotufilm_studio': [{**files, 'fps': fps, 'token': session.token}]})
 
 

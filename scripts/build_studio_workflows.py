@@ -21,8 +21,8 @@ def connect(graph, a, out, b, inp):
     nodes[a]['outputs'][out]['links'].append(id);nodes[b]['inputs'][inp]['link']=id
 
 def studio(id=2,pos=(490,120)):
-    n=node(id,'FotufilmStudio',pos,[('video','VIDEO'),('rendered_preview','VIDEO'),('enhanced_source','VIDEO')],
-        [('source_video','VIDEO'),('recipe_json','STRING'),('studio','FOTUFILM_STUDIO')],[json.dumps(recipe),24],size=(1100,850))
+    n=node(id,'FotufilmStudio',pos,[('video','VIDEO'),('rendered_preview','VIDEO'),('enhanced_source','VIDEO'),('master','FOTUFILM_HDR_MASTER')],
+        [('source_video','VIDEO'),('recipe_json','STRING'),('studio','FOTUFILM_STUDIO'),('master','FOTUFILM_HDR_MASTER')],[json.dumps(recipe),24],size=(1100,850))
     n['properties']['fotufilm_studio_expanded']=True
     return n
 
@@ -70,8 +70,26 @@ master['inputs'][2]['widget']={'name':'fps'}
 develop=node(5,'FotufilmDevelopHDRMaster',(2520,120),[('recipe_json','STRING'),('master','FOTUFILM_HDR_MASTER')],[('video','VIDEO')],['',json.dumps(recipe),'mp4'],size=(340,260));develop['inputs'][0]['widget']={'name':'recipe_json'}
 hlg=copy.deepcopy(bytype['FilmFinishSaveHDRVideo']);hlg.update(id=6,pos=[2100,460],size=[360,270]);hlg['inputs']=[dict(name=n,type=t,link=None)for n,t in [('images','IMAGE'),('audio','AUDIO'),('fps','FLOAT')]];hlg['inputs'][2]['widget']={'name':'fps'};hlg['outputs']=[dict(name='video',type='VIDEO',links=[],slot_index=0)]
 hdr=node(3,subid,(1690,120),[('video','VIDEO')],[(n,t)for n,t,_,_ in outs],size=(340,240),title='LTX 2.5 · Reconstruct HDR');hdr['properties']={}
-g=graph([copy.deepcopy(source),studio(),hdr,master,develop,hlg,review(7,(2930,120))]);g['nodes'][0]['outputs'][0]['links']=[];g['definitions']={'subgraphs':[sub]}
-for args in [(1,0,2,0),(1,0,3,0),(1,0,4,1),(3,0,4,0),(3,2,4,2),(4,0,5,1),(2,1,5,0),(3,0,6,0),(3,1,6,1),(3,2,6,2),(2,2,7,0),(5,0,7,1),(6,0,7,2)]:connect(g,*args)
-note=node(8,'Note',(1690,820),widgets=['ONE CONNECTED GRAPH\n1. Upload your video.\n2. Edit and save the Studio recipe.\n3. Run on a GPU ComfyUI server with the pinned LTX 2.5 models.\n\nLTX preserves float ACEScg → EXR master → Fotufilm. No reupload. Open the LTX subgraph to inspect all stages. Recipe edits do not feed into LTX. Keep the reconstruction seed fixed to reuse ComfyUI cache.\n\nReturn to Studio sends the finished render to the same viewer without a graph cycle. MP4 is an SDR delivery preview; the float HDR master stays separate. HLG output requires an eligible film/print recipe.'],size=(560,300),title='How this graph works')
+hdr['pos']=[500,120];master['pos']=[920,120]
+g=graph([copy.deepcopy(source),studio(pos=(1370,120)),hdr,master,develop,review(7,(2930,120))]);g['nodes'][0]['outputs'][0]['links']=[];g['definitions']={'subgraphs':[sub]}
+for args in [(1,0,2,0),(1,0,3,0),(1,0,4,1),(3,0,4,0),(3,2,4,2),(4,0,2,3),(2,3,5,1),(2,1,5,0),(2,2,7,0),(5,0,7,1)]:connect(g,*args)
+note=node(8,'Note',(1690,820),widgets=['HDR FINISHING WORKFLOW\n1. Upload your video.\n2. Run once to reconstruct HDR on your GPU server.\n3. Studio receives the float master automatically.\n4. Grade with Gear, choose film, and preview without rerunning LTX.\n5. Export from Studio or save the recipe and run the cached graph.\n\nLTX preserves float ACEScg → EXR master → Fotufilm. No reupload. Open the LTX subgraph to inspect all stages. Recipe edits do not feed into LTX. Keep the reconstruction seed fixed to reuse ComfyUI cache.\n\nReturn to Studio sends the finished render to the same viewer without a graph cycle. MP4 is an SDR delivery preview; the float HDR master stays separate. HLG output requires an eligible film/print recipe.'],size=(560,300),title='How this graph works')
 g['nodes'].append(note);g['last_node_id']=8
 save('Film Finish - Studio + LTX 2.5 HDR.json',g)
+
+# Exact paths on Rob's persistent Modal volume, kept separate from the BF16 reference.
+modal_graph=copy.deepcopy(g)
+for n in modal_graph['definitions']['subgraphs'][0]['nodes']:
+    values=n.get('widgets_values',[])
+    for i,value in enumerate(values):
+        if value=='ltx-2.5-22b-distilled-transformer-bf16.safetensors':values[i]='ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors'
+        elif value=='ltx-2.5-22b-ic-lora-sdr-to-hdr-1.0.safetensors':values[i]='ltx25/'+value
+save('Film Finish - Studio + LTX 2.5 HDR - Modal INT8.json',modal_graph)
+# Re-open a durable master for subsequent editing sessions, without LTX nodes.
+loader=node(1,'FotufilmLoadHDRMaster',(50,120),outputs=[('master','FOTUFILM_HDR_MASTER'),('original','VIDEO')],widgets=[''],size=(360,180))
+loaded=graph([loader,studio(),copy.deepcopy(develop),review(7,(2930,120))])
+for n in loaded['nodes']:
+    for i in n.get('inputs',[]):i['link']=None
+    for o in n.get('outputs',[]):o['links']=[]
+for args in [(1,1,2,0),(1,0,2,3),(2,3,5,1),(2,1,5,0),(2,2,7,0),(5,0,7,1)]:connect(loaded,*args)
+save('Fotufilm - Finish saved HDR master.json',loaded)

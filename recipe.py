@@ -43,6 +43,9 @@ def validate_recipe(value):
         bounded(seed, 0, 2147483647, "Grain seed")
         if not isinstance(seed, int):
             raise ValueError("Grain seed must be an integer.")
+    if 'grading' in recipe:
+        from .grading import validate_grading
+        recipe['grading'] = validate_grading(recipe['grading'])
     return recipe
 
 

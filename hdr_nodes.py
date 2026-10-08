@@ -16,13 +16,39 @@ class HDRMasterFile:
     path: str
 
 
+class FotufilmLoadHDRMaster(io.ComfyNode):
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(node_id='FotufilmLoadHDRMaster',display_name='Fotufilm · Load HDR Master',category='Film Finish',
+            description='Reuse a completed float master without running LTX. Enter its Comfy input path, or append [output] for a master in the output folder.',
+            inputs=[io.String.Input('file',default='')],outputs=[HDRMaster.Output('master'),io.Video.Output('original')])
+
+    @classmethod
+    def execute(cls,file):
+        import re, tempfile, shutil
+        from .studio_server import resolve_file
+        from .finish_pipeline import Source
+        match=re.fullmatch(r'(.*?)(?:\s*\[(input|output)\])?',file)
+        if not match:raise ValueError('Invalid master filename.')
+        path=resolve_file({'filename':match[1].strip(),'type':match[2] or 'input'})
+        source=Source(path)
+        if not source.is_hdr:raise ValueError('Choose a .ffhdr.zip master.')
+        import uuid
+        with tempfile.TemporaryDirectory() as directory:
+            original=source.audio_path(directory)
+            target=Path(folder_paths.get_temp_directory())/(f'fotufilm-original-{uuid.uuid4().hex}'+original.suffix)
+            shutil.copyfile(original,target)
+        return io.NodeOutput(HDRMasterFile(str(path)),InputImpl.VideoFromFile(str(target)))
+
+
 def resolve_master(file, master=None):
     root = Path(folder_paths.get_output_directory() if master is not None else folder_paths.get_input_directory()).resolve()
     if master is not None and not isinstance(master, HDRMasterFile):
         raise ValueError('Connect the master output of Save HDR Master.')
     source = Path(master.path) if master is not None else root / file
     source = source.resolve()
-    if not source.is_relative_to(root) or source.suffix.lower() != '.zip' or not source.is_file():
+    allowed=source.is_relative_to(root) or (master is not None and source.is_relative_to(Path(folder_paths.get_input_directory()).resolve()))
+    if not allowed or source.suffix.lower() != '.zip' or not source.is_file():
         raise ValueError('Choose an uploaded HDR master or connect Save HDR Master.')
     return source
 

@@ -1,25 +1,41 @@
-# Nodes 2.0 Studio integration
+# Native Studio in Nodes 2.0
 
-The viewer uses `nodeCreated`, `loadedGraphNode`, the public `executed` API event and `onNodeOutputsUpdated` for history restoration. It does not replace node prototypes. `recipe_json` uses the widget's `hidden` flag; FPS is a schema-declared advanced input. Inline editing uses `addDOMWidget`; the outer node retains ComfyUI's ports, header, resize handles, selection and subgraph behavior.
+Studio uses public extension hooks (`nodeCreated`, `loadedGraphNode`, `executed`, `onNodeOutputsUpdated`) and `addDOMWidget`. The outer node retains ComfyUI's ports, resize handles, selection and subgraph behavior. No private Vue renderer is replaced. Modern Node Design is a user setting; the pack does not force it on.
 
-## One graph, one Studio
+## Source discovery and HDR order
 
-The Studio outputs its source VIDEO, recipe STRING and opaque `FOTUFILM_STUDIO` session. The session contains a unique execution token and the exact validated recipe. A downstream `FotufilmStudioReview` receives that session and a developed VIDEO, then returns UI metadata carrying the token. The frontend routes the result to the corresponding Studio. There is no backward wire and no graph cycle. Two Studios have independent sessions; execution paths inside subgraphs are resolved separately from history locator IDs.
+The connected Load Video file widget is resolved without executing its producer, following the core video editor's file/output resolution pattern. Cached VIDEO outputs and subgraph output links are supported. A processing node with no cached output is not treated as a source file. Lightweight connection checks discover a changed file and clear old source/preview state.
 
-Existing optional Studio preview inputs remain compatible, but must only receive independent upstream media. Do not connect the Studio's downstream render back to those inputs.
+A Load HDR Master file can be registered without execution. Save HDR Master's completed output is discovered after reconstruction. The source bundle retains RGB32F EXRs with explicit primaries. The embedded original video is used for timing and audio; it is never used as the HDR image input to Fotufilm.
 
-`FilmFinishSaveHDRMaster` now returns a `FOTUFILM_HDR_MASTER` handle to its existing EXR archive. `FotufilmDevelopHDRMaster` accepts that handle without copying or reuploading. The resolver requires the concrete handle type, a real ZIP file, and a path inside the server's output directory. The original uploaded-file path remains supported under the input directory. Grading still consumes the EXR master, never an 8-bit browser preview.
+The consolidated workflow has six functional root nodes and an instruction note:
 
-## Rendering and cache
+`Load Video → LTX 2.5 subgraph → Save HDR Master → Studio → Develop HDR Master → Return to Studio`
 
-The editor's Run workflow action saves the recipe and uses ComfyUI's normal queue. It may run LTX if no valid cached reconstruction exists. Recipe edits do not feed into the LTX subgraph; fixed-seed reconstruction can be reused in the same cache. No promise of cache survival across restarts or graph changes is made.
+The original VIDEO also feeds Studio and Save HDR Master. Studio passes the typed master through and supplies its edited recipe. LTX receives no recipe connection, allowing fixed-seed reconstruction cache reuse. The 25-node LTX subgraph remains editable. Use the saved-master example after a restart to avoid relying on the execution cache.
 
-A completed preview records the rendered recipe. Later changes display a stale-preview message. Playback is browser-decoded video delivered by the ComfyUI server; a faster server accelerates rendering, not the browser decoder or network. This phase does not supply instantaneous grading or a calibrated HDR monitor. The preview demo uses a previously rendered native Fotufilm clip and labels its thumbnails as source thumbnails.
+## Processing
 
-## Examples
+`float source → Gear balance (ACEScct/AP1) → Fotufilm → Gear finish → display/delivery conversion`
 
-- `Fotufilm - Studio.json`: source, Studio, Develop Video, Return to Studio.
-- `Film Finish - Studio + LTX 2.5 HDR.json`: seven root nodes plus an instruction note. The LTX subgraph contains the original 25 model/conditioning/reconstruction/decode nodes. Open it for detailed inspection.
-- `scripts/build_studio_workflows.py` regenerates both from the pinned grouped LTX lab. It preserves model names and transforms.
+Input spaces are explicit; the adapter avoids Gear's Rec.709 input clamp. Neutral grading preserves the float buffer exactly. PNG previews and H.264 playback are SDR display conversions. A display histogram is labelled SDR; it is not an HDR luminance scope. HLG export remains limited to direct-view slide film / Reference exposure.
 
-The expanded editor and dialog share the same implementation. Save persists the recipe; Cancel discards unsaved editor edits. Expanding/collapsing and opening the dialog do not start generation. Nodes 2.0 is enabled only in the isolated review deployment, never forced by the installed extension.
+The Gear math is pinned and attributed in `vendor/`. Final video exports and frame-batch nodes use the same `Finisher` as interactive previews, including deterministic per-frame grain seeds. Preview downsampling can change texture, so it is not a substitute for full-resolution grain inspection.
+
+## Interactive rendering
+
+Edits debounce for 250 ms, cancel superseded frame/playback work, request a current-frame native render, and then prepare a browser-decodable playback clip. Stale responses cannot replace newer recipes. Frame seeking uses a separate request channel from playback. Opening the enlarged Studio disposes the inline editor's jobs; closing it restores the node editor.
+
+Jobs use the existing ComfyUI HTTP server. They do not submit the execution graph, load AI models, or call Developer Platform implicitly. The file resolver restricts reads to Comfy input/output/temp directories. The serialized worker bounds rendering concurrency; source registration and job status remain responsive. Queue cancellation removes pending futures. Cache keys include the source fingerprint, renderer code signature, recipe, frame and resolution. Preview cache is capped at 2 GiB; it is not durable storage.
+
+Look thumbnails are native renders of the active source's first frame, generated after the main playback render. They resume from cached thumbnails after edits. A complete Look includes film, color and texture; changing components preserves its name with a Modified badge. Save to node persists the recipe, including grading.
+
+## Export and graph execution
+
+Studio Export uses the active Original/HDR source and the current recipe, at source resolution. The graph's Run workflow follows its actual wired inputs and may execute uncached LTX stages. These are separate explicit actions. Return to Studio correlates a downstream render with an opaque execution token and exact recipe, so there is no graph cycle.
+
+Automatic previews render the first 20 seconds at a selected 960px or 1440px long edge, never upscaling. Exports render the complete source, with audio and frame rate retained. Source clips are treated as constant-frame-rate sequences; VFR conforming and calibrated browser HDR output are not part of this release.
+
+## Verification
+
+See `validation-2026-10-07.md` for the tested environment, timings and limits. Tests cover float headroom, explicit color conversion, real still/export math parity, video frame count/timing/audio, cancellation, file containment and graph connectivity. There is no LTX inference in these finishing tests.

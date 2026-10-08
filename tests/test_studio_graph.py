@@ -72,7 +72,7 @@ class HandoffTests(unittest.TestCase):
         from comfy_api.latest import InputImpl
         video=InputImpl.VideoFromFile(str(APP/'tests/codec-smoke.mp4'))
         result=self.preview.FotufilmStudio.execute(video,self.preview.DEFAULT_RECIPE,24)
-        original,recipe,session=result.result
+        original,recipe,session,master=result.result
         review=self.preview.FotufilmStudioReview.execute(session,video)
         self.assertIs(original,video)
         self.assertIs(review.result[0],video)
