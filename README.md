@@ -24,6 +24,7 @@ Restart ComfyUI after installation. Do not install this alongside the original l
 
 | Node ID | Purpose |
 |---|---|
+| `FotufilmStudio` | Open an in-ComfyUI video studio, edit a recipe, and compare an existing render. Interface scaffold; no live rendering yet. |
 | `FotufilmDevelopVideo` | Develop a VIDEO through Fotufilm; MP4, ProRes 422 HQ or eligible HLG output. |
 | `FotufilmDevelopFrames` | Develop IMAGE frame batches; returns **linear Display P3 float** frames. |
 | `FilmFinishHDRPad` | Pad video to LTX spatial / temporal alignment. |
@@ -33,6 +34,14 @@ Restart ComfyUI after installation. Do not install this alongside the original l
 | `FotufilmDevelopHDRMaster` | Develop a saved float master into MP4, ProRes or eligible HLG. |
 
 Category: **Film Finish**. IDs intentionally match existing workflows.
+
+### Studio interface preview
+
+Add **Fotufilm · Studio**, connect a `VIDEO`, and run it once to make the clip available to the viewer. Click **Open studio** on the node. Optional `rendered_preview` and `enhanced_source` inputs enable before/after comparison and source switching. Use browser-compatible MP4/WebM previews; this scaffold does not decode EXR or implement a calibrated HDR display transform.
+
+Playback, looping, scrubbing, frame stepping, zoom/pan, and recipe editing work. **Save to node** persists the recipe in the workflow; **Cancel** discards edits. Looks are complete recipes; changing a film marks the chosen look **Modified**. Recipe changes do not update the video until rendered separately. Connect `source_video` and `recipe_json` to a downstream Develop Video node; do not feed that downstream output back into the same Studio node, which would create a graph cycle. Use a separate downstream Studio for output review.
+
+See [the interface scaffold notes](docs/viewer-scaffold.md) and [`Fotufilm - Studio.json`](examples/Fotufilm%20-%20Studio.json). This is a UI review stage, not a real-time GPU performance claim.
 
 The pack does **not** perform neural SDR-to-HDR conversion by itself. The included LTX 2.5 workflow requires [ComfyUI-LTXVideo](https://github.com/Lightricks/ComfyUI-LTXVideo) at `3bf3ca62595f1764c47d01c35c8e5dfe47e1a88f`, the model files named in that workflow, and `colour-science==0.4.7`. Install model weights on your remote models volume, not in this repository or the container image.
 

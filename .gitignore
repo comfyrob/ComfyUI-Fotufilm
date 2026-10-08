@@ -5,3 +5,4 @@ __pycache__/
 linux-runtime/
 runtime.local.json
 .DS_Store
+web/viewer/demo/
