@@ -1,0 +1,11 @@
+# EXR frame inspection — 2026-10-12
+
+Prepared: node pack 0.2.2 adds Studio's explicit one-frame inspection request, a graph Inspect Frame node and a saved-master example. Both use the existing float pipeline and save source-resolution RGB32F Rec.2020 EXRs with chromaticities. Source/balance inspection avoids initializing Fotufilm. Film/finish inspection shares the existing developed-frame cache when source, recipe and resolution match.
+
+Executed: 24 Python CPU checks and 3 JavaScript/jsdom interaction checks passed. Python checks cover exact EXR float round-trip with negative/highlight values, gamut conversion, source/balance behavior, shared film cache stage boundaries, full-resolution extraction of the selected HDR master frame, cancellation, old/new asset capability handling, the upstream BLAKE3 JPEG naming contract, graph schema and example connectivity. Regression checks include grading, HDR master storage, scheduler priority, cache bounds and the existing consolidated graph. JavaScript checks cover playhead/stage/recipe capture, source-change cancellation and the dedicated inspection endpoint without graph submission.
+
+These tests used tiny synthetic CPU frames in the existing Comfy Python environment; no local server was started, AI inference run or model weights downloaded. Film-stage cache tests use a deterministic test renderer. Real native Fotufilm performance and end-to-end core viewer behavior were not revalidated in this change.
+
+Deployment: no Modal or Developer Platform build, core pin, frontend pin or running server was changed. The pack must be pulled/rebuilt in the target environment. The asset adapter targets backend PR #16898 head `23dfebb121753864fbda1c9a9034c7a0c69446e6` and frontend PR #20839 head `fe89e8ba38802eeb8450a70a256479a6065a214e`, inspected while still unmerged. Final merged compatibility requires validation in a build containing both changes with Assets enabled. Older builds use a PNG thumbnail and separate EXR output/download.
+
+Limitations: core's inspector displays SDR, not calibrated HDR video. Inspection is an explicit saved snapshot, not a live grading viewer. Studio frame jobs appear in Assets rather than workflow History. No private frontend viewer module is imported. Video rendering/playback behavior is unchanged.

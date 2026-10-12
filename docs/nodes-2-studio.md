@@ -24,7 +24,9 @@ The Gear math is pinned and attributed in `vendor/`. Final video exports and fra
 
 ## Interactive rendering
 
-Edits debounce for 250 ms, cancel superseded frame/playback work, request a current-frame native render, and then prepare a browser-decodable playback clip. Stale responses cannot replace newer recipes. Frame seeking uses a separate request channel from playback. Opening the enlarged Studio disposes the inline editor's jobs; closing it restores the node editor.
+Edits debounce for 100 ms, cancel superseded frame/playback work, request a current-frame native render, and then prepare a browser-decodable playback clip. Stale responses cannot replace newer recipes. Frame seeking uses a separate request channel from playback. Opening the enlarged Studio disposes the inline editor's jobs; closing it restores the node editor.
+
+Full-resolution inspection is a separate, explicit one-frame job. It snapshots the selected source, playhead, stage and recipe, keeps RGB32F pixels in Rec.2020, and publishes an EXR with chromaticities plus a JSON sidecar. Studio never submits a workflow to inspect a frame. Source and balance inspection do not initialize the film engine; film and finish can reuse developed float frames at matching resolution. The graph's Inspect Frame node exposes the same operation as an output branch. The current core inspector is reached through Assets/History; it is not imported from private frontend modules.
 
 Jobs use the existing ComfyUI HTTP server. They do not submit the execution graph, load AI models, or call Developer Platform implicitly. The file resolver restricts reads to Comfy input/output/temp directories. The serialized worker bounds rendering concurrency; source registration and job status remain responsive. Queue cancellation removes pending futures. Cache keys include the source fingerprint, renderer code signature, recipe, frame and resolution. Preview cache is capped at 2 GiB; it is not durable storage.
 

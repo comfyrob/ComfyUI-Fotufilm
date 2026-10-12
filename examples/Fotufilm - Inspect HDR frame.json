@@ -1,0 +1,144 @@
+{
+  "id": "a536cb49-9a7b-4e1f-a185-fae4edcb75cf",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 1,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "FotufilmLoadHDRMaster",
+      "pos": [
+        40,
+        140
+      ],
+      "size": [
+        360,
+        180
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "original",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmLoadHDRMaster"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "FotufilmInspectFrame",
+      "pos": [
+        480,
+        140
+      ],
+      "size": [
+        440,
+        570
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "link": 1
+        },
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_rec2020",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "color_space",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmInspectFrame"
+      },
+      "widgets_values": [
+        0,
+        "source",
+        "{\n  \"version\": 2,\n  \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\",\n  \"stock\": \"vision250d\",\n  \"format\": \"super35\",\n  \"medium\": \"screen\",\n  \"digitalReference\": \"graded-print\",\n  \"seed\": 1,\n  \"params\": {\n    \"ev\": 0,\n    \"temperature\": 6504,\n    \"tint\": 0,\n    \"highlights\": 0,\n    \"shadows\": 0,\n    \"saturation\": 1,\n    \"vibrance\": 0,\n    \"grain\": 0.55,\n    \"gradeShadowsWarmth\": 0,\n    \"gradeHighlightsWarmth\": 0\n  },\n  \"profile\": {\n    \"halation\": 0,\n    \"screenGrade\": 2,\n    \"screenExposure\": 0\n  }\n}\n",
+        "linear Rec.2020"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "MarkdownNote",
+      "pos": [
+        40,
+        390
+      ],
+      "size": [
+        360,
+        310
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## Inspect a saved HDR frame\nEnter your existing .ffhdr.zip path, adding [output] for an output file. Set frame (zero-based) and run. No LTX nodes are present.\n\nStage: source \u2192 balance \u2192 film \u2192 finish. Choose one stage per inspection; recipe_json supplies the grades and film.\n\nWith the updated core/frontend and Assets enabled, open the EXR in History or Assets. Older builds show an SDR thumbnail; the EXR is also saved in output/fotufilm-inspections.\n\nThe IMAGE output is linear Rec.2020, full float range. Viewer exposure changes inspection only."
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "FOTUFILM_HDR_MASTER"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  },
+  "version": 0.4
+}

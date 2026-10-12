@@ -21,6 +21,7 @@ from .finish_pipeline import Source, hdr_eligible, render_clip_steps, render_sti
 from .preview_runtime import PreviewRuntime
 from .preview_scheduler import PreviewScheduler
 from .recipe import validate_recipe
+from .inspection import STAGES, inspection_frame, publish_inspection, write_inspection
 
 ASSETS=OrderedDict()
 JOBS=OrderedDict()
@@ -182,6 +183,33 @@ def cancel_job(job):
     if future and future.cancel():job.update(status='cancelled',finished=time.monotonic())
 
 
+def inspect_job(job, asset, recipe, index, stage):
+    """Single-frame worker job; never submits the graph or encodes a playback clip."""
+    path = None
+    try:
+        if job['cancel'].is_set():raise InterruptedError()
+        job['status'] = 'running'
+        rgb, stats = inspection_frame(asset['source'], recipe, index, stage,
+                                     runtime=preview_runtime(), fingerprint=asset['fingerprint'])
+        if job['cancel'].is_set():raise InterruptedError()
+        path = Path(folder_paths.get_output_directory())/'fotufilm-inspections'/f'{stage}-{index:06d}-{uuid.uuid4().hex}.exr'
+        metadata = write_inspection(rgb, path, {'frame': index, 'stage': stage,
+            'source': {'name': asset['source'].path.name, 'fingerprint': asset['fingerprint']}, 'recipe': recipe})
+        if job['cancel'].is_set():raise InterruptedError()
+        result = publish_inspection(path, register=True)
+        result['exr'].pop('asset_preview', None)
+        job.update(status='complete', progress=1, result={**result, **metadata, **stats})
+    except InterruptedError:
+        if path:
+            for suffix in ('.exr', '.png', '.json'):path.with_suffix(suffix).unlink(missing_ok=True)
+        job['status'] = 'cancelled'
+    except Exception as error:
+        job.update(status='error', error=str(error))
+    finally:
+        job['finished'] = time.monotonic()
+    if False:yield  # The scheduler accepts cooperative generators.
+
+
 async def body(request):
     if request.content_length and request.content_length>65536:raise ValueError('Request too large.')
     value=await request.json()
@@ -196,6 +224,29 @@ def install_routes():
     async def source(request):
         try:return web.json_response(await asyncio.to_thread(register_file,await body(request)))
         except (ValueError,KeyError,OSError) as error:return web.json_response({'error':str(error)},status=400)
+
+    @routes.post('/fotufilm/inspect')
+    async def inspect_frame(request):
+        try:
+            value = await body(request)
+            asset = ASSETS.get(value.get('asset'))
+            if not asset:raise ValueError('Source expired; reconnect the video.')
+            recipe = validate_recipe(value.get('recipe'))
+            index, stage = value.get('frame', 0), value.get('stage', 'finish')
+            if type(index) is not int or not 0 <= index < asset['source'].info['frames']:
+                raise ValueError('Invalid frame number.')
+            if stage not in STAGES:raise ValueError('Invalid inspection stage.')
+            with LOCK:
+                if sum(j['status'] in ('queued','running') and not j['cancel'].is_set() for j in JOBS.values()) >= 8:
+                    raise ValueError('Preview queue is busy. Try again shortly.')
+                job = {'id':uuid.uuid4().hex,'status':'queued','progress':0,'cancel':threading.Event(),'submitted':time.monotonic()}
+                JOBS[job['id']] = job
+                for old in list(JOBS):
+                    if len(JOBS) <= 128:break
+                    if JOBS[old]['status'] not in ('queued','running'):JOBS.pop(old)
+                job['future'] = EXECUTOR.submit(0, inspect_job, job, asset, recipe, index, stage)
+            return web.json_response({'job': job['id']})
+        except (ValueError,KeyError,TypeError) as error:return web.json_response({'error':str(error)},status=400)
 
     @routes.post('/fotufilm/preview')
     async def preview(request):

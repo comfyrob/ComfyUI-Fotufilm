@@ -153,7 +153,7 @@ class PreviewRuntime:
             stats['sourceCacheHits'] += 1
         return rgb
 
-    def finished_frame(self, cursor, fingerprint, index, finisher, stats, source_rgb=None):
+    def developed_frame(self, cursor, fingerprint, index, finisher, stats, source_rgb=None):
         key = digest([self.key(cursor.source, fingerprint, index, cursor.edge), finisher.film_signature])
         developed = self.film_cache.get(key)
         memory_hit = developed is not None
@@ -170,7 +170,10 @@ class PreviewRuntime:
             stats['filmCacheHits'] += 1
         if not memory_hit:
             self.film_cache.put(key, developed)
-        return finisher.finish(developed)
+        return developed
+
+    def finished_frame(self, cursor, fingerprint, index, finisher, stats, source_rgb=None):
+        return finisher.finish(self.developed_frame(cursor, fingerprint, index, finisher, stats, source_rgb))
 
     def close(self):
         if self._engine is not None:

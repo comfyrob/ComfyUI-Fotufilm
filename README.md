@@ -57,6 +57,18 @@ Looks are complete recipes. Choosing a different film keeps the look name and ma
 
 The same float pipeline serves native frame previews, playback renders, frame-batch nodes and final exports. Film texture can differ with preview resolution; compare at full resolution when assessing grain. Rendering is asynchronous, not instantaneous: cached video plays at its normal frame rate after it is ready.
 
+### Full-resolution EXR inspection
+
+Open **Inspect full-resolution frame** below the recipe controls in Studio. Choose **Source**, **After balance grade**, **After Fotufilm**, or **After finishing grade**, then **Save EXR frame**. This captures the playhead and current recipe, processes only that frame at source resolution, and saves an unclipped RGB32F EXR in `output/fotufilm-inspections/`. No LTX job or video render is submitted. Where possible, inspection reuses the full-resolution source/film caches. The saved frame is a snapshot; subsequent slider edits do not change it.
+
+The new **Fotufilm · Inspect Frame** output node provides the same stages in a graph. Connect exactly one HDR master, VIDEO, or IMAGE batch. For IMAGE, explicitly choose the input color space; use **linear Display P3** for Develop Frames output. Stage **source** inspects the connected pixels without applying the recipe. Connecting an already-developed image and selecting film/finish would apply the film again. The node returns one IMAGE in **linear Rec.2020** and its color-space label. Ordinary graph execution may run uncached upstream nodes; use the Studio button or the saved-master example to avoid an LTX dependency.
+
+[`Fotufilm - Inspect HDR frame.json`](examples/Fotufilm%20-%20Inspect%20HDR%20frame.json) opens an existing master with no LTX nodes. Frame numbering starts at zero.
+
+On compatible ComfyUI backend/frontend builds with Assets enabled ([backend #16898](https://github.com/Comfy-Org/ComfyUI/pull/16898), [frontend #20839](https://github.com/Comfy-Org/ComfyUI_frontend/pull/20839)), open the EXR from **Assets → Outputs** or the inspection node's **History** result. Studio's independent frame jobs appear in Assets, not workflow History. The pack supplies its own color-converted SDR thumbnail through the new preview protocol; the original EXR remains separate. Older builds receive an SDR PNG thumbnail plus the saved EXR for download. Updating this pack alone does not install those core changes.
+
+Inspection copies are explicitly converted to Rec.2020, including Fotufilm's linear-P3 output, and include EXR chromaticities plus a JSON recipe/frame sidecar. No display transform is baked into the EXR. Core's current inspector reads float pixels but displays SDR; its exposure control changes the view, not the grade. There is no private frontend import or automatic opening of core's dialog. This feature does not change video playback speed or resolution.
+
 See [Nodes 2.0 integration notes](docs/nodes-2-studio.md).
 
 The pack does **not** perform neural SDR-to-HDR conversion by itself. The included LTX 2.5 workflow requires [ComfyUI-LTXVideo](https://github.com/Lightricks/ComfyUI-LTXVideo) at `3bf3ca62595f1764c47d01c35c8e5dfe47e1a88f`, the model files named in that workflow, and `colour-science==0.4.7`. Install model weights on your remote models volume, not in this repository or the container image.
