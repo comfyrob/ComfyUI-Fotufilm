@@ -53,3 +53,20 @@ test('preview client uses the inspection endpoint and retains the original EXR U
   assert.ok(calls.every(([path])=>!path.includes('prompt')));
   client.dispose();
 });
+
+test('playing timeline seeks update the stream without exporting or queueing the graph', async () => {
+  const updates=[];let renders=0,queues=0;
+  const studio=createStudio({source:'https://comfy.test/input.mp4',asset,
+    preview:{live:()=>({update:value=>updates.push(value),close(){}}),render:()=>{renders++;throw new Error('Unexpected clip render');}},
+    onRender:()=>queues++});
+  document.body.append(studio.element);
+  const video=studio.element.querySelector('video');
+  Object.defineProperty(video,'duration',{value:10,configurable:true});
+  Object.defineProperty(video,'paused',{value:false,configurable:true});
+  const slider=studio.element.querySelector('.ff-scrubber');slider.max='10';slider.value='2';
+  slider.dispatchEvent(new dom.window.Event('input'));
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(updates.at(-1).frame,48);assert.equal(updates.at(-1).playing,true);
+  assert.equal(renders,0);assert.equal(queues,0);
+  studio.dispose();
+});

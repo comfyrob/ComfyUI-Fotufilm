@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
-from .grading import apply_grade, convert, validate_grading
+from .grading import apply_grade, apply_grade_accelerated, convert, validate_grading
 from .hdr_master import PRIMARIES, read_manifest
 from .native import Engine
 from .recipe import render_request, validate_recipe
@@ -72,9 +72,21 @@ class Source:
                 for index,frame in enumerate(container.decode(stream)):
                     if index>=stop:break
                     if index<start:continue
-                    rgb=frame.to_ndarray(format='rgb48le').astype(np.float32)/65535
-                    rgb=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)
-                    yield index,resize_float(convert(rgb,'linear-rec709','linear-rec2020'),edge)
+                    encoded=frame.to_ndarray(format='rgb48le')
+                    if torch.cuda.is_available():
+                        with torch.inference_mode():
+                            rgb=torch.tensor(encoded.astype(np.float32),device='cuda')/65535
+                            rgb=torch.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)
+                            rgb=convert(rgb,'linear-rec709','linear-rec2020')
+                            if edge and max(rgb.shape[:2])>edge:
+                                scale=edge/max(rgb.shape[:2])
+                                rgb=F.interpolate(rgb.permute(2,0,1)[None],size=tuple(max(1,round(v*scale)) for v in rgb.shape[:2]),mode='area')[0].permute(1,2,0)
+                            output=rgb.cpu().numpy()
+                        yield index,output
+                    else:
+                        rgb=encoded.astype(np.float32)/65535
+                        rgb=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)
+                        yield index,resize_float(convert(rgb,'linear-rec709','linear-rec2020'),edge)
 
     def audio_path(self,directory):
         if not self.is_hdr:return self.path
@@ -109,14 +121,18 @@ class Finisher:
         return self._engine
 
     def develop(self,rgb,index):
-        rgb=apply_grade(rgb,self.grading['balance'],'linear-rec2020')
-        OpenEXR.File({'chromaticities':PRIMARIES['linear-rec2020']},
-            {c:np.ascontiguousarray(rgb[:,:,i]) for i,c in enumerate('RGB')}).write(str(self.path))
+        rgb=apply_grade_accelerated(rgb,self.grading['balance'],'linear-rec2020')
         self.request['edit']['seed']=((self.recipe.get('seed') or 0)+index*0x7f4a7c15)&0xffffffff
+        if self.engine.memory_input is not None:
+            return self.engine.render_rgb(rgb,self.request)
+        # Compatibility with the released upstream binary. Avoid compressing a
+        # temporary file that is immediately decoded again; values stay float32.
+        OpenEXR.File({'chromaticities':PRIMARIES['linear-rec2020'], 'compression':OpenEXR.NO_COMPRESSION},
+            {c:np.ascontiguousarray(rgb[:,:,i]) for i,c in enumerate('RGB')}).write(str(self.path))
         return self.engine.render_float(str(self.path),rgb.shape[1],rgb.shape[0],self.request)
 
     def finish(self,rgb):
-        return apply_grade(rgb,self.grading['finish'],'linear-p3')
+        return apply_grade_accelerated(rgb,self.grading['finish'],'linear-p3')
 
     def frame(self,rgb,index):
         return self.finish(self.develop(rgb,index))

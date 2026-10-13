@@ -132,13 +132,16 @@ class FilmFinishSaveHDRMaster(io.ComfyNode):
     @classmethod
     def define_schema(cls):
         return io.Schema(node_id='FilmFinishSaveHDRMaster', category='Film Finish/HDR', is_output_node=True,
-            description='Preserves float EXR masters and generates float Rec.2020 browser proxies. The source video is retained for audio and playback timing only.',
+            description='Optional archive branch. Studio accepts linear frames directly. Enable saving only when you want a reusable float EXR archive with source audio.',
             inputs=[io.Image.Input('images'), io.Video.Input('source'), io.Float.Input('fps', default=24, min=1, max=120),
                 io.Combo.Input('color_space', options=['linear-rec709', 'linear-acescg', 'linear-rec2020']),
-                io.String.Input('filename_prefix', default='film-finish-hdr/master')], outputs=[HDRMaster.Output('master')])
+                io.String.Input('filename_prefix', default='film-finish-hdr/master'),
+                io.Boolean.Input('enabled', default=True, optional=True)], outputs=[HDRMaster.Output('master')])
 
     @classmethod
-    def execute(cls, images, source, fps, color_space, filename_prefix):
+    def execute(cls, images, source, fps, color_space, filename_prefix, enabled=True):
+        if not enabled:
+            return io.NodeOutput(None, ui={'text': ['Archive disabled. Studio uses the direct linear frames.']})
         import tempfile
         import comfy.model_management
         from .hdr_master import write_master

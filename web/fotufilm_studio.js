@@ -35,6 +35,11 @@ function outputFile(node,master=false){
 }
 async function registerSource(node,mode){
   const state=states.get(node);if(!state||state.demo)return;
+  if(mode==='hdr'&&state.media?.direct){
+    state.sourceMode=mode;state.assets.hdr=state.media.direct;
+    state.editor?.setAsset(state.media.direct);if(active?.node===node)active.editor.setAsset(state.media.direct);
+    state.caption.textContent='Linear HDR frames ready · no archive required';return;
+  }
   const file=mode==='hdr'?state.media?.master:state.media?.source;
   if(!file)return;
   const key=JSON.stringify(file);state.sourceMode=mode;
@@ -86,7 +91,7 @@ function mediaOptions(node){
   const media=states.get(node)?.media||{},demo=Boolean(node.properties?.fotufilm_interface_demo);
   return {source:viewURL(media.source)||(demo?new URL('viewer/demo/source.mp4',BASE).href:''),
     rendered:viewURL(media.rendered)||(demo?new URL('viewer/demo/rendered.mp4',BASE).href:''),enhanced:viewURL(media.enhanced),
-    hasHDR:Boolean(media.master),renderedRecipe:media.rendered_recipe,recipe:readRecipe(node),lookId:node.properties?.fotufilm_studio_look,
+    hasHDR:Boolean(media.master||media.direct),renderedRecipe:media.rendered_recipe,recipe:readRecipe(node),lookId:node.properties?.fotufilm_studio_look,
     fps:media.fps||node.widgets?.find(w=>w.name==='fps')?.value||24,
     asset:states.get(node)?.assets?.[states.get(node)?.sourceMode],
     label:demo?'Courtyard study.mp4':media.source?.label||'Workflow video'};
@@ -147,7 +152,7 @@ function setMedia(node,media){
 function handleOutput(node,output){
   if(node)knownOutputs.set(locatorId(node),output);
   const media=output?.fotufilm_studio?.[0];if(media&&node)setMedia(node,media);
-  if(media?.master&&node)registerSource(node,'hdr');
+  if((media?.master||media?.direct)&&node)registerSource(node,'hdr');
   const review=output?.fotufilm_review?.[0];
   if(review){returns.set(review.token,review);if(returns.size>100)returns.delete(returns.keys().next().value);for(const [target,state] of states)if(state.media?.token===review.token)setMedia(target,state.media);}
 }

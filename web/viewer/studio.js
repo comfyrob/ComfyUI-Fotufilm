@@ -34,9 +34,10 @@ export function createStudio(options = {}) {
   let renderedRecipe = options.renderedRecipe || null;
   let label = options.label || 'Your video';
   let fps = Math.max(1, options.fps || 24);
-  let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=960, gradeStage='balance', stillReady=false;
+  let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=1280, gradeStage='balance', stillReady=false;
   let activeRenderedSource=sourceMode, previewClipKey='', pendingClipKey='', lookController=null, clipController=null, stillFrame=-1, swappingMedia=false;
   let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), lookTimer=0, exporting=false, inspecting=false, inspectionController=null;
+  let live=null, liveFrame=-1, liveStatsStart=0, liveFrames=0, deliveredFPS=0;
   const history=[clone(recipe)]; let historyTimer=0;
   let frameCallback = 0, raf = 0, thumbnailToken = 0, destroyed = false;
   let ownedURLs = [], pan = {x: 0, y: 0}, lastPointer = null;
@@ -57,11 +58,11 @@ export function createStudio(options = {}) {
         </div>
         <div class="ff-stage" tabindex="0" aria-label="Video preview. Space to play or pause. Arrow keys to step frames.">
           <div class="ff-picture"><video class="ff-main-video" playsinline preload="auto" muted></video>
-            <img class="ff-after-still" alt="Fotufilm preview" hidden/><div class="ff-before"><video class="ff-before-video" playsinline preload="auto" muted></video><img class="ff-before-still" alt="Source before finishing" hidden/></div>
+            <canvas class="ff-live-after" hidden></canvas><img class="ff-after-still" alt="Fotufilm preview" hidden/><div class="ff-before"><video class="ff-before-video" playsinline preload="auto" muted></video><canvas class="ff-live-before" hidden></canvas><img class="ff-before-still" alt="Source before finishing" hidden/></div>
           </div>
           <div class="ff-stage-label ff-stage-left" hidden>Original</div><div class="ff-stage-label ff-stage-right"></div>
           <label class="ff-wipe" hidden><span class="ff-wipe-line"><span>↔</span></span><input type="range" min="0" max="100" value="50" aria-label="Before and after divider"></label>
-          <div class="ff-empty">${icon('film')}<h2>Your footage, in a new light.</h2><p>Connect a loaded video. Existing files appear without running the graph.</p>${button('open-file', 'Open video', 'folder')}<small>HDR finishing starts when the connected float master is available.</small></div>
+          <div class="ff-empty">${icon('film')}<h2>Your footage, in a new light.</h2><p>Connect a loaded video. Existing files appear without running the graph.</p>${button('open-file', 'Open video', 'folder')}<small>Connect linear HDR frames from LTX to the images input. Saving a master is optional.</small></div>
           <div class="ff-video-error" role="alert" hidden></div>
         </div>
         <div class="ff-transport">
@@ -92,7 +93,7 @@ export function createStudio(options = {}) {
           <section class="ff-grade-panel" hidden><div class="ff-grade-stage" role="group" aria-label="Grading stage">${button('grade-balance','Balance input','','aria-pressed="true"')}${button('grade-finish','Finish look','','aria-pressed="false"')}</div><p class="ff-help ff-grade-help">Gear grading before Fotufilm. Changes the light exposing the film.</p><div class="ff-grade-sliders"></div><details><summary>Color wheels</summary><div class="ff-wheels"></div></details>${button('reset-grade','Reset this grade')}<details class="ff-scopes"><summary>Preview histogram</summary><canvas width="256" height="88" aria-label="SDR display histogram"></canvas><p class="ff-help">SDR display values after finishing. Not an HDR luminance scope.</p></details></section>
           <details class="ff-inspection"><summary>Inspect full-resolution frame</summary><p class="ff-help">Save the frame at the playhead with its full float range. Open the EXR in ComfyUI Assets to inspect exposure and pixel values.</p><label>Processing stage <select class="ff-inspection-stage" aria-label="Frame inspection stage"><option value="source">Source · before grading</option><option value="balance">After balance grade</option><option value="film">After Fotufilm</option><option value="finish" selected>After finishing grade</option></select></label>${button('inspect','Save EXR frame','','title="One frame at source resolution. Does not run LTX or render the video."')}<p class="ff-inspection-status" role="status"></p><a class="ff-inspection-download" hidden download>Download float EXR</a><p class="ff-help">Viewing exposure in core’s inspector does not change your grade. Its display is SDR.</p></details>
         </div>
-        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="960">960px · Smooth</option><option value="1440">1440px · Detailed</option></select></label>${button('undo','Undo','undo')}</div>${button('render', 'Run connected workflow', 'play', 'class="ff-render-button"')}<div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
+        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div>${button('render', 'Run connected workflow', 'play', 'class="ff-render-button"')}<div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
       </aside>
     </div><div class="ff-toast" role="status" hidden></div><input class="ff-file-input" type="file" accept="video/mp4,video/webm,video/quicktime" hidden>`;
   const $ = s => root.querySelector(s);
@@ -119,8 +120,44 @@ export function createStudio(options = {}) {
     const target=$('.ff-scopes canvas'),draw=target.getContext('2d'),peak=Math.max(...hist,1);draw.clearRect(0,0,256,88);draw.fillStyle='#b6dfcf';
     for(let i=0;i<256;i++){const h=88*Math.sqrt(hist[i]/peak);draw.fillRect(i,88-h,1,h);}
   }
+  function closeLive(){
+    live?.close();live=null;liveFrame=-1;liveFrames=0;liveStatsStart=0;
+    $('.ff-live-after').hidden=true;$('.ff-live-before').hidden=true;
+  }
+  function updateLive(){
+    if(!asset||destroyed)return;
+    try{
+      if(!live)live=options.preview.live({
+        onFrame:(frame,meta)=>{
+          if(destroyed)return;
+          const draw=(selector,x)=>{const canvas=$(selector);if(canvas.width!==meta.width)canvas.width=meta.width;if(canvas.height!==meta.height)canvas.height=meta.height;canvas.getContext('2d',{alpha:false}).drawImage(frame,x,0,meta.width,meta.height,0,0,meta.width,meta.height);canvas.hidden=false;};
+          draw('.ff-live-after',0);if(meta.compare)draw('.ff-live-before',meta.width);else $('.ff-live-before').hidden=true;
+          liveFrame=meta.frame;stillReady=true;showStill(false);action('compare').disabled=false;
+          $('.ff-stage-left').textContent='Before grade & film';$('.ff-stage-right').textContent='After · Gear + Fotufilm';
+          $('.ff-display').textContent=asset.info.hdr?'Linear HDR processing · SDR monitor stream':'SDR source · live film preview';
+          const now=performance.now();if(!liveStatsStart)liveStatsStart=now;liveFrames++;
+          if(video.paused&&$('.ff-scopes').open)updateScope($('.ff-live-after'));
+          if(video.paused&&!lookTimer)lookTimer=setTimeout(()=>{lookTimer=0;scheduleLookPreviews();},1500);
+          if(now-liveStatsStart>1000){deliveredFPS=(liveFrames-1)*1000/(now-liveStatsStart);liveStatsStart=now;liveFrames=1;}
+          setStatus(`${meta.width} × ${meta.height} · ${video.paused?'Paused':`${deliveredFPS.toFixed(1)} fps delivered`} · ${Math.round(meta.ms.total)} ms processing`);
+          $('.ff-render-state').title=`${meta.encoder} monitor stream. ${meta.memoryInput?'Direct float memory':'Legacy file input'}. Source ${meta.ms.source} ms; film ${meta.ms.film} ms; grade ${meta.ms.grade} ms; display ${meta.ms.display} ms; encode ${meta.ms.encode} ms. Exports use the original float frames.`;
+          if(!video.paused&&Math.abs(video.currentTime-meta.frame/fps)>.15)video.currentTime=meta.frame/fps;
+          updateTransport();
+        },
+        onError:error=>{setStatus(`Live preview: ${error.message}`);video.pause();},
+        onEnded:()=>{video.pause();updateTransport();},
+      });
+      live.update({asset:asset.asset,recipe:clone(recipe),edge:previewEdge,
+        frame:Math.min(asset.info.frames-1,Math.max(0,liveFrame>=0?liveFrame:Math.round(video.currentTime*fps))),
+        playing:!video.paused,compare:comparing,loop:video.loop,rate});
+    }catch(error){setStatus(error.message);}
+  }
   function schedulePreview(force=false){
     if(!options.preview||!asset||destroyed)return;
+    if(options.preview.live){
+      clearTimeout(historyTimer);historyTimer=setTimeout(()=>{if(!sameRecipe(history.at(-1),recipe)){history.push(clone(recipe));if(history.length>30)history.shift();action('undo').disabled=history.length<2;}},250);
+      clearTimeout(previewTimer);previewTimer=setTimeout(updateLive,0);return;
+    }
     const key=JSON.stringify([asset.asset,recipe,previewEdge]);
     if(!force&&key===previewKey)return;
     if(key!==previewKey){clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(historyTimer);historyTimer=setTimeout(()=>{if(!history.length||!sameRecipe(history.at(-1),recipe)){history.push(clone(recipe));if(history.length>30)history.shift();action('undo').disabled=history.length<2;}},250);}
@@ -140,38 +177,17 @@ export function createStudio(options = {}) {
         action('compare').disabled=false;$('.ff-stage-left').textContent='Before grade & film';$('.ff-stage-right').textContent='After · Gear + Fotufilm';
         $('.ff-display').textContent=currentAsset.info.hdr?'HDR master → SDR display preview':'SDR source → film preview';
         setStatus(`Frame ready · ${still.seconds}s${still.cached?' · cached':still.filmCacheHits?' · film reused':''}`);
-        if(previewClipKey!==key&&(pendingClipKey!==key||clipController?.signal.aborted))updatePlayback(key,currentAsset,snapshot);
+        if(!lookTimer)lookTimer=setTimeout(scheduleLookPreviews,1500);
       }catch(error){if(error.name!=='AbortError')setStatus(`Preview: ${error.message}`);}
     },100);
   }
-  async function updatePlayback(key,currentAsset,snapshot){
-    clipController?.abort();clipController=new AbortController();const controller=clipController,clipSignal=controller.signal,edge=previewEdge;
-    pendingClipKey=key;
-    try{
-      // Let the current frame settle before spending work on every frame of the clip.
-      await new Promise(resolve=>setTimeout(resolve,400));
-      if(destroyed||clipSignal.aborted)return;
-      setStatus('Frame ready · updating playback…');
-      const clip=await options.preview.render(currentAsset.asset,snapshot,{mode:'clip',edge,signal:clipSignal,channel:'playback',onProgress:state=>{if(!clipSignal.aborted)setStatus(`Updating playback · ${Math.round(state.progress*100)}%`);}});
-      if(destroyed||clipSignal.aborted)return;
-      const time=video.currentTime,playing=!video.paused,wasComparing=comparing;
-      rendered=clip.after;activeRenderedSource=sourceMode;previewClipKey=key;
-      swappingMedia=true;
-      const restore=()=>{video.currentTime=Math.min(time,Math.max(0,video.duration-.001));before.currentTime=video.currentTime;if(playing)video.play().catch(()=>{});compare(wasComparing);swappingMedia=false;video.style.visibility='';for(const name of ['play','back','next','loop','audio','fullscreen'])action(name).disabled=false;};
-      video.addEventListener('loadedmetadata',restore,{once:true,signal:abort.signal});
-      video.src=clip.after;before.src=clip.before;video.load();before.load();
-      makeThumbnails(clip.after);lookTimer=setTimeout(scheduleLookPreviews,1500);
-      setStatus(`Preview ready · ${clip.width||currentAsset.info.width}px · ${clip.frames} frames${clip.frames<currentAsset.info.frames?' · first 20s':''}`);
-    }catch(error){if(error.name!=='AbortError'&&!clipSignal.aborted)setStatus(`Playback: ${error.message}`);}
-    finally{if(clipController===controller)pendingClipKey='';}
-  }
   async function scheduleLookPreviews(){
-    if(!options.preview||!asset||destroyed)return;
+    if(!options.preview||!asset||destroyed||(!video.paused&&options.preview.live))return;
     lookController?.abort();lookController=new AbortController();const controller=lookController,current=asset;
     // Sequential thumbnails keep video rendering responsive and memory bounded.
     for(const look of looks){
       if($(`[data-look="${look.id}"] img`).dataset.asset===current.asset)continue;
-      if(controller.signal.aborted||destroyed)return;
+      if(controller.signal.aborted||destroyed||(!video.paused&&options.preview.live))return;
       try{
         const result=await options.preview.render(current.asset,lookRecipe(look.id,recipe.seed),{frame:0,edge:280,signal:controller.signal,channel:'looks'});
         if(controller.signal.aborted)return;
@@ -192,7 +208,7 @@ export function createStudio(options = {}) {
   }
   async function inspectFrame(){
     if(!asset||!options.preview||inspecting)return;
-    const current=asset,frame=Math.min(current.info.frames-1,Math.max(0,Math.round(video.currentTime*fps))),snapshot=clone(recipe),stage=$('.ff-inspection-stage').value;
+    const current=asset,frame=Math.min(current.info.frames-1,Math.max(0,liveFrame>=0?liveFrame:Math.round(video.currentTime*fps))),snapshot=clone(recipe),stage=$('.ff-inspection-stage').value;
     inspectionController?.abort();const controller=new AbortController();inspectionController=controller;
     inspecting=true;action('inspect').disabled=true;action('inspect').textContent='Saving frame…';
     $('.ff-inspection-download').hidden=true;$('.ff-inspection-status').textContent=`Frame ${frame} · ${current.info.width} × ${current.info.height}`;
@@ -273,14 +289,15 @@ export function createStudio(options = {}) {
     zoom=Math.min(4,Math.max(1,value)); if(zoom===1)pan={x:0,y:0};
     $('.ff-zoom').textContent=`${Math.round(zoom*100)}%`; action('fit').setAttribute('aria-pressed',String(zoom===1));
     action('minus').disabled=zoom===1; action('plus').disabled=zoom===4;
-    for (const surface of [video,before,$('.ff-after-still'),$('.ff-before-still')]) surface.style.transform=`translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
+    for (const surface of [video,before,$('.ff-after-still'),$('.ff-before-still'),$('.ff-live-after'),$('.ff-live-before')]) surface.style.transform=`translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
     stage.style.cursor=zoom>1?'grab':'';
   }
   function updateTransport() {
     const duration=Number.isFinite(video.duration)?video.duration:0;
-    $('.ff-time').innerHTML=`${timecode(video.currentTime,fps)} <span>/ ${timecode(duration,fps)}</span>`;
-    $('.ff-scrubber').max=String(duration||1);$('.ff-scrubber').value=String(video.currentTime);
-    $('.ff-timeline').style.setProperty('--progress',`${duration?100*video.currentTime/duration:0}%`);
+    const visibleTime=live&&liveFrame>=0?liveFrame/fps:video.currentTime;
+    $('.ff-time').innerHTML=`${timecode(visibleTime,fps)} <span>/ ${timecode(duration,fps)}</span>`;
+    $('.ff-scrubber').max=String(duration||1);$('.ff-scrubber').value=String(visibleTime);
+    $('.ff-timeline').style.setProperty('--progress',`${duration?100*visibleTime/duration:0}%`);
     const playState = video.paused ? 'play' : 'pause';
     if(action('play').dataset.state !== playState) {
       action('play').dataset.state=playState;
@@ -304,21 +321,22 @@ export function createStudio(options = {}) {
     if(video.paused){try{await video.play();if(comparing){before.currentTime=video.currentTime;await before.play();}}catch{toast('This clip could not play. Try an H.264 MP4 preview.');}}
     else {video.pause();before.pause();}
   }
-  function seek(time) {const duration=Number.isFinite(video.duration)?video.duration:0; video.currentTime=Math.min(duration,Math.max(0,time));if(before.readyState>=1)before.currentTime=video.currentTime;updateTransport();}
+  function seek(time) {liveFrame=-1;const duration=Number.isFinite(video.duration)?video.duration:0; video.currentTime=Math.min(duration,Math.max(0,time));if(before.readyState>=1)before.currentTime=video.currentTime;updateTransport();if(options.preview?.live)schedulePreview(true);}
   function compare(value) {
-    comparing=Boolean(value&&(stillReady||(rendered&&activeRenderedSource===sourceMode)));
+    comparing=Boolean(value&&(live||stillReady||(rendered&&activeRenderedSource===sourceMode)));
     $('.ff-before').hidden=!comparing;$('.ff-stage-left').hidden=!comparing;$('.ff-wipe').hidden=!comparing;
     action('compare').setAttribute('aria-pressed',String(comparing));
     if(comparing){before.currentTime=video.currentTime;if(!video.paused)before.play().catch(()=>toast('The reference clip could not play.'));}else before.pause();
+    if(live)schedulePreview(true);
   }
   on($('.ff-wipe input'),'input',event=>{stage.style.setProperty('--wipe',`${event.target.value}%`);$('.ff-before').style.clipPath=`inset(0 ${100-Number(event.target.value)}% 0 0)`;});
   function setSource(mode, preserve=true) {
-    if(mode!==sourceMode)clearInspection();
+    if(mode!==sourceMode){clearInspection();closeLive();}
     const time=preserve?video.currentTime:0, wasPlaying=!video.paused;
     video.pause(); before.pause(); sourceMode=mode; compare(false);
     const current=sources[mode]||(mode==='hdr'&&hasHDR?sources.original:'');
     const after=mode===activeRenderedSource?rendered:'';
-    const pendingHDR=mode==='hdr'&&!after;video.style.visibility=pendingHDR?'hidden':'';
+    const pendingHDR=mode==='hdr'&&!after&&!options.preview?.live;video.style.visibility=pendingHDR?'hidden':'';
     $('.ff-empty').hidden=Boolean(current||asset);$('.ff-video-error').hidden=true;
     $('.ff-file-name').textContent=label;
     if(current){video.src=after||current;before.src=current;video.load();before.load();}
@@ -365,11 +383,11 @@ export function createStudio(options = {}) {
     $('.ff-file-info').textContent=`${video.videoWidth} × ${video.videoHeight} / ${fps} fps`;
     $$('.ff-ticks span').forEach((el,i)=>el.textContent=timecode(video.duration*i/5,fps).slice(0,5));updateTransport();
   });
-  on(video,'play',()=>{showStill(false);stopTick();tick();});on(video,'pause',()=>{stopTick();before.pause();updateTransport();if(!swappingMedia){showStill(stillReady&&Math.abs(video.currentTime*fps-stillFrame)<1);schedulePreview(true);}});
-  on(video,'seeked',()=>{updateTransport();if(video.paused&&!swappingMedia)schedulePreview(true);});on(video,'timeupdate',updateTransport);
+  on(video,'play',()=>{lookController?.abort();clearTimeout(lookTimer);lookTimer=0;showStill(false);stopTick();tick();if(options.preview?.live)schedulePreview(true);});on(video,'pause',()=>{stopTick();before.pause();updateTransport();if(!swappingMedia){showStill(stillReady&&Math.abs(video.currentTime*fps-stillFrame)<1);schedulePreview(true);}});
+  on(video,'seeked',()=>{updateTransport();if(video.paused&&!swappingMedia&&!options.preview?.live)schedulePreview(true);});on(video,'timeupdate',updateTransport);
   on(video,'error',()=>{$('.ff-video-error').hidden=false;$('.ff-video-error').textContent='This browser cannot play the clip. Use an H.264 MP4 preview or choose another video.';});
   on($('.ff-scrubber'),'input',event=>seek(Number(event.target.value)));
-  on($('.ff-rate select'),'change',event=>{rate=Number(event.target.value);video.playbackRate=rate;before.playbackRate=rate;});
+  on($('.ff-rate select'),'change',event=>{rate=Number(event.target.value);video.playbackRate=rate;before.playbackRate=rate;if(live)schedulePreview(true);});
   on($('.ff-file-input'),'change',async event=>{
     const file=event.target.files[0];if(!file)return;clearInspection();asset=null;hasHDR=false;previewController?.abort();clipController?.abort();lookController?.abort();stillReady=false;showStill(false);const url=URL.createObjectURL(file);ownedURLs.push(url);sources={original:url,hdr:''};rendered='';label=file.name;setSource('original',false);if(options.onUpload){try{await options.onUpload(file);}catch(error){toast(error.message);}}else toast('Local playback only. Connect this clip to the workflow to finish it.');
   });
@@ -383,7 +401,7 @@ export function createStudio(options = {}) {
       case 'play':await play();break;
       case 'back':video.pause();seek(video.currentTime-1/fps);break;
       case 'next':video.pause();seek(video.currentTime+1/fps);break;
-      case 'loop':video.loop=!video.loop;before.loop=video.loop;target.setAttribute('aria-pressed',String(video.loop));break;
+      case 'loop':video.loop=!video.loop;before.loop=video.loop;target.setAttribute('aria-pressed',String(video.loop));if(live)schedulePreview(true);break;
       case 'audio':video.muted=!video.muted;target.innerHTML=icon(video.muted?'mute':'audio');target.setAttribute('aria-label',video.muted?'Unmute audio':'Mute audio');target.title=video.muted?'Unmute audio':'Mute audio';break;
       case 'compare':compare(!comparing);break;
       case 'source-original':setSource('original');options.onSourceMode?.('original');break;
@@ -403,9 +421,9 @@ export function createStudio(options = {}) {
       case 'reset':if(selectedLook){recipe=lookRecipe(selectedLook,recipe.seed);updateRecipeUI();}break;
       case 'open-file':$('.ff-file-input').click();break;
       case 'render':
-        if(!options.onRender){toast('Interface preview only. Connect Develop and Return to Studio in your workflow to render.');break;}
+        if(!options.onRender){toast('Connect this Studio to a ComfyUI workflow to render.');break;}
         target.disabled=true;
-        try{await options.onRender(clone(recipe),selectedLook);startingRecipe=clone(recipe);startingLook=selectedLook;toast('Workflow queued. The server will return its finished preview here.');}
+        try{await options.onRender(clone(recipe),selectedLook);startingRecipe=clone(recipe);startingLook=selectedLook;toast('Workflow queued. Connected stages will run; optional exports follow their enabled setting.');}
         catch(error){toast(`Could not queue workflow: ${error.message}`);}
         finally{target.disabled=false;updateRecipeUI();}break;
       case 'cancel':if(options.onClose)options.onClose();else {recipe=clone(startingRecipe);selectedLook=startingLook;updateRecipeUI();toast('Unsaved recipe changes discarded.');}break;
@@ -430,7 +448,7 @@ export function createStudio(options = {}) {
     $('.ff-sidebar-footer p').textContent=options.preview?'Edits preview automatically. Export uses full-resolution source.':'Renders on your ComfyUI server. The finished preview returns here.';
   }
   return {element:root,getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,pause(){video.pause();before.pause();},
-    setAsset(value){if(asset?.asset===value?.asset)return;clearInspection();asset=value;$$('.ff-look-image img').forEach(img=>{if(img.dataset.asset!==value?.asset){img.hidden=true;img.nextElementSibling.hidden=false;}});hasHDR=hasHDR||Boolean(value?.info?.hdr);fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=value?.info?.hdr?'hdr':'original';setSource(sourceMode);},
-    updateMedia(media){const newSource=media.source!==sources.original;sources={original:media.source||'',hdr:media.enhanced||''};hasHDR=Boolean(media.hasHDR);if(newSource){clearInspection();previewController?.abort();clipController?.abort();lookController?.abort();asset=null;stillReady=false;showStill(false);rendered='';previewKey='';previewClipKey='';}if(media.rendered){rendered=media.rendered;renderedRecipe=media.renderedRecipe||null;}label=media.label||label;setSource(sourceMode==='hdr'&&hasHDR?'hdr':'original');},
-    dispose(){destroyed=true;inspectionController?.abort();previewController?.abort();clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
+    setAsset(value){if(asset?.asset===value?.asset)return;closeLive();clearInspection();asset=value;$$('.ff-look-image img').forEach(img=>{if(img.dataset.asset!==value?.asset){img.hidden=true;img.nextElementSibling.hidden=false;}});hasHDR=hasHDR||Boolean(value?.info?.hdr);fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=value?.info?.hdr?'hdr':'original';setSource(sourceMode);},
+    updateMedia(media){const newSource=media.source!==sources.original;sources={original:media.source||'',hdr:media.enhanced||''};hasHDR=Boolean(media.hasHDR);if(newSource){closeLive();clearInspection();previewController?.abort();clipController?.abort();lookController?.abort();asset=null;stillReady=false;showStill(false);rendered='';previewKey='';previewClipKey='';}if(media.rendered){rendered=media.rendered;renderedRecipe=media.renderedRecipe||null;}label=media.label||label;setSource(sourceMode==='hdr'&&hasHDR?'hdr':'original');},
+    dispose(){destroyed=true;closeLive();inspectionController?.abort();previewController?.abort();clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
 }

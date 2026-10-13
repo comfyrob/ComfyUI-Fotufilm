@@ -4,6 +4,7 @@ import json
 import shutil
 import sys
 import tempfile
+import tarfile
 import urllib.request
 from pathlib import Path
 
@@ -39,7 +40,8 @@ def fetch(url, destination, sha256):
 def install():
     marker = hashlib.sha256(b''.join((ROOT / p).read_bytes() for p in (
         'scripts/install_linux.py', 'scripts/package_ffmpeg.py', 'scripts/package_system.py',
-        'runtime/ffmpeg-lock.json', 'runtime/system-libraries-lock.json'))).hexdigest()
+        'runtime/ffmpeg-lock.json', 'runtime/system-libraries-lock.json',
+        'runtime/float-engine-lock.json'))).hexdigest()
     destination = ROOT / 'linux-runtime'
     if (destination / '.installed').is_file() and (destination / '.installed').read_text() == marker:
         print('Pinned Fotufilm native runtime already installed.')
@@ -84,6 +86,18 @@ def install():
         from package_system import bundle as system_bundle
         ffmpeg_bundle(stage / 'ffmpeg6')
         system_bundle(stage / 'system')
+        float_lock = json.loads((ROOT / 'runtime/float-engine-lock.json').read_text())
+        float_archive = fetch(float_lock['url'], CACHE / float_lock['filename'], float_lock['sha256'])
+        with tarfile.open(float_archive) as bundle:
+            member = bundle.getmember('libfotufilm-float.so')
+            if not member.isfile() or member.size > 512 * 1024**2:
+                raise ValueError('Invalid float engine library.')
+            with bundle.extractfile(member) as source, (stage / member.name).open('wb') as output:
+                shutil.copyfileobj(source, output)
+        with (stage / 'libfotufilm-float.so').open('rb') as source:
+            if hashlib.file_digest(source, 'sha256').hexdigest() != float_lock['librarySha256']:
+                raise ValueError('Float engine library checksum mismatch.')
+        (stage / 'float-engine-provenance.json').write_text(json.dumps(float_lock, indent=2))
         provided, required = set(), set()
         for library in stage.rglob('lib*.so*'):
             with library.open('rb') as source:
@@ -102,7 +116,7 @@ def install():
         if destination.exists():
             shutil.rmtree(destination)
         stage.replace(destination)
-    print('Installed Fotufilm v1.11 native runtime, profiles and codec dependencies. No AI models downloaded.')
+    print('Installed Fotufilm v1.11, CUDA float-input engine, profiles and codec dependencies. No AI models downloaded.')
 
 
 if __name__ == '__main__':

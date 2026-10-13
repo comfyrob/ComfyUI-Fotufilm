@@ -1,8 +1,8 @@
 {
-  "id": "7bc8b6f8-b70c-485a-bc2c-2c5da58ad147",
+  "id": "172d1bc1-dbc4-4de3-a9f0-b9647fd18cc1",
   "revision": 0,
-  "last_node_id": 4,
-  "last_link_id": 5,
+  "last_node_id": 2,
+  "last_link_id": 1,
   "nodes": [
     {
       "id": 1,
@@ -24,8 +24,7 @@
           "name": "VIDEO",
           "type": "VIDEO",
           "links": [
-            1,
-            2
+            1
           ],
           "slot_index": 0
         }
@@ -71,6 +70,19 @@
           "name": "master",
           "type": "FOTUFILM_HDR_MASTER",
           "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
         }
       ],
       "outputs": [
@@ -83,17 +95,13 @@
         {
           "name": "recipe_json",
           "type": "STRING",
-          "links": [
-            3
-          ],
+          "links": [],
           "slot_index": 1
         },
         {
           "name": "studio",
           "type": "FOTUFILM_STUDIO",
-          "links": [
-            4
-          ],
+          "links": [],
           "slot_index": 2
         },
         {
@@ -109,104 +117,9 @@
       },
       "widgets_values": [
         "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
-        24
+        24,
+        "linear-acescg"
       ]
-    },
-    {
-      "id": 3,
-      "type": "FotufilmDevelopVideo",
-      "pos": [
-        1700,
-        120
-      ],
-      "size": [
-        320,
-        200
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "link": 2
-        },
-        {
-          "name": "recipe_json",
-          "type": "STRING",
-          "link": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": [
-            5
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "resolved_recipe",
-          "type": "STRING",
-          "links": [],
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FotufilmDevelopVideo"
-      },
-      "widgets_values": [
-        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
-        1,
-        "fixed",
-        "mp4"
-      ]
-    },
-    {
-      "id": 4,
-      "type": "FotufilmStudioReview",
-      "pos": [
-        2100,
-        120
-      ],
-      "size": [
-        320,
-        160
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "studio",
-          "type": "FOTUFILM_STUDIO",
-          "link": 4
-        },
-        {
-          "name": "rendered",
-          "type": "VIDEO",
-          "link": 5
-        },
-        {
-          "name": "enhanced_source",
-          "type": "VIDEO",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": [],
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FotufilmStudioReview"
-      },
-      "widgets_values": []
     }
   ],
   "links": [
@@ -216,38 +129,6 @@
       0,
       2,
       0,
-      "VIDEO"
-    ],
-    [
-      2,
-      1,
-      0,
-      3,
-      0,
-      "VIDEO"
-    ],
-    [
-      3,
-      2,
-      1,
-      3,
-      1,
-      "STRING"
-    ],
-    [
-      4,
-      2,
-      2,
-      4,
-      0,
-      "FOTUFILM_STUDIO"
-    ],
-    [
-      5,
-      3,
-      0,
-      4,
-      1,
       "VIDEO"
     ]
   ],

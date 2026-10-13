@@ -58,20 +58,24 @@ class FotufilmStudio(io.ComfyNode):
     def define_schema(cls):
         return io.Schema(
             node_id='FotufilmStudio', display_name='Fotufilm · Studio', category='Film Finish',
-            description='Interactive Gear grading and Fotufilm finishing. Connect the float master after HDR reconstruction. Existing source files preview without running LTX. Previews update automatically; the graph exports the saved recipe.',
+            description='Connect LTX linear HDR IMAGE frames directly to images. No Save HDR Master is required. Existing SDR source files preview before execution. Edits preview without rerunning LTX; export is a separate action.',
             is_output_node=True,
             inputs=[io.Video.Input('video'), io.String.Input('recipe_json', multiline=True, default=DEFAULT_RECIPE),
                     io.Float.Input('fps', default=24, min=1, max=120, advanced=True),
-                    io.Video.Input('rendered_preview', optional=True), io.Video.Input('enhanced_source', optional=True),
-                    HDRMaster.Input('master', optional=True)],
+                    io.Video.Input('rendered_preview', optional=True, advanced=True), io.Video.Input('enhanced_source', optional=True, advanced=True),
+                    HDRMaster.Input('master', optional=True, advanced=True), io.Image.Input('images', optional=True),
+                    io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020'], default='linear-acescg', optional=True, advanced=True)],
             outputs=[io.Video.Output('source_video'), io.String.Output('recipe_json'), StudioContext.Output('studio'), HDRMaster.Output('master')],
         )
 
     @classmethod
-    def execute(cls, video: Input.Video, recipe_json: str, fps: float, rendered_preview=None, enhanced_source=None, master=None):
+    def execute(cls, video: Input.Video, recipe_json: str, fps: float, rendered_preview=None, enhanced_source=None, master=None, images=None, input_color_space='linear-acescg'):
         recipe = validate_recipe(json.loads(recipe_json))
         session = StudioSession(uuid.uuid4().hex, recipe)
         files = {'source': preview_file(video, 'Original video')}
+        if images is not None:
+            from .studio_server import register_frames
+            files['direct'] = register_frames(images, fps, input_color_space, files['source'])
         if master is not None:
             from .studio_server import descriptor
             files['master'] = descriptor(resolve_master('', master))
@@ -90,7 +94,7 @@ class FotufilmStudioReview(io.ComfyNode):
                          category='Film Finish', is_output_node=True,
                          description='Returns the finished video to its originating Studio. Connect downstream of Develop; never wire the result back upstream.',
                          inputs=[StudioContext.Input('studio'), io.Video.Input('rendered'),
-                                 io.Video.Input('enhanced_source', optional=True)],
+                                 io.Video.Input('enhanced_source', optional=True, advanced=True)],
                          outputs=[io.Video.Output('video')])
 
     @classmethod

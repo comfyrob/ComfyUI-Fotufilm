@@ -1,0 +1,11 @@
+{
+  "filename": "fotufilm-float-v1.11-linux-x86_64.tar.gz",
+  "url": "https://github.com/comfyrob/ComfyUI-Fotufilm/releases/download/v0.3.0/fotufilm-float-v1.11-linux-x86_64.tar.gz",
+  "sha256": "7108ac05e6a25e803feb407582e302d4b7895b5e64a8efd3780e3a42ed1db7c9",
+  "librarySha256": "eb4e95597ddcfc41bbed6fefe9d7e9416ca348618055c47526b3efbae7e96016",
+  "upstreamCommit": "f602857a031a6a9c9b0966284ff989eb3046c323",
+  "swift": "6.2",
+  "halide": "21.0.0",
+  "target": "Linux x86_64 glibc 2.39; CUDA AOT StrictFloat; upstream film math",
+  "extension": "fotufilm_image_from_rgba32f"
+}

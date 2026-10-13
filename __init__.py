@@ -11,7 +11,7 @@ from comfy_api.latest import ComfyExtension, Input, InputImpl, io
 
 from .hdr_nodes import FilmFinishHDRPad, FilmFinishHDRRestore, FilmFinishSaveHDRVideo, FilmFinishSaveHDRMaster, FotufilmDevelopHDRMaster, FotufilmLoadHDRMaster
 from .recipe import validate_recipe
-from .preview_node import FotufilmStudio, FotufilmStudioReview
+from .preview_node import FotufilmStudio, FotufilmStudioReview, StudioContext
 from .inspection_node import FotufilmInspectFrame
 
 WEB_DIRECTORY = './web'
@@ -24,13 +24,19 @@ class FotufilmDevelopVideo(io.ComfyNode):
             category="Film Finish", is_output_node=True, inputs=[io.Video.Input("video"),
             io.String.Input("recipe_json", multiline=True),
             io.Int.Input("seed", default=0, min=0, max=2147483647),
-            io.Combo.Input("format", options=["mp4", "prores422hq", "hlg"], default="mp4")],
+            io.Combo.Input("format", options=["mp4", "prores422hq", "hlg"], default="mp4"),
+            io.Image.Input('images', optional=True),
+            io.Float.Input('fps', default=24, min=1, max=120, optional=True),
+            io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020'], default='linear-acescg', optional=True),
+            io.Boolean.Input('enabled', default=True, optional=True), StudioContext.Input('studio', optional=True)],
             outputs=[io.Video.Output("video"), io.String.Output("resolved_recipe")])
 
     @classmethod
-    def execute(cls, video: Input.Video, recipe_json: str, seed: int, format="mp4"):
+    def execute(cls, video: Input.Video, recipe_json: str, seed: int, format="mp4", images=None, fps=24, input_color_space='linear-acescg', enabled=True, studio=None):
         recipe = validate_recipe(json.loads(recipe_json))
         recipe["seed"] = recipe["seed"] if recipe["seed"] is not None else seed
+        if not enabled:
+            return io.NodeOutput(None, json.dumps(recipe), ui={'text':['Video export disabled. Edit in Studio, then enable this branch to save.']})
         with tempfile.TemporaryDirectory(prefix="fotufilm-video-") as directory:
             source = video.get_stream_source()
             if not isinstance(source, str):
@@ -41,9 +47,10 @@ class FotufilmDevelopVideo(io.ComfyNode):
                         output.write(chunk)
                 source = str(path)
             from .finish_pipeline import Source, render_clip
+            from .tensor_source import TensorSource
             extension = "mov" if format == "prores422hq" else "mp4"
             output_path = str(Path(folder_paths.get_output_directory()) / f"fotufilm-{uuid.uuid4().hex}.{extension}")
-            render_clip(Source(source), recipe, output_path, format,
+            render_clip(TensorSource(images,fps,input_color_space,source) if images is not None else Source(source), recipe, output_path, format,
                         interrupt=comfy.model_management.throw_exception_if_processing_interrupted)
             from .video_delivery import repair_packet_durations
             repair_packet_durations(output_path)
@@ -58,8 +65,11 @@ class FotufilmDevelopVideo(io.ComfyNode):
                         Path(output_path).unlink(missing_ok=True)
                         raise ValueError("This film/print finish did not produce Rec.2020 HLG video. Choose a direct-view slide film with Reference exposure.")
             Path(output_path).with_suffix(".recipe.json").write_text(json.dumps(recipe, indent=2))
-            return io.NodeOutput(InputImpl.VideoFromFile(output_path), json.dumps(recipe), ui={"files": [
-                {"filename": Path(output_path).name, "subfolder": "", "type": "output"}]})
+            file = {"filename":Path(output_path).name,"subfolder":"","type":"output"}
+            ui = {'files':[file]}
+            if studio is not None:
+                ui['fotufilm_review'] = [{'token':studio.token,'rendered':file,'rendered_recipe':recipe}]
+            return io.NodeOutput(InputImpl.VideoFromFile(output_path), json.dumps(recipe), ui=ui)
 
 
 class FotufilmDevelopFrames(io.ComfyNode):

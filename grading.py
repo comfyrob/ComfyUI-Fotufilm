@@ -51,7 +51,10 @@ def convert(rgb, source, destination):
     if source == destination: return rgb
     matrix=np.linalg.solve(np.asarray(TO_2020[destination],dtype=np.float64), np.asarray(TO_2020[source],dtype=np.float64))
     if isinstance(rgb,torch.Tensor):
-        return rgb @ torch.as_tensor(matrix.T,dtype=rgb.dtype,device=rgb.device)
+        # Small color matrices must stay float32 even when Comfy enables TF32
+        # matrix multiplication globally for neural inference.
+        m=torch.as_tensor(matrix,dtype=rgb.dtype,device=rgb.device)
+        return torch.stack([rgb[...,0]*m[i,0]+rgb[...,1]*m[i,1]+rgb[...,2]*m[i,2] for i in range(3)],dim=-1)
     return (rgb @ matrix.T).astype(np.float32)
 
 
@@ -88,3 +91,13 @@ def apply_grade(rgb, settings, space):
     output=convert(gear._cct_decode(cct),'linear-acescg',space)
     if not torch.isfinite(output).all(): raise ValueError('Grade produced non-finite pixels.')
     return output.cpu().numpy() if numpy_input else output
+
+
+def apply_grade_accelerated(rgb, settings, space):
+    """Same Gear math on CUDA, with the original CPU path on CPU-only hosts."""
+    if settings == neutral_grade() or not torch.cuda.is_available():
+        return apply_grade(rgb, settings, space)
+    # Copy once at the native engine boundary; no uint8/half intermediates.
+    tensor = torch.tensor(rgb, dtype=torch.float32, device='cuda')
+    with torch.inference_mode():
+        return apply_grade(tensor, settings, space).cpu().numpy()

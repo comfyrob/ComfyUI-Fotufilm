@@ -16,6 +16,12 @@ def configured_path(name, default):
 def library_path():
     if sys.platform == 'linux':
         default = ROOT / 'linux-runtime/libfotufilm.so'
+        extended = ROOT / 'linux-runtime/libfotufilm-float.so'
+        device = os.environ.get('FOTUFILM_GPU_DEVICE', 'auto').lower()
+        if extended.is_file() and device not in ('cpu', 'vulkan'):
+            import torch
+            if device == 'cuda' or torch.cuda.is_available():
+                default = extended
     else:
         default = ROOT / '.runtime/native-build/release/libFotufilmHost.dylib'
     return configured_path('FOTUFILM_LIBRARY', default)

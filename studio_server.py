@@ -8,6 +8,7 @@ import asyncio
 import atexit
 import hashlib
 import json
+import os
 import threading
 import time
 import uuid
@@ -30,11 +31,38 @@ LOCK=threading.RLock()
 LIMIT=2*1024**3
 PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','vendor/gear_grading.py'))).hexdigest()
 RUNTIME=None
+TENSOR_LIMIT=8*1024**3
+
+
+def register_frames(images, fps, color_space, playback):
+    from .tensor_source import TensorSource
+    source = TensorSource(images, fps, color_space, resolve_file(playback))
+    if source.nbytes > TENSOR_LIMIT:
+        raise ValueError('Direct preview batch exceeds 8 GiB. Trim the clip or use an archived master.')
+    token = uuid.uuid4().hex
+    with LOCK:
+        for existing, asset in ASSETS.items():
+            current = asset['source']
+            if (isinstance(current,TensorSource) and current.images.data_ptr()==images.data_ptr()
+                    and current.images.shape==images.shape and current.images.stride()==images.stride()
+                    and current.info['fps']==fps and current.info['colorSpace']==color_space
+                    and current.path==source.path):
+                ASSETS.move_to_end(existing)
+                return dict(asset=existing,info=current.info,playback=playback)
+        # Releasing an asset only removes the registry reference; an active render
+        # retains its source until its current frame finishes.
+        while sum(getattr(a['source'], 'nbytes', 0) for a in ASSETS.values()) + source.nbytes > TENSOR_LIMIT:
+            old = next(k for k,a in ASSETS.items() if getattr(a['source'], 'nbytes', 0))
+            ASSETS.pop(old)
+        ASSETS[token] = dict(source=source, fingerprint=token, playback=playback)
+        while len(ASSETS)>64: ASSETS.popitem(last=False)
+    return dict(asset=token, info=source.info, playback=playback)
 
 
 def preview_runtime():
     global RUNTIME
-    if RUNTIME is None:RUNTIME=PreviewRuntime(cache_root()/'float-frames',PIPELINE_SIGNATURE)
+    if RUNTIME is None:RUNTIME=PreviewRuntime(cache_root()/'float-frames',PIPELINE_SIGNATURE,
+        memory_limit=max(64,min(16384,int(os.environ.get('FOTUFILM_PREVIEW_CACHE_MB','4096'))))*1024**2)
     return RUNTIME
 
 
@@ -220,6 +248,10 @@ async def body(request):
 def install_routes():
     from server import PromptServer
     routes=PromptServer.instance.routes
+    @routes.get('/fotufilm/live')
+    async def live(request):
+        from .live_preview import stream
+        return await stream(request, ASSETS, EXECUTOR, preview_runtime)
     @routes.post('/fotufilm/source')
     async def source(request):
         try:return web.json_response(await asyncio.to_thread(register_file,await body(request)))

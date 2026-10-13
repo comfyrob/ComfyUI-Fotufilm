@@ -21,8 +21,9 @@ def connect(graph, a, out, b, inp):
     nodes[a]['outputs'][out]['links'].append(id);nodes[b]['inputs'][inp]['link']=id
 
 def studio(id=2,pos=(490,120)):
-    n=node(id,'FotufilmStudio',pos,[('video','VIDEO'),('rendered_preview','VIDEO'),('enhanced_source','VIDEO'),('master','FOTUFILM_HDR_MASTER')],
-        [('source_video','VIDEO'),('recipe_json','STRING'),('studio','FOTUFILM_STUDIO'),('master','FOTUFILM_HDR_MASTER')],[json.dumps(recipe),24],size=(1100,850))
+    n=node(id,'FotufilmStudio',pos,[('video','VIDEO'),('rendered_preview','VIDEO'),('enhanced_source','VIDEO'),('master','FOTUFILM_HDR_MASTER'),('images','IMAGE'),('fps','FLOAT')],
+        [('source_video','VIDEO'),('recipe_json','STRING'),('studio','FOTUFILM_STUDIO'),('master','FOTUFILM_HDR_MASTER')],[json.dumps(recipe),24,'linear-acescg'],size=(1100,850))
+    n['inputs'][5]['widget']={'name':'fps'}
     n['properties']['fotufilm_studio_expanded']=True
     return n
 
@@ -34,8 +35,8 @@ def save(name,g):
 
 review=lambda id,pos:node(id,'FotufilmStudioReview',pos,[('studio','FOTUFILM_STUDIO'),('rendered','VIDEO'),('enhanced_source','VIDEO')],[('video','VIDEO')],size=(320,160))
 source=node(1,'LoadVideo',(50,120),outputs=[('VIDEO','VIDEO')],widgets=[''],size=(340,260))
-g=graph([source,studio(),node(3,'FotufilmDevelopVideo',(1700,120),[('video','VIDEO'),('recipe_json','STRING')],[('video','VIDEO'),('resolved_recipe','STRING')],[json.dumps(recipe),1,'fixed','mp4']),review(4,(2100,120))])
-for args in [(1,0,2,0),(1,0,3,0),(2,1,3,1),(2,2,4,0),(3,0,4,1)]:connect(g,*args)
+g=graph([source,studio()])
+connect(g,1,0,2,0)
 save('Fotufilm - Studio.json',g)
 
 # Preserve every model pin and HDR transform from the existing LTX graph.
@@ -70,10 +71,14 @@ master['inputs'][2]['widget']={'name':'fps'}
 develop=node(5,'FotufilmDevelopHDRMaster',(2520,120),[('recipe_json','STRING'),('master','FOTUFILM_HDR_MASTER')],[('video','VIDEO')],['',json.dumps(recipe),'mp4'],size=(340,260));develop['inputs'][0]['widget']={'name':'recipe_json'}
 hlg=copy.deepcopy(bytype['FilmFinishSaveHDRVideo']);hlg.update(id=6,pos=[2100,460],size=[360,270]);hlg['inputs']=[dict(name=n,type=t,link=None)for n,t in [('images','IMAGE'),('audio','AUDIO'),('fps','FLOAT')]];hlg['inputs'][2]['widget']={'name':'fps'};hlg['outputs']=[dict(name='video',type='VIDEO',links=[],slot_index=0)]
 hdr=node(3,subid,(1690,120),[('video','VIDEO')],[(n,t)for n,t,_,_ in outs],size=(340,240),title='LTX 2.5 · Reconstruct HDR');hdr['properties']={}
-hdr['pos']=[500,120];master['pos']=[920,120]
-g=graph([copy.deepcopy(source),studio(pos=(1370,120)),hdr,master,develop,review(7,(2930,120))]);g['nodes'][0]['outputs'][0]['links']=[];g['definitions']={'subgraphs':[sub]}
-for args in [(1,0,2,0),(1,0,3,0),(1,0,4,1),(3,0,4,0),(3,2,4,2),(4,0,2,3),(2,3,5,1),(2,1,5,0),(2,2,7,0),(5,0,7,1)]:connect(g,*args)
-note=node(8,'Note',(1690,820),widgets=['HDR FINISHING WORKFLOW\n1. Upload your video.\n2. Run once to reconstruct HDR on your GPU server.\n3. Studio receives the float master automatically.\n4. Grade with Gear, choose film, and preview without rerunning LTX.\n5. Export from Studio or save the recipe and run the cached graph.\n\nLTX preserves float ACEScg → EXR master → Fotufilm. No reupload. Open the LTX subgraph to inspect all stages. Recipe edits do not feed into LTX. Keep the reconstruction seed fixed to reuse ComfyUI cache.\n\nReturn to Studio sends the finished render to the same viewer without a graph cycle. MP4 is an SDR delivery preview; the float HDR master stays separate. HLG output requires an eligible film/print recipe.'],size=(560,300),title='How this graph works')
+hdr['pos']=[460,120];master['pos']=[460,500];master['title']='Optional · Archive HDR source'
+master['widgets_values'].append(False)
+final=node(5,'FotufilmDevelopVideo',(2080,120),[('video','VIDEO'),('recipe_json','STRING'),('images','IMAGE'),('fps','FLOAT'),('studio','FOTUFILM_STUDIO')],
+    [('video','VIDEO'),('resolved_recipe','STRING')],[json.dumps(recipe),1,'fixed','mp4',24,'linear-acescg',False],title='Optional · Export finished video',size=(370,340))
+final['inputs'][1]['widget']={'name':'recipe_json'};final['inputs'][3]['widget']={'name':'fps'}
+g=graph([copy.deepcopy(source),studio(pos=(900,120)),hdr,master,final]);g['nodes'][0]['outputs'][0]['links']=[];g['definitions']={'subgraphs':[sub]}
+for args in [(1,0,2,0),(1,0,3,0),(3,0,2,4),(3,2,2,5),(1,0,4,1),(3,0,4,0),(3,2,4,2),(1,0,5,0),(2,1,5,1),(3,0,5,2),(3,2,5,3),(2,2,5,4)]:connect(g,*args)
+note=node(8,'Note',(460,850),widgets=['1. Load video. Existing SDR previews without a graph run.\n2. Run once: LTX reconstructs HDR and Studio receives linear ACEScg frames directly.\n3. Edit film and Gear grading in Studio. Preview changes do not rerun LTX.\n4. Export video in Studio, or enable the optional export branch and run the cached graph.\n\nThe archive branch is disabled by default. Enable it only to save an HDR master for a later session. It is never required for preview.\n\nThe monitor stream is SDR; processing stays float HDR. Full-resolution EXR inspection and exports read the float source. Keep the LTX seed fixed for cache reuse.'],size=(430,330),title='Direct HDR → Studio')
 g['nodes'].append(note);g['last_node_id']=8
 save('Film Finish - Studio + LTX 2.5 HDR.json',g)
 

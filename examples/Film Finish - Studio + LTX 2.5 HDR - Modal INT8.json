@@ -1,8 +1,8 @@
 {
-  "id": "1969f589-15d3-4307-8a39-e0255b847cf0",
+  "id": "942c0f11-f4c0-474d-a541-b74ab329ca6b",
   "revision": 0,
   "last_node_id": 8,
-  "last_link_id": 10,
+  "last_link_id": 12,
   "nodes": [
     {
       "id": 1,
@@ -26,7 +26,8 @@
           "links": [
             1,
             2,
-            3
+            5,
+            8
           ],
           "slot_index": 0
         }
@@ -42,7 +43,7 @@
       "id": 2,
       "type": "FotufilmStudio",
       "pos": [
-        1370,
+        900,
         120
       ],
       "size": [
@@ -71,7 +72,20 @@
         {
           "name": "master",
           "type": "FOTUFILM_HDR_MASTER",
-          "link": 6
+          "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 4,
+          "widget": {
+            "name": "fps"
+          }
         }
       ],
       "outputs": [
@@ -85,7 +99,7 @@
           "name": "recipe_json",
           "type": "STRING",
           "links": [
-            8
+            9
           ],
           "slot_index": 1
         },
@@ -93,16 +107,14 @@
           "name": "studio",
           "type": "FOTUFILM_STUDIO",
           "links": [
-            9
+            12
           ],
           "slot_index": 2
         },
         {
           "name": "master",
           "type": "FOTUFILM_HDR_MASTER",
-          "links": [
-            7
-          ],
+          "links": [],
           "slot_index": 3
         }
       ],
@@ -112,14 +124,15 @@
       },
       "widgets_values": [
         "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
-        24
+        24,
+        "linear-acescg"
       ]
     },
     {
       "id": 3,
       "type": "3c968edd-9020-4fc0-b40d-c94fa71ec85a",
       "pos": [
-        500,
+        460,
         120
       ],
       "size": [
@@ -141,7 +154,9 @@
           "name": "hdr_linear",
           "type": "IMAGE",
           "links": [
-            4
+            3,
+            6,
+            10
           ],
           "slot_index": 0
         },
@@ -155,7 +170,9 @@
           "name": "fps",
           "type": "FLOAT",
           "links": [
-            5
+            4,
+            7,
+            11
           ],
           "slot_index": 2
         }
@@ -168,8 +185,8 @@
       "id": 4,
       "type": "FilmFinishSaveHDRMaster",
       "pos": [
-        920,
-        120
+        460,
+        500
       ],
       "size": [
         360,
@@ -182,17 +199,17 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 4
+          "link": 6
         },
         {
           "name": "source",
           "type": "VIDEO",
-          "link": 3
+          "link": 5
         },
         {
           "name": "fps",
           "type": "FLOAT",
-          "link": 5,
+          "link": 7,
           "widget": {
             "name": "fps"
           }
@@ -202,9 +219,7 @@
         {
           "name": "master",
           "type": "FOTUFILM_HDR_MASTER",
-          "links": [
-            6
-          ],
+          "links": [],
           "slot_index": 0
         }
       ],
@@ -215,86 +230,56 @@
       "widgets_values": [
         24,
         "linear-acescg",
-        "film-finish-hdr/master"
-      ]
+        "film-finish-hdr/master",
+        false
+      ],
+      "title": "Optional \u00b7 Archive HDR source"
     },
     {
       "id": 5,
-      "type": "FotufilmDevelopHDRMaster",
+      "type": "FotufilmDevelopVideo",
       "pos": [
-        2520,
+        2080,
         120
       ],
       "size": [
-        340,
-        260
+        370,
+        340
       ],
       "flags": {},
       "order": 0,
       "mode": 0,
       "inputs": [
         {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 8
+        },
+        {
           "name": "recipe_json",
           "type": "STRING",
-          "link": 8,
+          "link": 9,
           "widget": {
             "name": "recipe_json"
           }
         },
         {
-          "name": "master",
-          "type": "FOTUFILM_HDR_MASTER",
-          "link": 7
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": [
-            10
-          ],
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FotufilmDevelopHDRMaster"
-      },
-      "widgets_values": [
-        "",
-        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
-        "mp4"
-      ]
-    },
-    {
-      "id": 7,
-      "type": "FotufilmStudioReview",
-      "pos": [
-        2930,
-        120
-      ],
-      "size": [
-        320,
-        160
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "studio",
-          "type": "FOTUFILM_STUDIO",
-          "link": 9
-        },
-        {
-          "name": "rendered",
-          "type": "VIDEO",
+          "name": "images",
+          "type": "IMAGE",
           "link": 10
         },
         {
-          "name": "enhanced_source",
-          "type": "VIDEO",
-          "link": null
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 11,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "link": 12
         }
       ],
       "outputs": [
@@ -303,23 +288,38 @@
           "type": "VIDEO",
           "links": [],
           "slot_index": 0
+        },
+        {
+          "name": "resolved_recipe",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
         }
       ],
       "properties": {
-        "Node name for S&R": "FotufilmStudioReview"
+        "Node name for S&R": "FotufilmDevelopVideo"
       },
-      "widgets_values": []
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
+        1,
+        "fixed",
+        "mp4",
+        24,
+        "linear-acescg",
+        false
+      ],
+      "title": "Optional \u00b7 Export finished video"
     },
     {
       "id": 8,
       "type": "Note",
       "pos": [
-        1690,
-        820
+        460,
+        850
       ],
       "size": [
-        560,
-        300
+        430,
+        330
       ],
       "flags": {},
       "order": 0,
@@ -330,9 +330,9 @@
         "Node name for S&R": "Note"
       },
       "widgets_values": [
-        "HDR FINISHING WORKFLOW\n1. Upload your video.\n2. Run once to reconstruct HDR on your GPU server.\n3. Studio receives the float master automatically.\n4. Grade with Gear, choose film, and preview without rerunning LTX.\n5. Export from Studio or save the recipe and run the cached graph.\n\nLTX preserves float ACEScg \u2192 EXR master \u2192 Fotufilm. No reupload. Open the LTX subgraph to inspect all stages. Recipe edits do not feed into LTX. Keep the reconstruction seed fixed to reuse ComfyUI cache.\n\nReturn to Studio sends the finished render to the same viewer without a graph cycle. MP4 is an SDR delivery preview; the float HDR master stays separate. HLG output requires an eligible film/print recipe."
+        "1. Load video. Existing SDR previews without a graph run.\n2. Run once: LTX reconstructs HDR and Studio receives linear ACEScg frames directly.\n3. Edit film and Gear grading in Studio. Preview changes do not rerun LTX.\n4. Export video in Studio, or enable the optional export branch and run the cached graph.\n\nThe archive branch is disabled by default. Enable it only to save an HDR master for a later session. It is never required for preview.\n\nThe monitor stream is SDR; processing stays float HDR. Full-resolution EXR inspection and exports read the float source. Keep the LTX seed fixed for cache reuse."
       ],
-      "title": "How this graph works"
+      "title": "Direct HDR \u2192 Studio"
     }
   ],
   "links": [
@@ -354,6 +354,22 @@
     ],
     [
       3,
+      3,
+      0,
+      2,
+      4,
+      "IMAGE"
+    ],
+    [
+      4,
+      3,
+      2,
+      2,
+      5,
+      "FLOAT"
+    ],
+    [
+      5,
       1,
       0,
       4,
@@ -361,7 +377,7 @@
       "VIDEO"
     ],
     [
-      4,
+      6,
       3,
       0,
       4,
@@ -369,7 +385,7 @@
       "IMAGE"
     ],
     [
-      5,
+      7,
       3,
       2,
       4,
@@ -377,44 +393,44 @@
       "FLOAT"
     ],
     [
-      6,
-      4,
-      0,
-      2,
-      3,
-      "FOTUFILM_HDR_MASTER"
-    ],
-    [
-      7,
-      2,
-      3,
-      5,
-      1,
-      "FOTUFILM_HDR_MASTER"
-    ],
-    [
       8,
-      2,
       1,
+      0,
       5,
       0,
-      "STRING"
+      "VIDEO"
     ],
     [
       9,
       2,
-      2,
-      7,
-      0,
-      "FOTUFILM_STUDIO"
+      1,
+      5,
+      1,
+      "STRING"
     ],
     [
       10,
-      5,
+      3,
       0,
-      7,
-      1,
-      "VIDEO"
+      5,
+      2,
+      "IMAGE"
+    ],
+    [
+      11,
+      3,
+      2,
+      5,
+      3,
+      "FLOAT"
+    ],
+    [
+      12,
+      2,
+      2,
+      5,
+      4,
+      "FOTUFILM_STUDIO"
     ]
   ],
   "groups": [],

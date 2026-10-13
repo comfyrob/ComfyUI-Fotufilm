@@ -1,3 +1,4 @@
+import {openLivePreview} from './live-client.js';
 /** Cancellable native Fotufilm previews; never submits the workflow graph. */
 export function createPreviewClient(api) {
   const client=crypto.randomUUID();let closed=false;const jobs=new Set();
@@ -9,6 +10,7 @@ export function createPreviewClient(api) {
   async function cancel(job){try{await request(`jobs/${job}/cancel`,{});}catch{}}
   return {
     fileURL,
+    live:callbacks=>openLivePreview(api.apiURL('/fotufilm/live'),callbacks),
     register:file=>request('source',file),
     async render(asset,recipe,{mode='frame',frame=0,edge=960,format='mp4',stage='finish',signal,onProgress,channel='main'}={}){
       if(closed||signal?.aborted)throw new DOMException('Cancelled','AbortError');

@@ -6,6 +6,7 @@ their own lifetime. No display-encoded pixels enter the intermediate cache.
 import hashlib
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from collections import OrderedDict
 from pathlib import Path
 
@@ -30,13 +31,14 @@ class FloatLRU:
             self.items.move_to_end(key)
         return value
 
-    def put(self, key, value):
+    def put(self, key, value, *, take_ownership=False):
         if value.nbytes > self.limit:
             return
         previous = self.items.pop(key, None)
         if previous is not None:
             self.bytes -= previous.nbytes
-        value = np.ascontiguousarray(value, dtype=np.float32).copy()
+        value = np.ascontiguousarray(value, dtype=np.float32)
+        if not take_ownership: value=value.copy()
         value.flags.writeable = False
         self.items[key] = value
         self.bytes += value.nbytes
@@ -123,6 +125,39 @@ class SourceCursor:
             self.iterator = None
 
 
+class PrefetchCursor:
+    """Decode exactly one frame ahead while Fotufilm processes the current one.
+
+    The decoder has one owning thread. Seeking waits for that bounded read, then
+    starts from the requested frame; no concurrent generator access or skipped
+    frames. The prefetched float buffer is released when the viewer closes.
+    """
+    def __init__(self, source, edge):
+        self.source, self.edge = source, edge
+        self.cursor = SourceCursor(source, edge)
+        self.worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix='fotufilm-decode')
+        self.future = None
+        self.index = -1
+
+    def read(self, index):
+        if self.future is not None and self.index != index:
+            self.future.result()
+            self.future = None
+        if self.future is None:
+            self.future = self.worker.submit(self.cursor.read, index)
+        result = self.future.result()
+        self.future = None
+        if index + 1 < self.source.info['frames']:
+            self.index = index + 1
+            self.future = self.worker.submit(self.cursor.read, self.index)
+        return result
+
+    def close(self):
+        self.worker.shutdown(wait=True, cancel_futures=True)
+        self.cursor.close()
+        self.future = None
+
+
 class PreviewRuntime:
     def __init__(self, root, signature, disk_limit=4 * 1024**3, memory_limit=192 * 1024**2):
         self.signature = signature
@@ -147,7 +182,7 @@ class PreviewRuntime:
         rgb = self.source_cache.get(key)
         if rgb is None:
             rgb = cursor.read(index)
-            self.source_cache.put(key, rgb)
+            self.source_cache.put(key, rgb, take_ownership=True)
             stats['decodedFrames'] += 1
         else:
             stats['sourceCacheHits'] += 1

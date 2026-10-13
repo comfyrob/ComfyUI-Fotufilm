@@ -33,13 +33,15 @@ class Engine:
         os.environ.setdefault("FOTUFILM_STOCKS", str(stocks_path()))
         if sys.platform == 'linux':
             packaged = Path(__file__).parent / 'linux-runtime'
-            if path.parent == packaged:
+            if packaged.is_dir():
                 os.environ.setdefault('FOTUFILM_RESOURCES', str(packaged / 'resources'))
                 os.environ.setdefault('FOTUFILM_STOCKS', str(packaged / 'resources/Stocks'))
                 os.environ.setdefault('LIBHEIF_PLUGIN_PATH', str(packaged / 'heif-plugins'))
-                pending = (list(packaged.glob('lib*.so*')) + list((packaged / 'ffmpeg6').glob('lib*.so*'))
-                           + list((packaged / 'system').glob('lib*.so*')))
-                pending.remove(path)
+                pending = list(path.parent.glob('lib*.so*'))
+                if path.parent == packaged:
+                    pending += list((packaged / 'ffmpeg6').glob('lib*.so*')) + list((packaged / 'system').glob('lib*.so*'))
+                if path in pending: pending.remove(path)
+                pending = [p for p in pending if not p.name.startswith(('libfotufilm', 'libFotufilm'))]
                 while pending:
                     loaded = []
                     for dependency in pending:
@@ -74,6 +76,10 @@ class Engine:
         for name, (result, args) in signatures.items():
             fn = getattr(self.lib, name)
             fn.restype, fn.argtypes = result, args
+        self.memory_input = getattr(self.lib, 'fotufilm_image_from_rgba32f', None)
+        if self.memory_input is not None:
+            self.memory_input.restype = C.c_void_p
+            self.memory_input.argtypes = [C.c_void_p, C.c_uint32, C.c_uint32, C.c_size_t, C.POINTER(C.c_void_p)]
         if self.lib.fotufilm_api_version() != 1:
             raise RuntimeError("Unsupported Fotufilm C API. Install the pinned version.")
         self.lock = threading.RLock()
@@ -134,6 +140,33 @@ class Engine:
                 if status:
                     self.raise_error(error)
                 return pixels[:, :, :3].copy()
+            finally:
+                self.lib.fotufilm_image_release(image)
+
+    def render_rgb(self, rgb, request):
+        """No encoder/decoder or filesystem round trip. Exact pinned film engine."""
+        import numpy as np
+        if self.memory_input is None:
+            raise RuntimeError('This runtime does not expose the float-memory input extension.')
+        height, width, channels = rgb.shape
+        if channels != 3 or not np.isfinite(rgb).all():
+            raise ValueError('Expected finite linear Rec.2020 RGB pixels.')
+        rgba = np.ones((height, width, 4), dtype=np.float32)
+        rgba[..., :3] = rgb
+        with self.lock:
+            error = C.c_void_p()
+            image = self.memory_input(rgba.ctypes.data, width, height, rgba.size, C.byref(error))
+            if not image:
+                self.raise_error(error)
+            pixels = np.empty_like(rgba)
+            target = Target(0, 1, pixels.ctypes.data, width * 16, pixels.nbytes)
+            info = Info()
+            try:
+                status = self.lib.fotufilm_render(self.handle, image, json.dumps(request).encode(),
+                    C.byref(target), C.byref(info), C.byref(error))
+                if status:
+                    self.raise_error(error)
+                return pixels[..., :3].copy()
             finally:
                 self.lib.fotufilm_image_release(image)
 
