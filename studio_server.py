@@ -149,7 +149,7 @@ def execute_job(job,asset,recipe,mode,edge,index,format_id):
     finally:steps.close()
 
 
-def execute_job_steps(job,asset,recipe,mode,edge,index,format_id):
+def execute_job_steps(job,asset,recipe,mode,edge,index,format_id,start=0,export_count=None):
     def interrupt():
         if job['cancel'].is_set():raise InterruptedError('Superseded or cancelled.')
     def progress(value):job['progress']=value
@@ -157,7 +157,7 @@ def execute_job_steps(job,asset,recipe,mode,edge,index,format_id):
         interrupt();job['status']='running';started=time.monotonic()
         job['queueSeconds']=round(started-job.get('submitted',started),3)
         source=asset['source'];root=cache_root()
-        key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],recipe,mode,edge,index if mode=='frame' else 0,format_id],sort_keys=True).encode()).hexdigest()
+        key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],recipe,mode,edge,index if mode=='frame' else 0,format_id,start,export_count],sort_keys=True).encode()).hexdigest()
         extension='.png' if mode=='frame' else '.mov' if format_id=='prores422hq' else '.mp4'
         destination=root/(key+extension)
         before_path=root/(key+'-before'+extension)
@@ -179,12 +179,12 @@ def execute_job_steps(job,asset,recipe,mode,edge,index,format_id):
             result={'after':descriptor(destination),'before':descriptor(before_path),'frame':index}
         else:
             # Bounded automatic playback previews; exports retain the complete source.
-            count=min(source.info['frames'],max(1,round(source.info['fps']*20))) if mode=='clip' else None
+            count=min(source.info['frames'],max(1,round(source.info['fps']*20))) if mode=='clip' else export_count
             if not destination.is_file():
                 info.update((yield from render_clip_steps(source,recipe,destination,format_id,edge if mode=='clip' else None,
-                    count=count,interrupt=interrupt,progress=progress,runtime=runtime,fingerprint=asset['fingerprint'])))
+                    start=start,count=count,interrupt=interrupt,progress=progress,runtime=runtime,fingerprint=asset['fingerprint'])))
             interrupt()
-            result={'after':descriptor(destination),'frames':count or source.info['frames'],'fps':source.info['fps']}
+            result={'after':descriptor(destination),'frames':count or source.info['frames'],'fps':source.info['fps'],'startFrame':start}
             if mode=='clip':
                 # Film eligibility determines only the terminal SDR shoulder.
                 before_key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],edge,recipe['stock'],recipe['medium'],recipe['digitalReference'],'before']).encode()).hexdigest()
@@ -293,6 +293,8 @@ def install_routes():
             if type(index) is not int or not 0<=index<asset['source'].info['frames']:raise ValueError('Invalid frame number.')
             format_id=value.get('format','mp4') if mode=='export' else 'mp4'
             if format_id not in ('mp4','prores422hq','hlg'):raise ValueError('Unsupported export format.')
+            from .export_range import export_range
+            start,count=export_range(asset['source'].info,value.get('range','full'),value.get('start',0)) if mode=='export' else (0,None)
             client=value.get('client')
             if not isinstance(client,str) or not 1<=len(client)<=128:raise ValueError('Invalid editor session.')
             with LOCK:
@@ -308,7 +310,7 @@ def install_routes():
                     if JOBS[old]['status'] not in ('queued','running'):JOBS.pop(old)
                 while len(CLIENTS)>128:CLIENTS.pop(next(iter(CLIENTS)))
                 priority=(30 if value.get('channel')=='looks' else 0) if mode=='frame' else 10 if mode=='clip' else 20
-                job['future']=EXECUTOR.submit(priority,execute_job_steps,job,asset,recipe,mode,edge,index,format_id)
+                job['future']=EXECUTOR.submit(priority,execute_job_steps,job,asset,recipe,mode,edge,index,format_id,start,count)
             return web.json_response({'job':job['id']})
         except (ValueError,KeyError,TypeError) as error:return web.json_response({'error':str(error)},status=400)
 

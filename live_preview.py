@@ -99,7 +99,7 @@ class LiveRenderer:
         self.encoder = None
         self.force_keyframe = False
 
-    def render(self, recipe, index, compare, revision, still=False):
+    def render(self, recipe, index, compare, revision, still=False, queue_ms=0, setup_ms=0):
         started = time.perf_counter()
         if recipe != self.recipe:
             if self.finisher: self.finisher.close()
@@ -139,7 +139,7 @@ class LiveRenderer:
         meta = dict(revision=revision, frame=index, timestamp=stamp, key=keyframe, reset=reset,
                     width=w, height=h, codedWidth=size[0], codedHeight=size[1], compare=compare,
                     encoder='png' if still else self.encoder.name, memoryInput=self.runtime.engine.memory_input is not None,
-                    ms=dict(source=round((decoded-started)*1000,2), film=round((filmed-decoded)*1000,2),
+                    ms=dict(queue=round(queue_ms,2), setup=round(setup_ms,2), source=round((decoded-started)*1000,2), film=round((filmed-decoded)*1000,2),
                             grade=round((finished-filmed)*1000,2), display=round((displayed-finished)*1000,2),
                             encode=round((end-displayed)*1000,2), total=round((end-started)*1000,2)))
         header = json.dumps(meta, separators=(',',':')).encode()
@@ -156,6 +156,7 @@ async def stream(request, assets, executor, runtime_factory):
     """Latest controls, with a bounded acknowledgement window sized for the RTT."""
     ws = web.WebSocketResponse(compress=False, max_msg_size=65536, heartbeat=20)
     await ws.prepare(request)
+    await ws.send_json({"capabilities":["gesture-h264","revision-timing"]})
     state = None
     wake = asyncio.Event()
     pending = {}
@@ -165,14 +166,16 @@ async def stream(request, assets, executor, runtime_factory):
     sequence = 0
     stopped = False
 
-    def work(snapshot, index):
+    def work(snapshot, index, submitted):
         nonlocal renderer
+        begun=time.perf_counter()
         identity = (snapshot['asset'], snapshot['edge'])
         if renderer is None or getattr(renderer,'identity',None) != identity:
             if renderer: renderer.close()
             renderer = LiveRenderer(snapshot['_asset'], snapshot['edge'], runtime_factory())
             renderer.identity = identity
-        result = renderer.render(snapshot['recipe'], index, snapshot['compare'], snapshot['revision'], still=not snapshot['playing'])
+        result = renderer.render(snapshot['recipe'], index, snapshot['compare'], snapshot['revision'], still=not (snapshot['playing'] or snapshot['interacting']),
+            queue_ms=(begun-submitted)*1000,setup_ms=(time.perf_counter()-begun)*1000)
         return result
         yield
 
@@ -196,7 +199,9 @@ async def stream(request, assets, executor, runtime_factory):
                 try: await asyncio.wait_for(wake.wait(), remaining)
                 except asyncio.TimeoutError: pass
                 if state['revision'] != snapshot['revision']: continue
-            packet = await asyncio.wrap_future(executor.submit(0, work, snapshot, index))
+            if snapshot['revision'] != last_revision:
+                await ws.send_json({'phase':'preparing' if renderer is None else 'rendering','revision':snapshot['revision']})
+            packet = await asyncio.wrap_future(executor.submit(0, work, snapshot, index, time.perf_counter()))
             if stopped: break
             # Drop obsolete *control revisions*, never silently skip source frames
             # to claim a frame rate the engine did not actually deliver.
@@ -214,7 +219,7 @@ async def stream(request, assets, executor, runtime_factory):
                 if snapshot['loop']: index = 0
                 else:
                     state = {**state,'playing':False}
-                    await ws.send_json({'ended':True})
+                    await ws.send_json({'ended':True,'revision':snapshot['revision']})
             due = max(due+1/(snapshot['_asset']['source'].info['fps']*snapshot['rate']), time.monotonic())
 
     task = asyncio.create_task(send_frames())
@@ -247,7 +252,7 @@ async def stream(request, assets, executor, runtime_factory):
             rate = value.get('rate',1)
             if rate not in (.5,1,1.5,2): raise ValueError('Invalid playback rate.')
             state = dict(asset=value['asset'], _asset=asset, recipe=validate_recipe(value.get('recipe')),
-                         frame=frame,edge=edge,revision=revision,playing=value.get('playing') is True,
+                         frame=frame,edge=edge,revision=revision,playing=value.get('playing') is True,interacting=value.get('interacting') is True,
                          compare=value.get('compare') is True,loop=value.get('loop') is not False,rate=rate)
             wake.set()
             if task.done(): task.result()

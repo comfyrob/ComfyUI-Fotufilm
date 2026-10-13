@@ -104,3 +104,48 @@ test('the still-version selector explains itself without changing the recipe', (
   assert.deepEqual(studio.getRecipe(),initial);
   studio.dispose();
 });
+
+test('numeric edits commit once, Escape cancels, and undo keeps look identity', () => {
+  let closes=0;
+  const studio=createStudio({recipe:baseRecipe(),lookId:'clean',onClose:()=>closes++});
+  document.body.append(studio.element);const root=studio.element;
+  const input=root.querySelector('.ff-grade-quick [aria-label="Grade Exposure value EV"]');
+  input.focus();input.value='.25';
+  assert.equal(studio.getRecipe().grading.finish.exposure,0);
+  input.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  assert.equal(studio.getRecipe().grading.finish.exposure,.25);
+  input.focus();input.value='1.5';input.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+  assert.equal(studio.getRecipe().grading.finish.exposure,.25);assert.equal(closes,0);
+  root.querySelector('[data-action="undo"]').click();
+  assert.equal(studio.getRecipe().grading.finish.exposure,0);assert.equal(studio.getLookId(),'clean');
+  input.value='900';input.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  assert.equal(studio.getRecipe().grading.finish.exposure,5);
+  studio.dispose();
+});
+
+test('look browsing preserves input corrections, explicit color override and undo/reset semantics', () => {
+  const recipe=baseRecipe();recipe.grading.balance.exposure=1.25;recipe.grading.finish.saturation=.73;
+  const studio=createStudio({recipe,lookId:'clean'});document.body.append(studio.element);const root=studio.element;
+  root.querySelector('[data-look="pastel"]').click();
+  assert.equal(studio.getRecipe().grading.balance.exposure,1.25);
+  assert.equal(studio.getRecipe().grading.finish.saturation,.9); // Preset default.
+  root.querySelector('[data-action="undo"]').click();
+  assert.equal(studio.getLookId(),'clean');assert.equal(studio.getRecipe().grading.finish.saturation,.73);
+  root.querySelector('.ff-keep-finish').checked=true;
+  root.querySelector('[data-look="pastel"]').click();
+  assert.equal(studio.getRecipe().grading.finish.saturation,.73);
+  root.querySelector('[data-action="reset"]').click();
+  assert.equal(studio.getRecipe().grading.balance.exposure,1.25);assert.equal(studio.getRecipe().grading.finish.saturation,.9);
+  studio.dispose();
+});
+
+test('trial export uses current source frame, original resolution and can be cancelled', async () => {
+  const calls=[];let finish;
+  const studio=createStudio({asset,preview:{render:(_a,_r,options)=>{calls.push(options);return new Promise(resolve=>finish=resolve);}}});
+  document.body.append(studio.element);studio.element.querySelector('video').currentTime=2;
+  studio.element.querySelector('[data-action="test-export"]').click();
+  assert.equal(calls[0].start,48);assert.equal(calls[0].range,'trial');assert.equal(calls[0].edge,undefined);
+  assert.equal(studio.element.querySelector('[data-action="export"]').disabled,true);
+  studio.element.querySelector('[data-action="cancel-export"]').click();assert.equal(calls[0].signal.aborted,true);
+  finish({after:'trial.mp4'});await flush();studio.dispose();
+});

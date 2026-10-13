@@ -1,4 +1,5 @@
-import { baseRecipe, clone, films, formats, looks, lookRecipe, matchLook, filmName, sameRecipe, timecode, neutralGrade, normalizeRecipe } from './model.js';
+import { baseRecipe, clone, films, formats, looks, lookRecipe, matchLook, filmName, sameRecipe, timecode, neutralGrade, normalizeRecipe, selectLook } from './model.js';
+import {attachNumericControl} from './numeric-control.js';
 
 const icons = {
   play: '<path d="m8 5 11 7-11 7z"/>', pause: '<path d="M8 5v14M16 5v14"/>',
@@ -36,9 +37,11 @@ export function createStudio(options = {}) {
   let fps = Math.max(1, options.fps || 24);
   let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=1280, stillReady=false;
   let activeRenderedSource=sourceMode, previewClipKey='', pendingClipKey='', lookController=null, clipController=null, stillFrame=-1, swappingMedia=false;
-  let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), lookTimer=0, exporting=false, inspecting=false, inspectionController=null;
+  let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), lookTimer=0, exporting=false, inspecting=false, inspectionController=null, exportController=null;
   let live=null, liveFrame=-1, liveStatsStart=0, liveFrames=0, deliveredFPS=0;
-  const history=[clone(recipe)]; let historyTimer=0;
+  const snapshot = () => ({recipe:clone(recipe),lookId:selectedLook});
+  const history=[snapshot()]; let historyTimer=0, interacting=false, editStarted=0;
+  const numericControls=new WeakMap();
   let frameCallback = 0, raf = 0, thumbnailToken = 0, destroyed = false;
   let ownedURLs = [], pan = {x: 0, y: 0}, lastPointer = null;
   root.innerHTML = `
@@ -78,9 +81,9 @@ export function createStudio(options = {}) {
       </main>
       <aside class="ff-sidebar" aria-label="Film recipe">
         <div class="ff-current"><span>Current look</span><div class="ff-look-title"><h1></h1><span class="ff-modified" hidden>Modified</span>${iconButton('reset', 'Reset this look', 'undo')}</div><p class="ff-recipe-summary"></p></div>
-        <nav class="ff-tabs" aria-label="Recipe editor">${button('tab-looks', 'Looks', '', 'aria-pressed="true"')}${button('tab-customize', 'Film', '', 'aria-pressed="false"')}${button('tab-grade','Grade','','aria-pressed="false"')}</nav>
+        <nav class="ff-tabs" aria-label="Recipe editor">${button('tab-looks', 'Looks', '', 'aria-pressed="true"')}${button('tab-customize', 'Film', '', 'aria-pressed="false"')}${button('tab-grade','Color & texture','','aria-pressed="false"')}</nav>
         <div class="ff-panel-content">
-          <section class="ff-looks-panel"><p class="ff-intro">A complete film, color and texture recipe.</p><div class="ff-look-grid">${looks.map(look=>`<button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><div class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">First frame</span><span class="ff-look-check">${icon('check')}</span></div><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button>`).join('')}</div><p class="ff-thumbnail-note">Looks preview the first frame of your active source.</p></section>
+          <section class="ff-looks-panel"><p class="ff-intro">A complete film, color and texture recipe. Input corrections always stay.</p><label class="ff-keep-color"><input type="checkbox" class="ff-keep-finish"> Keep my color settings</label><p class="ff-help ff-keep-hint">Off: use each look’s color settings.</p><div class="ff-look-grid">${looks.map(look=>`<button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><div class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">First frame</span><span class="ff-look-check">${icon('check')}</span></div><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button>`).join('')}</div><p class="ff-thumbnail-note">Looks preview the first frame of your active source.</p></section>
           <section class="ff-customize-panel" hidden>
             <div class="ff-section"><div class="ff-section-heading"><h2>Film</h2><span>The foundation of your look</span></div><div class="ff-films">${films.map(([id,name,note])=>`<button type="button" data-film="${id}" aria-pressed="false"><span>${name}</span><small>${note}</small>${icon('check')}</button>`).join('')}</div>
               <h3>Film size</h3><div class="ff-chips">${formats.map(([id,name])=>`<button type="button" data-format="${id}" aria-pressed="false">${name}</button>`).join('')}</div><p class="ff-help">Changes the scale of grain and halation, not the crop.</p>
@@ -88,11 +91,10 @@ export function createStudio(options = {}) {
               <label class="ff-reference">Screen conversion<select data-control="digitalReference"><option value="graded-print">Graded print</option><option value="reference-exposure">Reference exposure</option></select></label>
             </div>
             <details class="ff-section"><summary>Film exposure & print response</summary><div class="ff-light-sliders"></div></details>
-            <div class="ff-section"><div class="ff-section-heading"><h2>Texture</h2></div><div class="ff-texture-sliders"></div><p class="ff-help">Texture is rendered by Fotufilm on the server.</p></div>
           </section>
           <section class="ff-grade-panel" hidden>
             <p class="ff-intro">Adjust the finished look. Your film choice stays in place.</p>
-            <div class="ff-grade-sliders ff-grade-quick"></div>
+            <div class="ff-grade-sliders ff-grade-quick"></div><div class="ff-texture-sliders ff-grade-quick"></div>
             <section class="ff-wheel-panel" aria-label="Color wheels">
               <div class="ff-section-heading"><h2>Color wheels</h2><span>Tint the dark, middle or bright areas.</span></div>
               <div class="ff-wheels ff-wheels-primary"></div>
@@ -108,7 +110,7 @@ export function createStudio(options = {}) {
             ${button('render', 'Run connected workflow', 'play', 'class="ff-render-button"')}
           </details>
         </div>
-        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div><div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
+        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div><div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><div class="ff-trial-row">${button('test-export','Test 5 seconds','','title="Export up to five seconds from the playhead, at full resolution and the selected format."')}${button('cancel-export','Cancel export','','hidden')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
       </aside>
     </div><div class="ff-toast" role="status" hidden></div><input class="ff-file-input" type="file" accept="video/mp4,video/webm,video/quicktime" hidden>`;
   const $ = s => root.querySelector(s);
@@ -139,10 +141,31 @@ export function createStudio(options = {}) {
     live?.close();live=null;liveFrame=-1;liveFrames=0;liveStatsStart=0;
     $('.ff-live-after').hidden=true;$('.ff-live-before').hidden=true;
   }
+  function commitHistory(){
+    clearTimeout(historyTimer);
+    const previous=history.at(-1);
+    if(previous.lookId!==selectedLook||!sameRecipe(previous.recipe,recipe)){
+      history.push(snapshot());if(history.length>30)history.shift();
+    }
+    action('undo').disabled=history.length<2;
+  }
+  function bindNumeric(input, apply){
+    numericControls.set(input,attachNumericControl(input,{on,commit:value=>{commitHistory();apply(value);commitHistory();}}));
+  }
+  const isGesture = target => target.matches('input[type="range"][data-grade],input[type="range"][data-section],.ff-wheel-master input,.ff-wheel');
+  root.addEventListener('pointerdown',event=>{if(isGesture(event.target)){commitHistory();interacting=true;}},{signal:abort.signal,capture:true});
+  function endGesture(){if(!interacting)return;interacting=false;editStarted=performance.now();commitHistory();schedulePreview(true);}
+  for(const event of ['pointerup','pointercancel','blur'])window.addEventListener(event,endGesture,{signal:abort.signal,capture:true});
+  on($('.ff-keep-finish'),'change',()=>{
+    $('.ff-keep-hint').textContent=$('.ff-keep-finish').checked?'On: your entire after-film grade replaces the look’s color settings.':'Off: use each look’s color settings.';
+    lookController?.abort();clearTimeout(lookTimer);lookTimer=setTimeout(scheduleLookPreviews,500);
+  });
+  function candidateLook(id){return selectLook(recipe,id,$('.ff-keep-finish').checked);}
   function updateLive(){
     if(!asset||destroyed)return;
     try{
-      if(!live)live=options.preview.live({
+      if(!live){setStatus('Connecting film preview…');live=options.preview.live({
+        onStatus:status=>{if(status.phase==='preparing')setStatus('Preparing film engine…');else if(status.phase==='queued')setStatus('Updating preview…');},
         onFrame:(frame,meta)=>{
           if(destroyed)return;
           const draw=(selector,x)=>{const canvas=$(selector);if(canvas.width!==meta.width)canvas.width=meta.width;if(canvas.height!==meta.height)canvas.height=meta.height;canvas.getContext('2d',{alpha:false}).drawImage(frame,x,0,meta.width,meta.height,0,0,meta.width,meta.height);canvas.hidden=false;};
@@ -152,30 +175,31 @@ export function createStudio(options = {}) {
           $('.ff-display').textContent=asset.info.hdr?'Linear HDR processing · SDR monitor stream':'SDR source · live film preview';
           const now=performance.now();if(!liveStatsStart)liveStatsStart=now;liveFrames++;
           if(video.paused&&$('.ff-scopes').open)updateScope($('.ff-live-after'));
-          if(video.paused&&!lookTimer)lookTimer=setTimeout(()=>{lookTimer=0;scheduleLookPreviews();},1500);
+          if(video.paused&&tab==='looks'&&!interacting&&!lookTimer)lookTimer=setTimeout(()=>{lookTimer=0;scheduleLookPreviews();},1500);
           if(now-liveStatsStart>1000){deliveredFPS=(liveFrames-1)*1000/(now-liveStatsStart);liveStatsStart=now;liveFrames=1;}
-          setStatus(`${meta.width} × ${meta.height} · ${video.paused?'Paused':`${deliveredFPS.toFixed(1)} fps delivered`} · ${Math.round(meta.ms.total)} ms processing`);
-          $('.ff-render-state').title=`${meta.encoder} monitor stream. ${meta.memoryInput?'Direct float memory':'Legacy file input'}. Source ${meta.ms.source} ms; film ${meta.ms.film} ms; grade ${meta.ms.grade} ms; display ${meta.ms.display} ms; encode ${meta.ms.encode} ms. Exports use the original float frames.`;
+          setStatus(`${meta.width} × ${meta.height} · ${video.paused?(meta.encoder==='png'?'Up to date':'Adjusting'):`${deliveredFPS.toFixed(1)} fps`} · ${meta.interaction?`${Math.round(meta.interaction.editToDraw)} ms response`:`${Math.round(meta.ms.total)} ms processing`}`);
+          $('.ff-render-state').title=`${meta.interaction?`Edit to canvas draw ${Math.round(meta.interaction.editToDraw)} ms (browser clock). `:''}Queue ${meta.ms.queue??'?'} ms; worker setup ${meta.ms.setup??'?'} ms; ${meta.encoder} SDR monitor stream. ${meta.memoryInput?'Direct float memory':'Legacy file input'}. Source ${meta.ms.source} ms; film ${meta.ms.film} ms; grade ${meta.ms.grade} ms; display ${meta.ms.display} ms; encode ${meta.ms.encode} ms. Exports use the original float frames.`;
           if(!video.paused&&Math.abs(video.currentTime-meta.frame/fps)>.15)video.currentTime=meta.frame/fps;
           updateTransport();
         },
         onError:error=>{setStatus(`Live preview: ${error.message}`);video.pause();},
         onEnded:()=>{video.pause();updateTransport();},
-      });
-      live.update({asset:asset.asset,recipe:clone(recipe),edge:previewEdge,
+      });}
+      live.update({editedAt:editStarted||performance.now(),interacting,asset:asset.asset,recipe:clone(recipe),edge:previewEdge,
         frame:Math.min(asset.info.frames-1,Math.max(0,liveFrame>=0?liveFrame:Math.round(video.currentTime*fps))),
         playing:!video.paused,compare:comparing,loop:video.loop,rate});
     }catch(error){setStatus(error.message);}
   }
   function schedulePreview(force=false){
     if(!options.preview||!asset||destroyed)return;
+    editStarted=performance.now();
     if(options.preview.live){
-      clearTimeout(historyTimer);historyTimer=setTimeout(()=>{if(!sameRecipe(history.at(-1),recipe)){history.push(clone(recipe));if(history.length>30)history.shift();action('undo').disabled=history.length<2;}},250);
+      lookController?.abort();clearTimeout(lookTimer);lookTimer=0;
       clearTimeout(previewTimer);previewTimer=setTimeout(updateLive,0);return;
     }
     const key=JSON.stringify([asset.asset,recipe,previewEdge]);
     if(!force&&key===previewKey)return;
-    if(key!==previewKey){clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(historyTimer);historyTimer=setTimeout(()=>{if(!history.length||!sameRecipe(history.at(-1),recipe)){history.push(clone(recipe));if(history.length>30)history.shift();action('undo').disabled=history.length<2;}},250);}
+    if(key!==previewKey){clipController?.abort();lookController?.abort();clearTimeout(lookTimer);}
     previewKey=key;if(force&&Math.abs(video.currentTime*fps-stillFrame)>=1){stillReady=false;showStill(false);}clearTimeout(previewTimer);previewController?.abort();previewController=new AbortController();
     const controller=previewController,snapshot=clone(recipe),currentAsset=asset;
     setStatus('Updating film preview…');
@@ -197,29 +221,33 @@ export function createStudio(options = {}) {
     },100);
   }
   async function scheduleLookPreviews(){
-    if(!options.preview||!asset||destroyed||(!video.paused&&options.preview.live))return;
+    if(!options.preview||!asset||destroyed||tab!=='looks'||interacting||(!video.paused&&options.preview.live))return;
     lookController?.abort();lookController=new AbortController();const controller=lookController,current=asset;
     // Sequential thumbnails keep video rendering responsive and memory bounded.
     for(const look of looks){
-      if($(`[data-look="${look.id}"] img`).dataset.asset===current.asset)continue;
+      const candidate=candidateLook(look.id),key=JSON.stringify([current.asset,candidate]);
+      if($(`[data-look="${look.id}"] img`).dataset.previewKey===key)continue;
       if(controller.signal.aborted||destroyed||(!video.paused&&options.preview.live))return;
       try{
-        const result=await options.preview.render(current.asset,lookRecipe(look.id,recipe.seed),{frame:0,edge:280,signal:controller.signal,channel:'looks'});
-        if(controller.signal.aborted)return;
-        const image=$(`[data-look="${look.id}"] img`);image.src=result.after;image.dataset.asset=current.asset;image.hidden=false;image.nextElementSibling.hidden=true;
+        const result=await options.preview.render(current.asset,candidate,{frame:0,edge:280,signal:controller.signal,channel:'looks'});
+        if(controller.signal.aborted||key!==JSON.stringify([asset?.asset,candidateLook(look.id)]))return;
+        const image=$(`[data-look="${look.id}"] img`);image.src=result.after;image.dataset.asset=current.asset;image.dataset.previewKey=key;image.hidden=false;image.nextElementSibling.hidden=true;
       }catch(error){if(error.name==='AbortError')return;$('.ff-thumbnail-note').textContent='Look previews unavailable: '+error.message;return;}
     }
     $('.ff-thumbnail-note').textContent=current.info.hdr?'Rendered from your HDR master.':'Rendered from the first frame of your video.';
   }
-  async function exportVideo(){
-    if(!asset||!options.preview){toast('Connect an available source first.');return;}
-    $('.ff-download').hidden=true;const target=action('export');exporting=true;target.disabled=true;const snapshot=clone(recipe);
+  async function exportVideo(trial=false){
+    if(!asset||!options.preview||exporting){toast('Connect an available source first.');return;}
+    $('.ff-download').hidden=true;const target=action(trial?'test-export':'export');exporting=true;action('export').disabled=true;action('test-export').disabled=true;action('cancel-export').hidden=false;const snapshot=clone(recipe);
+    exportController=new AbortController();const controller=exportController;
+    const start=trial?Math.min(asset.info.frames-1,Math.max(0,liveFrame>=0?liveFrame:Math.round(video.currentTime*fps))):0;
     try{
       options.onSave?.(snapshot,selectedLook);
-      const result=await options.preview.render(asset.asset,snapshot,{mode:'export',format:$('.ff-export-format').value,signal:abort.signal,channel:'export',onProgress:state=>target.textContent=`Export ${Math.round(state.progress*100)}%`});
-      const link=$('.ff-download');link.href=result.after;link.hidden=false;link.textContent='Download finished video ↗';toast('Full-resolution export ready.');
+      const result=await options.preview.render(asset.asset,snapshot,{mode:'export',format:$('.ff-export-format').value,signal:controller.signal,start,range:trial?'trial':'full',channel:'export',onProgress:state=>target.textContent=`Export ${Math.round(state.progress*100)}%`});
+      if(destroyed||controller.signal.aborted)return;
+      const link=$('.ff-download');link.href=result.after;link.hidden=false;link.textContent='Download finished video ↗';toast(trial?'Full-resolution test clip ready.':'Full-resolution export ready.');
     }catch(error){if(error.name!=='AbortError')toast(error.message);}
-    finally{exporting=false;target.disabled=!asset;target.textContent='Export video';}
+    finally{exporting=false;exportController=null;action('export').disabled=!asset;action('test-export').disabled=!asset;action('cancel-export').hidden=true;target.textContent=trial?'Test 5 seconds':'Export video';}
   }
   async function inspectFrame(){
     if(!asset||!options.preview||inspecting)return;
@@ -245,11 +273,12 @@ export function createStudio(options = {}) {
   for(const stage of ['finish','balance'])for(const [key,name,min,max,step,unit] of gradeSliders){
     const wrap=document.createElement('div');wrap.className='ff-grade-control';
     const prefix=stage==='balance'?'Input ':'';
-    wrap.innerHTML=`<label class="ff-slider"><span>${name}<output></output></span><input type="range" data-grade="${key}" data-grade-stage="${stage}" data-digits="2" data-unit="${unit}" min="${min}" max="${max}" step="${step}" aria-label="${prefix}Grade ${name}" title="${gradeHints[key]}"></label>${iconButton('reset-control',`Reset ${prefix.toLowerCase()}${name.toLowerCase()}`,'undo')}`;
+    wrap.innerHTML=`<div class="ff-slider"><span>${name}<output></output></span><input type="range" data-grade="${key}" data-grade-stage="${stage}" data-digits="2" data-unit="${unit}" min="${min}" max="${max}" step="${step}" aria-label="${prefix}Grade ${name}" title="${gradeHints[key]}"></div>${iconButton('reset-control',`Reset ${prefix.toLowerCase()}${name.toLowerCase()}`,'undo')}`;
     $(stage==='balance'?'.ff-grade-input':['highlights','shadows','vibrance'].includes(key)?'.ff-grade-extra':'.ff-grade-quick').append(wrap);
     const input=wrap.querySelector('input'),reset=wrap.querySelector('button');
     reset.dataset.gradeReset=key;reset.dataset.gradeStage=stage;
-    on(input,'input',event=>{recipe.grading[stage][key]=Number(event.target.value);updateRecipeUI();});
+    const apply=value=>{recipe.grading[stage][key]=value;updateRecipeUI();};
+    bindNumeric(input,apply);on(input,'input',event=>apply(Number(event.target.value)));
     on(reset,'click',()=>{recipe.grading[stage][key]=neutralGrade()[key];updateRecipeUI();});
   }
   const wheelNames=[['lift','Shadows'],['gamma','Midtones'],['gain','Highlights'],['offset','Overall']];
@@ -279,7 +308,7 @@ export function createStudio(options = {}) {
   function updateRecipeUI() {
     const look = looks.find(x=>x.id === selectedLook);
     $('.ff-look-title h1').textContent = look?.name || 'Custom recipe';
-    $('.ff-modified').hidden = !look || sameRecipe(recipe, lookRecipe(look.id));
+    $('.ff-modified').hidden = !look || sameRecipe(recipe, selectLook(recipe,look.id));
     $('.ff-recipe-summary').textContent = `${filmLabel()} · ${formats.find(x=>x[0]===recipe.format)?.[1] || recipe.format} · ${recipe.medium === 'screen' ? 'Digital' : recipe.medium.replace('vision-', '')}`;
     $$('.ff-look').forEach(el=>el.setAttribute('aria-pressed', String(el.dataset.look === selectedLook)));
     for (const [attribute, value] of [['film',recipe.stock],['format',recipe.format],['medium',recipe.medium]]) {
@@ -288,15 +317,17 @@ export function createStudio(options = {}) {
     $$('input[data-section]').forEach(input=> {input.value=recipe[input.dataset.section][input.dataset.key]; updateSlider(input);});
     $('[data-control="digitalReference"]').value = recipe.digitalReference;
     $('.ff-render-state').textContent = previewStatus || (renderedRecipe ? (sameRecipe(recipe,renderedRecipe)?'Rendered recipe · up to date':'Recipe changed · run workflow to update') : options.onRender ? 'Save your recipe, then run the workflow' : changed() ? 'Recipe edited · demo render unchanged' : rendered ? 'Existing render · interface preview' : 'Source playback');
-    action('reset').disabled = !selectedLook || sameRecipe(recipe, lookRecipe(selectedLook));
+    action('reset').disabled = !selectedLook || sameRecipe(recipe, selectLook(recipe,selectedLook));
     root.querySelectorAll('[data-grade]').forEach(input=>{input.value=recipe.grading[input.dataset.gradeStage][input.dataset.grade];updateSlider(input);});
     root.querySelectorAll('[data-grade-reset]').forEach(el=>el.disabled=recipe.grading[el.dataset.gradeStage][el.dataset.gradeReset]===neutralGrade()[el.dataset.gradeReset]);
     const inputEdited=JSON.stringify(recipe.grading.balance)!==JSON.stringify(neutralGrade());$('.ff-input-state').hidden=!inputEdited;action('reset-input').disabled=!inputEdited;
-    action('undo').disabled=history.length<2;updateWheels(); schedulePreview();
+    action('undo').disabled=history.length<2&&sameRecipe(recipe,history.at(-1).recipe)&&selectedLook===history.at(-1).lookId;
+    clearTimeout(historyTimer);if(!interacting)historyTimer=setTimeout(commitHistory,250);
+    editStarted=performance.now();updateWheels();schedulePreview();
   }
   function updateSlider(input) {
     const value = Number(input.value), digits = Number(input.dataset.digits || 0);
-    input.closest('.ff-slider').querySelector('output').textContent = `${value.toFixed(digits)}${input.dataset.unit || ''}`;
+    numericControls.get(input)?.sync();
     input.style.setProperty('--fill',`${100*(value-Number(input.min))/(Number(input.max)-Number(input.min))}%`);
   }
   const sliders = [
@@ -307,17 +338,20 @@ export function createStudio(options = {}) {
     ['texture','params','grain','Grain',0,2,.01,2,''],['texture','profile','halation','Halation',-6,6,.1,1,''],
   ];
   for (const [group, section, key, text, min, max, step, digits, unit] of sliders) {
-    const label = document.createElement('label'); label.className='ff-slider';
+    const label = document.createElement('div'); label.className='ff-slider';
     label.innerHTML = `<span>${text}<output></output></span><input type="range" data-section="${section}" data-key="${key}" data-digits="${digits}" data-unit="${unit}" min="${min}" max="${max}" step="${step}" aria-label="${text}">`;
     $(`.ff-${group}-sliders`).append(label);
     const input=label.querySelector('input');
-    on(input,'input',()=>{recipe[section][key]=Number(input.value);updateRecipeUI();});
+    const apply=value=>{recipe[section][key]=value;updateRecipeUI();};
+    bindNumeric(input,apply);on(input,'input',()=>apply(Number(input.value)));
   }
   on($('[data-control="digitalReference"]'),'change',event=>{recipe.digitalReference=event.target.value;updateRecipeUI();});
   function setTab(next) {
     tab=next; $('.ff-looks-panel').hidden=tab!=='looks'; $('.ff-customize-panel').hidden=tab!=='customize'; $('.ff-grade-panel').hidden=tab!=='grade';
     action('tab-looks').setAttribute('aria-pressed',String(tab==='looks'));action('tab-customize').setAttribute('aria-pressed',String(tab==='customize'));action('tab-grade').setAttribute('aria-pressed',String(tab==='grade'));
     $('.ff-panel-content').scrollTop=0;
+    lookController?.abort();clearTimeout(lookTimer);lookTimer=0;
+    if(tab==='looks'&&video.paused)lookTimer=setTimeout(()=>{lookTimer=0;scheduleLookPreviews();},500);
   }
   function setZoom(value) {
     zoom=Math.min(4,Math.max(1,value)); if(zoom===1)pan={x:0,y:0};
@@ -386,7 +420,7 @@ export function createStudio(options = {}) {
     $('.ff-scrubber').disabled=!current;
     if(current&&!pendingHDR)makeThumbnails(current);
     if(asset&&Boolean(asset.info.hdr)!==(mode==='hdr')){asset=null;previewController?.abort();clipController?.abort();lookController?.abort();clearTimeout(previewTimer);stillReady=false;showStill(false);}
-    action('export').disabled=!asset||exporting;action('inspect').disabled=!asset||!options.preview||inspecting;schedulePreview();
+    action('export').disabled=!asset||exporting;action('test-export').disabled=!asset||exporting;action('inspect').disabled=!asset||!options.preview||inspecting;schedulePreview();
   }
   async function makeThumbnails(url) {
     const token=++thumbnailToken;
@@ -427,7 +461,7 @@ export function createStudio(options = {}) {
   });
   on(root,'click',async event=>{
     const target=event.target.closest('button');if(!target||target.disabled)return;
-    if(target.dataset.look){selectedLook=target.dataset.look;recipe=lookRecipe(selectedLook,recipe.seed);updateRecipeUI();return;}
+    if(target.dataset.look){commitHistory();selectedLook=target.dataset.look;recipe=candidateLook(selectedLook);updateRecipeUI();commitHistory();return;}
     if(target.dataset.film){recipe.stock=target.dataset.film;updateRecipeUI();return;}
     if(target.dataset.format){recipe.format=target.dataset.format;updateRecipeUI();return;}
     if(target.dataset.medium){recipe.medium=target.dataset.medium;updateRecipeUI();return;}
@@ -449,10 +483,12 @@ export function createStudio(options = {}) {
       case 'tab-grade':setTab('grade');break;
       case 'reset-grade':recipe.grading.finish=neutralGrade();updateRecipeUI();break;
       case 'reset-input':recipe.grading.balance=neutralGrade();updateRecipeUI();break;
-      case 'undo':if(history.length>1){clearTimeout(historyTimer);history.pop();recipe=clone(history.at(-1));previewKey='';updateRecipeUI();}break;
+      case 'undo':commitHistory();if(history.length>1){history.pop();const previous=history.at(-1);recipe=clone(previous.recipe);selectedLook=previous.lookId;previewKey='';updateRecipeUI();}break;
       case 'export':await exportVideo();break;
+      case 'test-export':await exportVideo(true);break;
+      case 'cancel-export':exportController?.abort();break;
       case 'inspect':await inspectFrame();break;
-      case 'reset':if(selectedLook){recipe=lookRecipe(selectedLook,recipe.seed);updateRecipeUI();}break;
+      case 'reset':if(selectedLook){commitHistory();recipe=selectLook(recipe,selectedLook);updateRecipeUI();commitHistory();}break;
       case 'open-file':$('.ff-file-input').click();break;
       case 'render':
         if(!options.onRender){toast('Connect this Studio to a ComfyUI workflow to render.');break;}
@@ -481,8 +517,8 @@ export function createStudio(options = {}) {
     action('render').querySelector('span').textContent='Run workflow';
     $('.ff-sidebar-footer p').textContent=options.preview?'Edits preview automatically. Export uses full-resolution source.':'Renders on your ComfyUI server. The finished preview returns here.';
   }
-  return {element:root,getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,pause(){video.pause();before.pause();},
+  return {element:root,getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,getPreviewMetrics:()=>live?.getMetrics?.()||[],pause(){video.pause();before.pause();},
     setAsset(value){if(asset?.asset===value?.asset)return;closeLive();clearInspection();asset=value;$$('.ff-look-image img').forEach(img=>{if(img.dataset.asset!==value?.asset){img.hidden=true;img.nextElementSibling.hidden=false;}});hasHDR=hasHDR||Boolean(value?.info?.hdr);fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=value?.info?.hdr?'hdr':'original';setSource(sourceMode);},
     updateMedia(media){const newSource=media.source!==sources.original;sources={original:media.source||'',hdr:media.enhanced||''};hasHDR=Boolean(media.hasHDR);if(newSource){closeLive();clearInspection();previewController?.abort();clipController?.abort();lookController?.abort();asset=null;stillReady=false;showStill(false);rendered='';previewKey='';previewClipKey='';}if(media.rendered){rendered=media.rendered;renderedRecipe=media.renderedRecipe||null;}label=media.label||label;setSource(sourceMode==='hdr'&&hasHDR?'hdr':'original');},
-    dispose(){destroyed=true;closeLive();inspectionController?.abort();previewController?.abort();clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
+    dispose(){destroyed=true;exportController?.abort();closeLive();inspectionController?.abort();previewController?.abort();clipController?.abort();lookController?.abort();clearTimeout(lookTimer);clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
 }

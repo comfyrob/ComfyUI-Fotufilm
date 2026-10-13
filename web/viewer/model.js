@@ -37,6 +37,14 @@ export function lookRecipe(id, seed = 1) {
     digitalReference: look.reference || recipe.digitalReference, params: {...recipe.params, ...look.params}, profile: {...recipe.profile, ...look.profile},
     grading:{balance:{...neutralGrade(),...look.grading?.balance},finish:{...neutralGrade(),...look.grading?.finish}} };
 }
+// Source correction belongs to the clip. The optional finish override replaces
+// the entire after-film grade; it does not add/multiply preset wheel vectors.
+export function selectLook(current, id, keepFinish = false) {
+  const next = lookRecipe(id, current.seed);
+  next.grading.balance = clone(current.grading.balance);
+  if (keepFinish) next.grading.finish = clone(current.grading.finish);
+  return next;
+}
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const filmName = id => films.find(f => f[0] === id)?.[1] || id;
 export function sameRecipe(a, b) {

@@ -1,4 +1,9 @@
-# Continuous Studio preview (0.3.0)
+# Continuous Studio preview
+
+For the 0.3.1 numeric controls, correction-preserving looks, coalesced gesture
+transport, timing measurements and short exports, see
+[Studio interaction upgrade](interaction-upgrade.md). The underlying native
+engine and float-memory ABI below remain pinned to v1.11.
 
 Studio is a ComfyUI DOM widget: inline with Nodes 2.0 or opened in a larger
 ComfyUI dialog. It does not launch a separate application or inference server.

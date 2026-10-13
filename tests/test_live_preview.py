@@ -132,3 +132,27 @@ class PrefetchTests(unittest.TestCase):
         finally:cursor.close()
 
 if __name__=='__main__':unittest.main()
+
+class GestureParityTests(unittest.TestCase):
+    def test_gesture_uses_h264_then_final_png_matches_exact_display_and_reuses_film(self):
+        import io, struct
+        from PIL import Image
+        from film_finish.live_preview import LiveRenderer
+        from film_finish.finish_pipeline import Source
+        from film_finish.preview_runtime import PreviewRuntime
+        recipe=json.loads((ROOT/'examples/vision250d-clean.recipe.json').read_text())
+        source=Source(ROOT/'tests/codec-smoke.mp4')
+        with tempfile.TemporaryDirectory() as directory:
+            runtime=PreviewRuntime(Path(directory)/'cache','gesture-test')
+            renderer=LiveRenderer({'source':source,'fingerprint':'gesture'},160,runtime)
+            def unpack(packet):
+                n=struct.unpack('!I',packet[:4])[0];return json.loads(packet[4:4+n]),packet[4+n:]
+            try:
+                _,before=unpack(renderer.render(recipe,0,True,1,still=True))
+                meta,_=unpack(renderer.render(recipe,0,True,2,still=False,queue_ms=2,setup_ms=3))
+                self.assertNotEqual(meta['encoder'],'png');self.assertEqual(meta['frame'],0)
+                self.assertEqual(meta['ms']['queue'],2);self.assertEqual(meta['ms']['setup'],3)
+                final,data=unpack(renderer.render(recipe,0,True,3,still=True))
+                self.assertEqual(final['encoder'],'png')
+                np.testing.assert_array_equal(np.asarray(Image.open(io.BytesIO(before))),np.asarray(Image.open(io.BytesIO(data))))
+            finally:renderer.close();runtime.close()

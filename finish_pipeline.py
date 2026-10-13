@@ -192,7 +192,9 @@ def render_clip_steps(source,recipe,destination,format_id='mp4',edge=None,start=
             scale=min(1,(edge or max(source.info['width'],source.info['height']))/max(source.info['width'],source.info['height']))
             width,height=[max(1,round(source.info[k]*scale)) for k in ('width','height')]
             width+=width%2;height+=height%2
-            total=min(count or source.info['frames'],source.info['frames']-start)
+            if type(start) is not int or not 0<=start<source.info['frames']:raise ValueError('Invalid export start frame.')
+            if count is not None and (type(count) is not int or count<1):raise ValueError('Invalid export frame count.')
+            total=min(count if count is not None else source.info['frames'],source.info['frames']-start)
             audio=source.audio_path(directory)
             matrix='bt2020' if hdr else 'bt709'
             args=[imageio_ffmpeg.get_ffmpeg_exe(),'-hide_banner','-loglevel','error','-y',

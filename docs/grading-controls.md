@@ -34,3 +34,8 @@ existing corrections, wheel keyboard/reset behavior, still selection, seeking
 and the stream client. The Nodes 2.0 dialog was checked at 1280px and 320px widths,
 including a keyboard wheel edit and horizontal overflow checks. Screen-reader
 speech output, RTL and 200% text resizing were not tested in this pass.
+
+The subsequent interaction upgrade adds numeric entry, moves grain/halation
+beside everyday color, and preserves input corrections during look changes.
+See [interaction-upgrade.md](interaction-upgrade.md) for current selection,
+transport and test-export behavior.
