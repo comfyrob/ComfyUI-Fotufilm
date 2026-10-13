@@ -34,7 +34,7 @@ export function createStudio(options = {}) {
   let renderedRecipe = options.renderedRecipe || null;
   let label = options.label || 'Your video';
   let fps = Math.max(1, options.fps || 24);
-  let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=1280, gradeStage='balance', stillReady=false;
+  let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=1280, stillReady=false;
   let activeRenderedSource=sourceMode, previewClipKey='', pendingClipKey='', lookController=null, clipController=null, stillFrame=-1, swappingMedia=false;
   let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), lookTimer=0, exporting=false, inspecting=false, inspectionController=null;
   let live=null, liveFrame=-1, liveStatsStart=0, liveFrames=0, deliveredFPS=0;
@@ -90,10 +90,25 @@ export function createStudio(options = {}) {
             <details class="ff-section"><summary>Film exposure & print response</summary><div class="ff-light-sliders"></div></details>
             <div class="ff-section"><div class="ff-section-heading"><h2>Texture</h2></div><div class="ff-texture-sliders"></div><p class="ff-help">Texture is rendered by Fotufilm on the server.</p></div>
           </section>
-          <section class="ff-grade-panel" hidden><div class="ff-grade-stage" role="group" aria-label="Grading stage">${button('grade-balance','Balance input','','aria-pressed="true"')}${button('grade-finish','Finish look','','aria-pressed="false"')}</div><p class="ff-help ff-grade-help">Gear grading before Fotufilm. Changes the light exposing the film.</p><div class="ff-grade-sliders"></div><details><summary>Color wheels</summary><div class="ff-wheels"></div></details>${button('reset-grade','Reset this grade')}<details class="ff-scopes"><summary>Preview histogram</summary><canvas width="256" height="88" aria-label="SDR display histogram"></canvas><p class="ff-help">SDR display values after finishing. Not an HDR luminance scope.</p></details></section>
-          <details class="ff-inspection"><summary>Inspect full-resolution frame</summary><p class="ff-help">Save the frame at the playhead with its full float range. Open the EXR in ComfyUI Assets to inspect exposure and pixel values.</p><label>Processing stage <select class="ff-inspection-stage" aria-label="Frame inspection stage"><option value="source">Source · before grading</option><option value="balance">After balance grade</option><option value="film">After Fotufilm</option><option value="finish" selected>After finishing grade</option></select></label>${button('inspect','Save EXR frame','','title="One frame at source resolution. Does not run LTX or render the video."')}<p class="ff-inspection-status" role="status"></p><a class="ff-inspection-download" hidden download>Download float EXR</a><p class="ff-help">Viewing exposure in core’s inspector does not change your grade. Its display is SDR.</p></details>
+          <section class="ff-grade-panel" hidden>
+            <p class="ff-intro">Adjust the finished look. Your film choice stays in place.</p>
+            <div class="ff-grade-sliders ff-grade-quick"></div>
+            <section class="ff-wheel-panel" aria-label="Color wheels">
+              <div class="ff-section-heading"><h2>Color wheels</h2><span>Tint the dark, middle or bright areas.</span></div>
+              <div class="ff-wheels ff-wheels-primary"></div>
+              <p class="ff-help">Move toward a color to add it. Center is neutral.</p>
+            </section>
+            <details class="ff-grade-more"><summary>More color controls</summary><div class="ff-grade-extra"></div><div class="ff-wheels ff-wheel-overall"></div></details>
+            ${button('reset-grade','Reset color adjustments','','class="ff-reset-section" title="Reset adjustments after film. Keeps your look, film settings and input corrections."')}
+            <details class="ff-input-correction"><summary>Advanced: before-film correction <span class="ff-input-state" hidden>Edited</span></summary><p class="ff-help">Fix source exposure or a color cast before film is applied. This changes how the film responds; the controls above adjust the finished result.</p><div class="ff-grade-input"></div><details><summary>Before-film color wheels</summary><div class="ff-wheels ff-wheels-input"></div></details>${button('reset-input','Reset input corrections','','class="ff-reset-section"')}</details>
+          </section>
+          <details class="ff-tools"><summary>Advanced tools</summary>
+            <details class="ff-scopes"><summary>Preview histogram</summary><canvas width="256" height="88" aria-label="SDR display histogram"></canvas><p class="ff-help">Brightness in the SDR preview. Does not measure the full HDR range.</p></details>
+            <details class="ff-inspection"><summary>Save a still · EXR</summary><p class="ff-help">Save the current frame at original resolution. HDR values are preserved when your source contains them.</p><label>Frame version to save <select class="ff-inspection-stage" aria-label="Frame version to save"><option value="finish" selected>Final look · recommended</option><option value="source">Original · no adjustments</option><option value="balance">Corrected input · before film</option><option value="film">Film only · before color adjustments</option></select></label><p class="ff-inspection-hint ff-help">Includes film and all color adjustments. This choice only affects the saved still.</p>${button('inspect','Save EXR frame','','title="Save one frame. Does not change playback, export settings or run LTX."')}<p class="ff-inspection-status" role="status"></p><a class="ff-inspection-download" hidden download>Download EXR still</a><p class="ff-help">Open the EXR in ComfyUI Assets to inspect HDR values. Its viewer displays SDR.</p></details>
+            ${button('render', 'Run connected workflow', 'play', 'class="ff-render-button"')}
+          </details>
         </div>
-        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div>${button('render', 'Run connected workflow', 'play', 'class="ff-render-button"')}<div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
+        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div><div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
       </aside>
     </div><div class="ff-toast" role="status" hidden></div><input class="ff-file-input" type="file" accept="video/mp4,video/webm,video/quicktime" hidden>`;
   const $ = s => root.querySelector(s);
@@ -223,26 +238,43 @@ export function createStudio(options = {}) {
   }
   function clearInspection(){inspectionController?.abort();inspectionController=null;inspecting=false;$('.ff-inspection-download').hidden=true;$('.ff-inspection-status').textContent='';action('inspect').textContent='Save EXR frame';}
   on($('.ff-quality'),'change',event=>{previewEdge=Number(event.target.value);schedulePreview(true);});
+  const inspectionHints={finish:'Includes film and all color adjustments.',source:'Uses the active source with no grading or film.',balance:'Includes input corrections, without film or final color adjustments.',film:'Includes input corrections and film, without final color adjustments.'};
+  on($('.ff-inspection-stage'),'change',event=>{$('.ff-inspection-hint').textContent=`${inspectionHints[event.target.value]} This choice only affects the saved still.`;});
   const gradeSliders=[['exposure','Exposure',-5,5,.05,' EV'],['temperature','Warmth',-1,1,.01,''],['tint','Tint',-1,1,.01,''],['contrast','Contrast',.25,2,.01,''],['highlights','Highlights',-2,2,.02,''],['shadows','Shadows',-2,2,.02,''],['saturation','Saturation',0,2,.01,''],['vibrance','Vibrance',-1,1,.01,'']];
-  for(const [key,name,min,max,step,unit] of gradeSliders){
-    const label=document.createElement('label');label.className='ff-slider';label.innerHTML=`<span>${name}<output></output></span><input type="range" data-grade="${key}" data-digits="2" data-unit="${unit}" min="${min}" max="${max}" step="${step}" aria-label="Grade ${name}">`;$('.ff-grade-sliders').append(label);
-    on(label.querySelector('input'),'input',event=>{recipe.grading[gradeStage][key]=Number(event.target.value);updateRecipeUI();});
+  const gradeHints={exposure:'Make the image brighter or darker.',temperature:'Shift toward cooler blue or warmer amber.',tint:'Shift between green and magenta.',contrast:'Adjust the separation between dark and bright areas.',highlights:'Adjust bright areas.',shadows:'Adjust dark areas.',saturation:'Adjust overall color intensity.',vibrance:'Adjust color intensity while protecting already saturated colors.'};
+  for(const stage of ['finish','balance'])for(const [key,name,min,max,step,unit] of gradeSliders){
+    const wrap=document.createElement('div');wrap.className='ff-grade-control';
+    const prefix=stage==='balance'?'Input ':'';
+    wrap.innerHTML=`<label class="ff-slider"><span>${name}<output></output></span><input type="range" data-grade="${key}" data-grade-stage="${stage}" data-digits="2" data-unit="${unit}" min="${min}" max="${max}" step="${step}" aria-label="${prefix}Grade ${name}" title="${gradeHints[key]}"></label>${iconButton('reset-control',`Reset ${prefix.toLowerCase()}${name.toLowerCase()}`,'undo')}`;
+    $(stage==='balance'?'.ff-grade-input':['highlights','shadows','vibrance'].includes(key)?'.ff-grade-extra':'.ff-grade-quick').append(wrap);
+    const input=wrap.querySelector('input'),reset=wrap.querySelector('button');
+    reset.dataset.gradeReset=key;reset.dataset.gradeStage=stage;
+    on(input,'input',event=>{recipe.grading[stage][key]=Number(event.target.value);updateRecipeUI();});
+    on(reset,'click',()=>{recipe.grading[stage][key]=neutralGrade()[key];updateRecipeUI();});
   }
-  const wheelNames=[['lift','Shadows'],['gamma','Midtones'],['gain','Highlights'],['offset','Offset']];
-  for(const [key,name] of wheelNames){
-    const wrap=document.createElement('div');wrap.className='ff-wheel-wrap';wrap.dataset.wheel=key;
-    wrap.innerHTML=`<span>${name}</span><div class="ff-wheel" role="slider" tabindex="0" aria-label="${name} color wheel" aria-valuemin="-1" aria-valuemax="1"><i></i></div><label class="ff-wheel-master">Master <input type="range" aria-label="${name} master" min="${['gamma','gain'].includes(key)?.1:-.3}" max="${['gamma','gain'].includes(key)?2:.3}" step=".005"></label>`;
-    $('.ff-wheels').append(wrap);const wheel=wrap.querySelector('.ff-wheel'),master=wrap.querySelector('input');
-    const fromPoint=(x,y)=>{const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}const rgb=[x,-.5*x-.866*y,-.5*x+.866*y],mean=Number(master.value),amount=['gamma','gain'].includes(key)?.35:.12;recipe.grading[gradeStage][key]=rgb.map(v=>Math.max(key==='gamma'?.1:key==='gain'?0:-1,Math.min(key==='gamma'||key==='gain'?4:1,mean+v*amount)));updateRecipeUI();};
+  const wheelNames=[['lift','Shadows'],['gamma','Midtones'],['gain','Highlights'],['offset','Overall']];
+  for(const stage of ['finish','balance'])for(const [key,name] of wheelNames){
+    const wrap=document.createElement('div');wrap.className='ff-wheel-wrap';wrap.dataset.wheel=key;wrap.dataset.gradeStage=stage;
+    const prefix=stage==='balance'?'Input ':'';
+    wrap.innerHTML=`<span class="ff-wheel-name">${name}</span><div class="ff-wheel" role="slider" tabindex="0" aria-label="${prefix}${name} color wheel" aria-valuemin="-1" aria-valuemax="1" title="Click or drag to tint. Arrow keys fine-tune; Home centers the tint."><i></i></div><span class="ff-wheel-state"></span><label class="ff-wheel-master">Brightness <output></output><input type="range" aria-label="${prefix}${name} brightness" min="${['gamma','gain'].includes(key)?.1:-.3}" max="${['gamma','gain'].includes(key)?2:.3}" step=".005"></label>${button('reset-wheel','Reset','','aria-label="Reset '+prefix.toLowerCase()+name.toLowerCase()+' wheel"')}`;
+    $(stage==='balance'?'.ff-wheels-input':key==='offset'?'.ff-wheel-overall':'.ff-wheels-primary').append(wrap);const wheel=wrap.querySelector('.ff-wheel'),master=wrap.querySelector('input'),reset=wrap.querySelector('button');
+    const fromPoint=(x,y)=>{const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}const rgb=[x,-.5*x-.866*y,-.5*x+.866*y],vector=recipe.grading[stage][key],mean=vector.reduce((a,b)=>a+b)/3,amount=['gamma','gain'].includes(key)?.35:.12;recipe.grading[stage][key]=rgb.map(v=>Math.max(key==='gamma'?.1:key==='gain'?0:-1,Math.min(key==='gamma'||key==='gain'?4:1,mean+v*amount)));updateRecipeUI();};
     const move=event=>{const box=wheel.getBoundingClientRect();fromPoint((event.clientX-box.left)/box.width*2-1,(event.clientY-box.top)/box.height*2-1);};
     on(wheel,'pointerdown',event=>{event.preventDefault();event.stopPropagation();wheel.setPointerCapture(event.pointerId);move(event);});
     on(wheel,'pointermove',event=>{if(wheel.hasPointerCapture(event.pointerId)){event.stopPropagation();move(event);}});
     on(wheel,'pointerup',event=>{if(wheel.hasPointerCapture(event.pointerId))wheel.releasePointerCapture(event.pointerId);});
     on(wheel,'keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home'].includes(event.key))return;event.preventDefault();event.stopPropagation();const dot=wheel.querySelector('i'),x=Number(dot.dataset.x||0),y=Number(dot.dataset.y||0);fromPoint(event.key==='Home'?0:x+(event.key==='ArrowLeft'?-.05:event.key==='ArrowRight'?.05:0),event.key==='Home'?0:y+(event.key==='ArrowUp'?-.05:event.key==='ArrowDown'?.05:0));});
-    on(master,'input',()=>{const vector=recipe.grading[gradeStage][key],mean=vector.reduce((a,b)=>a+b)/3;recipe.grading[gradeStage][key]=vector.map(v=>Math.max(key==='gamma'?.1:key==='gain'?0:-1,Math.min(['gamma','gain'].includes(key)?4:1,v-mean+Number(master.value))));updateRecipeUI();});
+    on(wheel,'dblclick',()=>fromPoint(0,0));
+    on(master,'input',()=>{const vector=recipe.grading[stage][key],mean=vector.reduce((a,b)=>a+b)/3;recipe.grading[stage][key]=vector.map(v=>Math.max(key==='gamma'?.1:key==='gain'?0:-1,Math.min(['gamma','gain'].includes(key)?4:1,v-mean+Number(master.value))));updateRecipeUI();});
+    on(reset,'click',()=>{recipe.grading[stage][key]=neutralGrade()[key];updateRecipeUI();});
   }
   function updateWheels(){
-    for(const [key] of wheelNames){const wrap=$(`[data-wheel="${key}"]`);if(!wrap)continue;const vector=recipe.grading[gradeStage][key],mean=vector.reduce((a,b)=>a+b)/3,amount=['gamma','gain'].includes(key)?.35:.12,x=(vector[0]-mean)/amount,y=(vector[2]-vector[1])/(1.732*amount),dot=wrap.querySelector('i');dot.dataset.x=x;dot.dataset.y=y;dot.style.left=`${50+Math.max(-1,Math.min(1,x))*46}%`;dot.style.top=`${50+Math.max(-1,Math.min(1,y))*46}%`;wrap.querySelector('input').value=mean;wrap.querySelector('[role=slider]').setAttribute('aria-valuetext',vector.map(v=>v.toFixed(3)).join(', '));}
+    for(const wrap of $$('[data-wheel]')){const key=wrap.dataset.wheel,vector=recipe.grading[wrap.dataset.gradeStage][key],mean=vector.reduce((a,b)=>a+b)/3,amount=['gamma','gain'].includes(key)?.35:.12,x=(vector[0]-mean)/amount,y=(vector[2]-vector[1])/(1.732*amount),dot=wrap.querySelector('i'),radius=Math.hypot(x,y),scale=radius>1?1/radius:1;
+      dot.dataset.x=x;dot.dataset.y=y;dot.style.left=`${50+x*scale*46}%`;dot.style.top=`${50+y*scale*46}%`;
+      wrap.querySelector('input').value=mean;wrap.querySelector('output').textContent=mean.toFixed(2);wrap.querySelector('.ff-wheel-state').textContent=radius<.005?'Neutral tint':'Tinted';
+      const wheel=wrap.querySelector('[role=slider]');wheel.setAttribute('aria-valuenow',String(Math.max(-1,Math.min(1,x))));wheel.setAttribute('aria-valuetext',`Red ${vector[0].toFixed(3)}, green ${vector[1].toFixed(3)}, blue ${vector[2].toFixed(3)}. Arrow keys adjust tint; Home centers.`);
+      wrap.querySelector('button').disabled=vector.every((v,i)=>Math.abs(v-neutralGrade()[key][i])<1e-6);
+    }
   }
   function updateRecipeUI() {
     const look = looks.find(x=>x.id === selectedLook);
@@ -257,7 +289,9 @@ export function createStudio(options = {}) {
     $('[data-control="digitalReference"]').value = recipe.digitalReference;
     $('.ff-render-state').textContent = previewStatus || (renderedRecipe ? (sameRecipe(recipe,renderedRecipe)?'Rendered recipe · up to date':'Recipe changed · run workflow to update') : options.onRender ? 'Save your recipe, then run the workflow' : changed() ? 'Recipe edited · demo render unchanged' : rendered ? 'Existing render · interface preview' : 'Source playback');
     action('reset').disabled = !selectedLook || sameRecipe(recipe, lookRecipe(selectedLook));
-    root.querySelectorAll('[data-grade]').forEach(input=>{input.value=recipe.grading[gradeStage][input.dataset.grade];updateSlider(input);});
+    root.querySelectorAll('[data-grade]').forEach(input=>{input.value=recipe.grading[input.dataset.gradeStage][input.dataset.grade];updateSlider(input);});
+    root.querySelectorAll('[data-grade-reset]').forEach(el=>el.disabled=recipe.grading[el.dataset.gradeStage][el.dataset.gradeReset]===neutralGrade()[el.dataset.gradeReset]);
+    const inputEdited=JSON.stringify(recipe.grading.balance)!==JSON.stringify(neutralGrade());$('.ff-input-state').hidden=!inputEdited;action('reset-input').disabled=!inputEdited;
     action('undo').disabled=history.length<2;updateWheels(); schedulePreview();
   }
   function updateSlider(input) {
@@ -413,8 +447,8 @@ export function createStudio(options = {}) {
       case 'tab-looks':setTab('looks');break;
       case 'tab-customize':setTab('customize');break;
       case 'tab-grade':setTab('grade');break;
-      case 'grade-balance':case 'grade-finish':gradeStage=target.dataset.action.slice(6);action('grade-balance').setAttribute('aria-pressed',String(gradeStage==='balance'));action('grade-finish').setAttribute('aria-pressed',String(gradeStage==='finish'));$('.ff-grade-help').textContent=gradeStage==='balance'?'Gear grading before Fotufilm. Changes the light exposing the film.':'Gear grading after Fotufilm. Refines the developed look.';updateRecipeUI();break;
-      case 'reset-grade':recipe.grading[gradeStage]=neutralGrade();updateRecipeUI();break;
+      case 'reset-grade':recipe.grading.finish=neutralGrade();updateRecipeUI();break;
+      case 'reset-input':recipe.grading.balance=neutralGrade();updateRecipeUI();break;
       case 'undo':if(history.length>1){clearTimeout(historyTimer);history.pop();recipe=clone(history.at(-1));previewKey='';updateRecipeUI();}break;
       case 'export':await exportVideo();break;
       case 'inspect':await inspectFrame();break;

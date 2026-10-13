@@ -10,6 +10,7 @@ globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.windo
 for (const name of ['load','pause']) dom.window.HTMLMediaElement.prototype[name] = function() {};
 const { createStudio } = await import('../web/viewer/studio.js');
 const { createPreviewClient } = await import('../web/viewer/preview-client.js');
+const { baseRecipe } = await import('../web/viewer/model.js');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const asset = { asset:'first', info:{width:3840,height:2160,frames:240,fps:24,hdr:true} };
 
@@ -68,5 +69,38 @@ test('playing timeline seeks update the stream without exporting or queueing the
   await new Promise(resolve=>setTimeout(resolve,10));
   assert.equal(updates.at(-1).frame,48);assert.equal(updates.at(-1).playing,true);
   assert.equal(renders,0);assert.equal(queues,0);
+  studio.dispose();
+});
+
+test('everyday adjustments and visible wheels edit the finish without altering existing input corrections', () => {
+  const recipe=baseRecipe();recipe.grading.balance.exposure=1.25;
+  const studio=createStudio({recipe});document.body.append(studio.element);
+  const root=studio.element;root.querySelector('[data-action="tab-grade"]').click();
+  assert.equal(root.querySelector('.ff-input-correction').open,false);
+  assert.equal(root.querySelector('.ff-input-state').hidden,false);
+  const slider=root.querySelector('.ff-grade-quick [data-grade="exposure"]');
+  slider.value='.5';slider.dispatchEvent(new dom.window.Event('input'));
+  assert.equal(studio.getRecipe().grading.finish.exposure,.5);
+  assert.equal(studio.getRecipe().grading.balance.exposure,1.25);
+  assert.equal(root.querySelectorAll('.ff-wheels-primary .ff-wheel').length,3);
+  const wheel=root.querySelector('.ff-wheels-primary [data-wheel="lift"] [role="slider"]');
+  assert.equal(wheel.closest('details'),null);
+  wheel.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
+  assert.ok(studio.getRecipe().grading.finish.lift[0]>0);
+  assert.deepEqual(studio.getRecipe().grading.balance.lift,[0,0,0]);
+  root.querySelector('[aria-label="Reset shadows wheel"]').click();
+  assert.deepEqual(studio.getRecipe().grading.finish.lift,[0,0,0]);
+  root.querySelector('[data-action="reset-grade"]').click();
+  assert.equal(studio.getRecipe().grading.finish.exposure,0);
+  assert.equal(studio.getRecipe().grading.balance.exposure,1.25);
+  studio.dispose();
+});
+
+test('the still-version selector explains itself without changing the recipe', () => {
+  const studio=createStudio({recipe:baseRecipe()});document.body.append(studio.element);
+  const initial=studio.getRecipe(),select=studio.element.querySelector('.ff-inspection-stage');
+  assert.equal(select.value,'finish');select.value='source';select.dispatchEvent(new dom.window.Event('change'));
+  assert.match(studio.element.querySelector('.ff-inspection-hint').textContent,/only affects the saved still/);
+  assert.deepEqual(studio.getRecipe(),initial);
   studio.dispose();
 });
