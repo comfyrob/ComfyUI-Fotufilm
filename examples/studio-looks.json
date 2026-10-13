@@ -1,0 +1,2306 @@
+[
+  {
+    "id": "clean",
+    "name": "Clean cinema",
+    "description": "Quiet color, fine texture",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision250d",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.55,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "warm",
+    "name": "Warm portrait",
+    "description": "Soft light, warm skin",
+    "family": "Portrait",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "portra400",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 7000,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.65,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 1.7,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "night",
+    "name": "Night lights",
+    "description": "Tungsten, luminous highlights",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision500t",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 5900,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 0.95,
+        "vibrance": 0,
+        "grain": 0.55,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0.6,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "eight",
+    "name": "Super 8 diary",
+    "description": "Warm color, visible grain",
+    "family": "Vintage",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "gold200",
+      "format": "super8",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 7100,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 0.9,
+        "vibrance": 0,
+        "grain": 0.85,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": -0.5,
+        "screenGrade": 1.65,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "slide",
+    "name": "Daylight slide",
+    "description": "Ektachrome, open highlights",
+    "family": "Slide",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "ektachromee100",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "reference-exposure",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.55,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "silver",
+    "name": "Silver screen",
+    "description": "Silver grain, bold contrast",
+    "family": "B&W",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "trix400",
+      "format": "16mm",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.8,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2.5,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "golden",
+    "name": "Golden hour",
+    "description": "Sunlit warmth, soft contrast",
+    "family": "Vintage",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "gold200",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 7400,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.65,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0.2
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 1.8,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "print",
+    "name": "Cinema print",
+    "description": "250D negative, 2383 print",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision250d",
+      "format": "super35",
+      "medium": "vision-2383",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1.05,
+        "vibrance": 0,
+        "grain": 0.6,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "pastel",
+    "name": "Pastel portrait",
+    "description": "Gentle contrast, soft color",
+    "family": "Portrait",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "portra400",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.35,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 0.87,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.9,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "neon",
+    "name": "Neon nights",
+    "description": "Cool shadows, luminous color",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "cinestill800t",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.55,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0.7,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1.12,
+          "vibrance": 0,
+          "lift": [
+            -0.008,
+            0,
+            0.014
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "editorial",
+    "name": "Cool editorial",
+    "description": "Clean detail, restrained color",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision250d",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.35,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": -0.08,
+          "tint": 0,
+          "contrast": 1.08,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.85,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "noir",
+    "name": "Midnight noir",
+    "description": "Deep blacks, silver texture",
+    "family": "B&W",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "trix400",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.55,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2.5,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1.12,
+          "pivot": 0.18,
+          "shadows": -0.15,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "chrome-road",
+    "name": "Chrome road",
+    "description": "Muted color, crisp shadows",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision250d",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.4,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": -0.03,
+          "tint": 0,
+          "contrast": 1.12,
+          "pivot": 0.18,
+          "shadows": -0.05,
+          "highlights": 0,
+          "saturation": 0.72,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "silver-print",
+    "name": "Silver print",
+    "description": "Bleach-inspired, dense contrast",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision500t",
+      "format": "super35",
+      "medium": "vision-2383",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.65,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1.18,
+          "pivot": 0.18,
+          "shadows": -0.1,
+          "highlights": 0,
+          "saturation": 0.48,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "tungsten-print",
+    "name": "Tungsten print",
+    "description": "Evening color, release print",
+    "family": "Cinema",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision500t",
+      "format": "super35",
+      "medium": "vision-2393",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.5,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0.04,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.92,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "soft-window",
+    "name": "Window light",
+    "description": "Soft contrast, fine texture",
+    "family": "Portrait",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "portra400",
+      "format": "120",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.25,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 1.8,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0.15,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 0.92,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.94,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "rose-portrait",
+    "name": "Rose portrait",
+    "description": "Warm mids, a hint of rose",
+    "family": "Portrait",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "portra400",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.4,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0.06,
+          "tint": 0.025,
+          "contrast": 0.96,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.92,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "vivid-daylight",
+    "name": "Vivid daylight",
+    "description": "Rich color, crisp slide contrast",
+    "family": "Slide",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "ektachromee100",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "reference-exposure",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.35,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1.08,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1.16,
+          "vibrance": 0.12,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "cool-slide",
+    "name": "Blue hour slide",
+    "description": "Cool color, open highlights",
+    "family": "Slide",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "ektachromee100",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "reference-exposure",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.35,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": -0.08,
+          "tint": 0,
+          "contrast": 0.96,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.92,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "amber-slide",
+    "name": "Amber slide",
+    "description": "Warm color, gentle contrast",
+    "family": "Slide",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "ektachromee100",
+      "format": "super35",
+      "medium": "screen",
+      "digitalReference": "reference-exposure",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.45,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0.09,
+          "tint": 0,
+          "contrast": 0.94,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1.04,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "faded-travel",
+    "name": "Faded travel",
+    "description": "Lifted blacks, faded warmth",
+    "family": "Vintage",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "gold200",
+      "format": "35mm",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.75,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 1.6,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0.04,
+          "tint": 0,
+          "contrast": 0.9,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.8,
+          "vibrance": 0,
+          "lift": [
+            0.012,
+            0.01,
+            0.008
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "everyday-35",
+    "name": "Everyday 35",
+    "description": "Punchy color, familiar grain",
+    "family": "Vintage",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "gold200",
+      "format": "35mm",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.7,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1.04,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1.08,
+          "vibrance": 0.08,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "documentary-16",
+    "name": "Documentary 16",
+    "description": "Restrained color, tactile grain",
+    "family": "Vintage",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "vision250d",
+      "format": "16mm",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.85,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 2,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": -0.025,
+          "tint": 0,
+          "contrast": 1.04,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 0.82,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "soft-silver",
+    "name": "Soft silver",
+    "description": "Gentle monochrome, fine grain",
+    "family": "B&W",
+    "recipe": {
+      "version": 2,
+      "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+      "stock": "trix400",
+      "format": "120",
+      "medium": "screen",
+      "digitalReference": "graded-print",
+      "seed": 1,
+      "params": {
+        "ev": 0,
+        "temperature": 6504,
+        "tint": 0,
+        "highlights": 0,
+        "shadows": 0,
+        "saturation": 1,
+        "vibrance": 0,
+        "grain": 0.3,
+        "gradeShadowsWarmth": 0,
+        "gradeHighlightsWarmth": 0
+      },
+      "profile": {
+        "halation": 0,
+        "screenGrade": 1.65,
+        "screenExposure": 0
+      },
+      "grading": {
+        "balance": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 1,
+          "pivot": 0.18,
+          "shadows": 0,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        },
+        "finish": {
+          "exposure": 0,
+          "temperature": 0,
+          "tint": 0,
+          "contrast": 0.92,
+          "pivot": 0.18,
+          "shadows": 0.08,
+          "highlights": 0,
+          "saturation": 1,
+          "vibrance": 0,
+          "lift": [
+            0,
+            0,
+            0
+          ],
+          "gamma": [
+            1,
+            1,
+            1
+          ],
+          "gain": [
+            1,
+            1,
+            1
+          ],
+          "offset": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  }
+]

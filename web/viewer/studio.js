@@ -1,4 +1,4 @@
-import { baseRecipe, clone, films, formats, looks, lookRecipe, matchLook, filmName, sameRecipe, timecode, neutralGrade, normalizeRecipe, selectLook } from './model.js';
+import { baseRecipe, clone, films, formats, looks, lookGroups, looksInGroup, lookRecipe, matchLook, filmName, sameRecipe, timecode, neutralGrade, normalizeRecipe, selectLook } from './model.js';
 import {attachNumericControl} from './numeric-control.js';
 import {createLookPreviews} from './look-previews.js';
 
@@ -30,6 +30,7 @@ export function createStudio(options = {}) {
   let startingRecipe = clone(recipe);
   let selectedLook = looks.some(look=>look.id===options.lookId) ? options.lookId : matchLook(recipe)?.id || null;
   let startingLook = selectedLook;
+  let lookGroup = 'all';
   let tab = 'looks', sourceMode = options.asset?.info?.hdr ? 'hdr' : 'original', comparing = false, zoom = 1, rate = 1;
   let sources = {original: options.source || '', hdr: options.enhanced || ''};
   let rendered = options.rendered || '';
@@ -84,7 +85,7 @@ export function createStudio(options = {}) {
         <div class="ff-current"><span>Current look</span><div class="ff-look-title"><h1></h1><span class="ff-modified" hidden>Modified</span>${iconButton('reset', 'Reset this look', 'undo')}</div><p class="ff-recipe-summary"></p></div>
         <nav class="ff-tabs" aria-label="Recipe editor">${button('tab-looks', 'Looks', '', 'aria-pressed="true"')}${button('tab-customize', 'Film', '', 'aria-pressed="false"')}${button('tab-grade','Color & texture','','aria-pressed="false"')}</nav>
         <div class="ff-panel-content">
-          <section class="ff-looks-panel"><p class="ff-intro">One look. Film, color and texture together.</p><label class="ff-keep-color" title="Keep your current finishing color adjustments when choosing a look."><input type="checkbox" class="ff-keep-finish"> Keep my color settings</label><div class="ff-look-grid">${looks.map(look=>`<button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><div class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">Connect a video</span><span class="ff-look-check">${icon('check')}</span></div><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button>`).join('')}</div><div class="ff-thumbnail-status"><p class="ff-thumbnail-note" role="status">First-frame previews</p>${button('retry-looks','Retry previews','','hidden')}</div></section>
+          <section class="ff-looks-panel"><p class="ff-intro">One look. Film, color and texture together.</p><label class="ff-keep-color" title="Keep your current finishing color adjustments when choosing a look."><input type="checkbox" class="ff-keep-finish"> Keep my color settings</label><div class="ff-look-filters" role="group" aria-label="Filter looks">${lookGroups.map(([id,label])=>`<button type="button" data-look-group="${id}" aria-pressed="${id===lookGroup}">${label}</button>`).join('')}</div><div class="ff-look-grid">${looks.map(look=>`<button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><div class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">Connect a video</span><span class="ff-look-check">${icon('check')}</span></div><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button>`).join('')}</div><div class="ff-thumbnail-status"><p class="ff-thumbnail-note" role="status">First-frame previews</p>${button('retry-looks','Retry previews','','hidden')}</div></section>
           <section class="ff-customize-panel" hidden>
             <div class="ff-section"><div class="ff-section-heading"><h2>Film</h2><span>The foundation of your look</span></div><div class="ff-films">${films.map(([id,name,note])=>`<button type="button" data-film="${id}" aria-pressed="false"><span>${name}</span><small>${note}</small>${icon('check')}</button>`).join('')}</div>
               <h3>Film size</h3><div class="ff-chips">${formats.map(([id,name])=>`<button type="button" data-format="${id}" aria-pressed="false">${name}</button>`).join('')}</div><p class="ff-help">Changes the scale of grain and halation, not the crop.</p>
@@ -168,7 +169,7 @@ export function createStudio(options = {}) {
   function candidateLook(id){return selectLook(recipe,id,$('.ff-keep-finish').checked);}
   function scheduleLookPreviews(force=false){
     if(!options.preview||!asset||destroyed||tab!=='looks'||interacting)return;
-    lookPreviews.update(asset.asset,looks.map(look=>({id:look.id,recipe:candidateLook(look.id)})),force);
+    lookPreviews.update(asset.asset,looksInGroup(lookGroup).map(look=>({id:look.id,recipe:candidateLook(look.id)})),force);
   }
   function updateLive(){
     if(!asset||destroyed)return;
@@ -433,6 +434,13 @@ export function createStudio(options = {}) {
   });
   on(root,'click',async event=>{
     const target=event.target.closest('button');if(!target||target.disabled)return;
+    if(target.dataset.lookGroup){
+      lookGroup=target.dataset.lookGroup;
+      const visible=new Set(looksInGroup(lookGroup).map(look=>look.id));
+      $$('[data-look]').forEach(card=>{card.hidden=!visible.has(card.dataset.look);});
+      $$('[data-look-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lookGroup===lookGroup)));
+      scheduleLookPreviews();return;
+    }
     if(target.dataset.look){commitHistory();selectedLook=target.dataset.look;recipe=candidateLook(selectedLook);updateRecipeUI();commitHistory();return;}
     if(target.dataset.film){recipe.stock=target.dataset.film;updateRecipeUI();return;}
     if(target.dataset.format){recipe.format=target.dataset.format;updateRecipeUI();return;}

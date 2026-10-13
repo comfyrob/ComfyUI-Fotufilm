@@ -122,6 +122,30 @@ test('look browsing preserves input corrections, explicit color override and und
   studio.dispose();
 });
 
+test('filtering looks leaves the current recipe intact and requests only the visible family', async () => {
+  const requests=[];
+  const studio=createStudio({recipe:baseRecipe(),asset,preview:{render:async(id,recipe,options)=>{
+    if(options.channel==='looks')requests.push(recipe.stock);
+    throw new Error('Offline preview fixture');
+  }}});
+  document.body.append(studio.element);const root=studio.element;
+  const before=studio.getRecipe();
+  root.querySelector('[data-look-group="mono"]').click();
+  assert.deepEqual(studio.getRecipe(),before);
+  assert.equal(root.querySelector('[data-look-group="mono"]').getAttribute('aria-pressed'),'true');
+  const visible=[...root.querySelectorAll('[data-look]')].filter(card=>!card.hidden);
+  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver']);
+  await new Promise(resolve=>setTimeout(resolve,180));
+  assert.deepEqual(requests,['trix400','trix400','trix400']);
+  root.querySelector('[data-look="soft-silver"]').click();
+  root.querySelector('[data-look-group="cinema"]').click();
+  assert.equal(studio.getLookId(),'soft-silver');
+  root.querySelector('[data-look-group="all"]').click();
+  assert.equal(root.querySelector('[data-look="soft-silver"]').hidden,false);
+  assert.equal(root.querySelector('[data-look="soft-silver"]').getAttribute('aria-pressed'),'true');
+  studio.dispose();
+});
+
 test('trial export uses current source frame, original resolution and can be cancelled', async () => {
   const calls=[];let finish;
   const studio=createStudio({asset,preview:{render:(_a,_r,options)=>{calls.push(options);return new Promise(resolve=>finish=resolve);}}});
