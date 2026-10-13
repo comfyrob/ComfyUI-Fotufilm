@@ -18,7 +18,7 @@ The original VIDEO also feeds Studio and Save HDR Master. Studio passes the type
 
 `float source → Gear balance (ACEScct/AP1) → Fotufilm → Gear finish → display/delivery conversion`
 
-Input spaces are explicit; the adapter avoids Gear's Rec.709 input clamp. Neutral grading preserves the float buffer exactly. PNG previews and H.264 playback are SDR display conversions. A display histogram is labelled SDR; it is not an HDR luminance scope. HLG export remains limited to direct-view slide film / Reference exposure.
+Input spaces are explicit; the adapter avoids Gear's Rec.709 input clamp. Neutral grading preserves the float buffer exactly. PNG previews and H.264 playback are SDR display conversions. Studio has no histogram; inspect full-range stills on a separate output branch. HLG export remains limited to direct-view slide film / Reference exposure.
 
 The Gear math is pinned and attributed in `vendor/`. Final video exports and frame-batch nodes use the same `Finisher` as interactive previews, including deterministic per-frame grain seeds. Preview downsampling can change texture, so it is not a substitute for full-resolution grain inspection.
 
@@ -34,7 +34,7 @@ Look thumbnails are native renders of the active source's first frame, generated
 
 ## Export and graph execution
 
-Studio Export uses the active Original/HDR source and the current recipe, at source resolution. The graph's Run workflow follows its actual wired inputs and may execute uncached LTX stages. These are separate explicit actions. Return to Studio correlates a downstream render with an opaque execution token and exact recipe, so there is no graph cycle.
+Studio Export uses the active Original/HDR source and the current recipe, at source resolution. ComfyUI's Run action follows its actual wired inputs and may execute uncached LTX stages. These are separate explicit actions. Return to Studio correlates a downstream render with an opaque execution token and exact recipe, so there is no graph cycle.
 
 Automatic previews render the first 20 seconds at a selected 960px or 1440px long edge, never upscaling. Exports render the complete source, with audio and frame rate retained. Source clips are treated as constant-frame-rate sequences; VFR conforming and calibrated browser HDR output are not part of this release.
 

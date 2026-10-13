@@ -14,31 +14,13 @@ const { baseRecipe } = await import('../web/viewer/model.js');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const asset = { asset:'first', info:{width:3840,height:2160,frames:240,fps:24,hdr:true} };
 
-test('inspection captures playhead, stage and full recipe without queueing a graph or a clip', async () => {
-  const calls=[];let queues=0;
-  const studio=createStudio({asset,preview:{render:async (...args)=>{calls.push(args);return {exr:'/view?filename=frame.exr',assetId:'id'};}},onRender:()=>queues++});
-  document.body.append(studio.element);
-  studio.element.querySelector('video').currentTime=3;
-  studio.element.querySelector('.ff-inspection-stage').value='balance';
-  const button=studio.element.querySelector('[data-action="inspect"]');button.click();
-  assert.equal(button.disabled,true);await flush();
-  assert.equal(calls.length,1);assert.equal(calls[0][0],'first');
-  assert.equal(calls[0][2].mode,'inspect');assert.equal(calls[0][2].frame,72);assert.equal(calls[0][2].stage,'balance');
-  assert.equal(calls[0][2].edge,undefined);assert.equal(queues,0);
-  assert.equal(studio.element.querySelector('.ff-inspection-download').hidden,false);
-  assert.match(studio.element.querySelector('.ff-inspection-status').textContent,/frame 72/);
-  studio.dispose();
-});
-
-test('switching source cancels inspection and cannot expose the previous source result', async () => {
-  let finish,signal;
-  const studio=createStudio({asset,preview:{render:(_a,_r,options)=>{signal=options.signal;return new Promise(resolve=>finish=resolve);}}});
-  document.body.append(studio.element);
-  studio.element.querySelector('[data-action="inspect"]').click();
-  studio.setAsset({...asset,asset:'second'});assert.equal(signal.aborted,true);
-  finish({exr:'/view?filename=old.exr'});await flush();
-  assert.equal(studio.element.querySelector('.ff-inspection-download').hidden,true);
-  assert.equal(studio.element.querySelector('[data-action="inspect"]').disabled,false);
+test('Studio leaves still saving, scopes and source correction to graph nodes', () => {
+  const studio=createStudio({recipe:baseRecipe()});document.body.append(studio.element);
+  assert.equal(studio.element.querySelector('.ff-inspection'),null);
+  assert.equal(studio.element.querySelector('.ff-scopes'),null);
+  assert.equal(studio.element.querySelector('[data-grade-stage="balance"]'),null);
+  assert.equal(studio.element.querySelector('[data-action="render"]'),null);
+  assert.equal(studio.element.querySelector('.ff-legacy-balance').hidden,true);
   studio.dispose();
 });
 
@@ -76,8 +58,7 @@ test('everyday adjustments and visible wheels edit the finish without altering e
   const recipe=baseRecipe();recipe.grading.balance.exposure=1.25;
   const studio=createStudio({recipe});document.body.append(studio.element);
   const root=studio.element;root.querySelector('[data-action="tab-grade"]').click();
-  assert.equal(root.querySelector('.ff-input-correction').open,false);
-  assert.equal(root.querySelector('.ff-input-state').hidden,false);
+  assert.equal(root.querySelector('.ff-legacy-balance').hidden,false);
   const slider=root.querySelector('.ff-grade-quick [data-grade="exposure"]');
   slider.value='.5';slider.dispatchEvent(new dom.window.Event('input'));
   assert.equal(studio.getRecipe().grading.finish.exposure,.5);
@@ -96,12 +77,14 @@ test('everyday adjustments and visible wheels edit the finish without altering e
   studio.dispose();
 });
 
-test('the still-version selector explains itself without changing the recipe', () => {
-  const studio=createStudio({recipe:baseRecipe()});document.body.append(studio.element);
-  const initial=studio.getRecipe(),select=studio.element.querySelector('.ff-inspection-stage');
-  assert.equal(select.value,'finish');select.value='source';select.dispatchEvent(new dom.window.Event('change'));
-  assert.match(studio.element.querySelector('.ff-inspection-hint').textContent,/only affects the saved still/);
-  assert.deepEqual(studio.getRecipe(),initial);
+test('legacy input correction stays intact until explicitly cleared and undo restores it', () => {
+  const recipe=baseRecipe();recipe.grading.balance.exposure=1.25;
+  const studio=createStudio({recipe});document.body.append(studio.element);
+  studio.element.querySelector('[data-action="reset-input"]').click();
+  assert.equal(studio.getRecipe().grading.balance.exposure,0);
+  assert.equal(studio.element.querySelector('.ff-legacy-balance').hidden,true);
+  studio.element.querySelector('[data-action="undo"]').click();
+  assert.equal(studio.getRecipe().grading.balance.exposure,1.25);
   studio.dispose();
 });
 

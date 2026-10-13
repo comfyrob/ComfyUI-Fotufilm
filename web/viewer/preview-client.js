@@ -1,7 +1,7 @@
 import {openLivePreview} from './live-client.js';
 /** Cancellable native Fotufilm previews; never submits the workflow graph. */
 export function createPreviewClient(api) {
-  const client=crypto.randomUUID();let closed=false;const jobs=new Set();
+  const client=crypto.randomUUID();let closed=false;const jobs=new Set(),lookCache=new Map();
   async function request(path,data,signal){
     const response=await api.fetchApi(`/fotufilm/${path}`,data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal}:{signal});
     const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||'Preview request failed.');return result;
@@ -9,6 +9,7 @@ export function createPreviewClient(api) {
   const fileURL=file=>file?api.apiURL(`/view?${new URLSearchParams({filename:file.filename,subfolder:file.subfolder||'',type:file.type})}`):'';
   async function cancel(job){try{await request(`jobs/${job}/cancel`,{});}catch{}}
   return {
+    lookCache,
     fileURL,
     live:callbacks=>openLivePreview(api.apiURL('/fotufilm/live'),callbacks),
     register:file=>request('source',file),
@@ -28,6 +29,6 @@ export function createPreviewClient(api) {
         throw new DOMException('Cancelled','AbortError');
       }finally{jobs.delete(job);signal?.removeEventListener('abort',abort);if(closed||signal?.aborted)await cancel(job);}
     },
-    dispose(){closed=true;for(const job of jobs)cancel(job);jobs.clear();}
+    dispose(){closed=true;for(const job of jobs)cancel(job);jobs.clear();lookCache.clear();}
   };
 }

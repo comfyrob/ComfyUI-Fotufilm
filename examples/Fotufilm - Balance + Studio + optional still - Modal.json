@@ -1,0 +1,2262 @@
+{
+  "id": "942c0f11-f4c0-474d-a541-b74ab329ca6b",
+  "revision": 0,
+  "last_node_id": 10,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadVideo",
+      "pos": [
+        50,
+        120
+      ],
+      "size": [
+        340,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            1,
+            2,
+            5,
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "FotufilmStudio",
+      "pos": [
+        900,
+        120
+      ],
+      "size": [
+        1100,
+        850
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        },
+        {
+          "name": "rendered_preview",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "enhanced_source",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 4,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "source_video",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "links": [
+            9,
+            15
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "links": [
+            12
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "links": [],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmStudio",
+        "fotufilm_studio_expanded": true
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
+        24,
+        "linear-acescg"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "3c968edd-9020-4fc0-b40d-c94fa71ec85a",
+      "pos": [
+        460,
+        120
+      ],
+      "size": [
+        340,
+        240
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "hdr_linear",
+          "type": "IMAGE",
+          "links": [
+            6,
+            13
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "links": [
+            4,
+            7,
+            11
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {},
+      "widgets_values": [],
+      "title": "LTX 2.5 \u00b7 Reconstruct HDR"
+    },
+    {
+      "id": 4,
+      "type": "FilmFinishSaveHDRMaster",
+      "pos": [
+        460,
+        500
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        },
+        {
+          "name": "source",
+          "type": "VIDEO",
+          "link": 5
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 7,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FilmFinishSaveHDRMaster",
+        "film_finish_source_id": "6003"
+      },
+      "widgets_values": [
+        24,
+        "linear-acescg",
+        "film-finish-hdr/master",
+        false
+      ],
+      "title": "Optional \u00b7 Archive HDR source"
+    },
+    {
+      "id": 5,
+      "type": "FotufilmDevelopVideo",
+      "pos": [
+        2080,
+        120
+      ],
+      "size": [
+        370,
+        340
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 8
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 9,
+          "widget": {
+            "name": "recipe_json"
+          }
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 10
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 11,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "resolved_recipe",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmDevelopVideo"
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
+        1,
+        "fixed",
+        "mp4",
+        24,
+        "linear-acescg",
+        false
+      ],
+      "title": "Optional \u00b7 Export finished video"
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [
+        460,
+        850
+      ],
+      "size": [
+        430,
+        450
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "Optional source correction \u2192 Studio \u2192 optional saving.\n\nBalance Source uses Gear math on linear HDR frames. Queue after changing it; LTX reuses its cached output when its inputs are unchanged. Studio Before/after compares this corrected input with the finished film look.\n\nStudio color wheels adjust the finished look live. There is no histogram or still-save panel inside Studio.\n\nSave final still is disabled by default. Set its frame, enable, then queue to save one full-resolution EXR with Studio\u2019s recipe. No MP4 round trip.\n\nOlder recipes can already contain an input correction. Studio labels these; clear it there before moving the same settings into Balance Source to avoid applying it twice.\n\nArchive keeps the uncorrected HDR source. The monitor remains SDR."
+      ],
+      "title": "Direct HDR \u2192 Studio"
+    },
+    {
+      "id": 9,
+      "type": "FotufilmBalanceFrames",
+      "pos": [
+        860,
+        1020
+      ],
+      "size": [
+        340,
+        410
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_acescg",
+          "type": "IMAGE",
+          "links": [
+            3,
+            10,
+            14
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "color_space",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmBalanceFrames"
+      },
+      "widgets_values": [
+        "linear ACEScg",
+        true,
+        0,
+        0,
+        0,
+        1,
+        0.18,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 10,
+      "type": "FotufilmInspectFrame",
+      "title": "Optional \u00b7 Save final still",
+      "pos": [
+        2100,
+        560
+      ],
+      "size": [
+        350,
+        310
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 15,
+          "widget": {
+            "name": "recipe_json"
+          }
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_rec2020",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "color_space",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmInspectFrame"
+      },
+      "widgets_values": [
+        0,
+        "finish",
+        "{\n  \"version\": 2,\n  \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\",\n  \"stock\": \"vision250d\",\n  \"format\": \"super35\",\n  \"medium\": \"screen\",\n  \"digitalReference\": \"graded-print\",\n  \"seed\": 1,\n  \"params\": {\n    \"ev\": 0,\n    \"temperature\": 6504,\n    \"tint\": 0,\n    \"highlights\": 0,\n    \"shadows\": 0,\n    \"saturation\": 1,\n    \"vibrance\": 0,\n    \"grain\": 0.55,\n    \"gradeShadowsWarmth\": 0,\n    \"gradeHighlightsWarmth\": 0\n  },\n  \"profile\": {\n    \"halation\": 0,\n    \"screenGrade\": 2,\n    \"screenExposure\": 0\n  }\n}\n",
+        "linear ACEScg",
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "VIDEO"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "VIDEO"
+    ],
+    [
+      3,
+      9,
+      0,
+      2,
+      4,
+      "IMAGE"
+    ],
+    [
+      4,
+      3,
+      2,
+      2,
+      5,
+      "FLOAT"
+    ],
+    [
+      5,
+      1,
+      0,
+      4,
+      1,
+      "VIDEO"
+    ],
+    [
+      6,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      3,
+      2,
+      4,
+      2,
+      "FLOAT"
+    ],
+    [
+      8,
+      1,
+      0,
+      5,
+      0,
+      "VIDEO"
+    ],
+    [
+      9,
+      2,
+      1,
+      5,
+      1,
+      "STRING"
+    ],
+    [
+      10,
+      9,
+      0,
+      5,
+      2,
+      "IMAGE"
+    ],
+    [
+      11,
+      3,
+      2,
+      5,
+      3,
+      "FLOAT"
+    ],
+    [
+      12,
+      2,
+      2,
+      5,
+      4,
+      "FOTUFILM_STUDIO"
+    ],
+    [
+      13,
+      3,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      9,
+      0,
+      10,
+      1,
+      "IMAGE"
+    ],
+    [
+      15,
+      2,
+      1,
+      10,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        30,
+        20
+      ]
+    }
+  },
+  "version": 0.4,
+  "definitions": {
+    "subgraphs": [
+      {
+        "id": "3c968edd-9020-4fc0-b40d-c94fa71ec85a",
+        "version": 1,
+        "state": {
+          "lastGroupId": 0,
+          "lastNodeId": 4206132015266245,
+          "lastLinkId": 44,
+          "lastRerouteId": 0
+        },
+        "revision": 0,
+        "config": {},
+        "name": "LTX 2.5 \u00b7 Reconstruct HDR",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -300,
+            380,
+            180,
+            100
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            4800,
+            380,
+            180,
+            160
+          ]
+        },
+        "inputs": [
+          {
+            "id": "7e174e43-fb64-5cf9-9034-0d4c68854feb",
+            "name": "video",
+            "type": "VIDEO",
+            "linkIds": [
+              40
+            ],
+            "pos": {
+              "0": -100,
+              "1": 400
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "id": "99115778-7815-5889-b566-9fade641a1cc",
+            "name": "hdr_linear",
+            "type": "IMAGE",
+            "linkIds": [
+              41
+            ],
+            "pos": {
+              "0": 4820,
+              "1": 400
+            }
+          },
+          {
+            "id": "3bc616ba-19dc-5e04-bc6f-8e4fa4028584",
+            "name": "audio",
+            "type": "AUDIO",
+            "linkIds": [
+              42
+            ],
+            "pos": {
+              "0": 4820,
+              "1": 424
+            }
+          },
+          {
+            "id": "74d7894b-c190-513c-9f8f-e29475b271d7",
+            "name": "fps",
+            "type": "FLOAT",
+            "linkIds": [
+              43
+            ],
+            "pos": {
+              "0": 4820,
+              "1": 448
+            }
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 208137318105326,
+            "type": "RandomNoise",
+            "pos": [
+              2760,
+              360
+            ],
+            "size": [
+              385,
+              140
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "NOISE",
+                "type": "NOISE",
+                "links": [
+                  4
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "RandomNoise",
+              "film_finish_source_id": "4832"
+            },
+            "widgets_values": [
+              42,
+              "fixed"
+            ]
+          },
+          {
+            "id": 4206132015266245,
+            "type": "CFGGuider",
+            "pos": [
+              2760,
+              630
+            ],
+            "size": [
+              385,
+              180
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "model",
+                "type": "MODEL",
+                "link": 1
+              },
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 2
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 3
+              }
+            ],
+            "outputs": [
+              {
+                "name": "GUIDER",
+                "type": "GUIDER",
+                "links": [
+                  5
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "CFGGuider",
+              "film_finish_source_id": "4828"
+            },
+            "widgets_values": [
+              1
+            ]
+          },
+          {
+            "id": 2629243286156502,
+            "type": "KSamplerSelect",
+            "pos": [
+              3200,
+              360
+            ],
+            "size": [
+              385,
+              110
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "SAMPLER",
+                "type": "SAMPLER",
+                "links": [
+                  6
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "KSamplerSelect",
+              "film_finish_source_id": "4831"
+            },
+            "widgets_values": [
+              "euler"
+            ]
+          },
+          {
+            "id": 3361341782889222,
+            "type": "ManualSigmas",
+            "pos": [
+              3200,
+              630
+            ],
+            "size": [
+              400,
+              240
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "SIGMAS",
+                "type": "SIGMAS",
+                "links": [
+                  7
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ManualSigmas",
+              "film_finish_source_id": "4984"
+            },
+            "widgets_values": [
+              "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+            ]
+          },
+          {
+            "id": 3068795723739698,
+            "type": "SamplerCustomAdvanced",
+            "pos": [
+              2760,
+              1010
+            ],
+            "size": [
+              420,
+              225
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "noise",
+                "type": "NOISE",
+                "link": 4
+              },
+              {
+                "name": "guider",
+                "type": "GUIDER",
+                "link": 5
+              },
+              {
+                "name": "sampler",
+                "type": "SAMPLER",
+                "link": 6
+              },
+              {
+                "name": "sigmas",
+                "type": "SIGMAS",
+                "link": 7
+              },
+              {
+                "name": "latent_image",
+                "type": "LATENT",
+                "link": 8
+              }
+            ],
+            "outputs": [
+              {
+                "name": "output",
+                "type": "LATENT",
+                "links": [
+                  9
+                ]
+              },
+              {
+                "name": "denoised_output",
+                "type": "LATENT",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "SamplerCustomAdvanced",
+              "film_finish_source_id": "4829"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 663292463568756,
+            "type": "LTXVSeparateAVLatent",
+            "pos": [
+              3780,
+              360
+            ],
+            "size": [
+              420,
+              110
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "av_latent",
+                "type": "LATENT",
+                "link": 9
+              }
+            ],
+            "outputs": [
+              {
+                "name": "video_latent",
+                "type": "LATENT",
+                "links": [
+                  12
+                ]
+              },
+              {
+                "name": "audio_latent",
+                "type": "LATENT",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVSeparateAVLatent",
+              "film_finish_source_id": "4845"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 1681716081761363,
+            "type": "LTXVCropGuides",
+            "pos": [
+              4260,
+              360
+            ],
+            "size": [
+              420,
+              155
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 10
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 11
+              },
+              {
+                "name": "latent",
+                "type": "LATENT",
+                "link": 12
+              }
+            ],
+            "outputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": []
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": []
+              },
+              {
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  13
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVCropGuides",
+              "film_finish_source_id": "5000"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 507579890429115,
+            "type": "VAEDecodeTiled",
+            "pos": [
+              3780,
+              640
+            ],
+            "size": [
+              420,
+              280
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "samples",
+                "type": "LATENT",
+                "link": 13
+              },
+              {
+                "name": "vae",
+                "type": "VAE",
+                "link": 14
+              }
+            ],
+            "outputs": [
+              {
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  16
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAEDecodeTiled",
+              "film_finish_source_id": "5538"
+            },
+            "widgets_values": [
+              512,
+              64,
+              128,
+              32
+            ]
+          },
+          {
+            "id": 1303878523339175,
+            "type": "VAELoader",
+            "pos": [
+              570,
+              960
+            ],
+            "size": [
+              460,
+              135
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  35
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAELoader",
+              "film_finish_source_id": "5600"
+            },
+            "widgets_values": [
+              "ltx-2.5-audio-vae-bf16.safetensors"
+            ]
+          },
+          {
+            "id": 1662421446783234,
+            "type": "VAELoader",
+            "pos": [
+              570,
+              650
+            ],
+            "size": [
+              460,
+              135
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  21
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAELoader",
+              "film_finish_source_id": "5601"
+            },
+            "widgets_values": [
+              "ltx-2.5-video-vae-bf16.safetensors"
+            ]
+          },
+          {
+            "id": 2625548805057373,
+            "type": "UNETLoader",
+            "pos": [
+              570,
+              360
+            ],
+            "size": [
+              460,
+              165
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "MODEL",
+                "type": "MODEL",
+                "links": [
+                  15
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "UNETLoader",
+              "film_finish_source_id": "5602"
+            },
+            "widgets_values": [
+              "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+              "default"
+            ]
+          },
+          {
+            "id": 2305924178829848,
+            "type": "LTXICLoRALoaderModelOnly",
+            "pos": [
+              1070,
+              360
+            ],
+            "size": [
+              460,
+              190
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "model",
+                "type": "MODEL",
+                "link": 15
+              }
+            ],
+            "outputs": [
+              {
+                "name": "model",
+                "type": "MODEL",
+                "links": [
+                  1
+                ]
+              },
+              {
+                "name": "latent_downscale_factor",
+                "type": "FLOAT",
+                "links": [
+                  32
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXICLoRALoaderModelOnly",
+              "film_finish_source_id": "5606"
+            },
+            "widgets_values": [
+              "ltx25/ltx-2.5-22b-ic-lora-sdr-to-hdr-1.0.safetensors",
+              1
+            ]
+          },
+          {
+            "id": 1885835605168275,
+            "type": "LTXVLoadConditioning",
+            "pos": [
+              1070,
+              960
+            ],
+            "size": [
+              460,
+              165
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "CONDITIONING",
+                "type": "CONDITIONING",
+                "links": [
+                  17,
+                  18
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVLoadConditioning",
+              "film_finish_source_id": "9020"
+            },
+            "widgets_values": [
+              "ltx-2.5-22b-ic-lora-sdr-to-hdr-scene-emb.safetensors",
+              "cpu"
+            ]
+          },
+          {
+            "id": 2873915308447822,
+            "type": "LTXVHDRDecodePostprocess",
+            "pos": [
+              4260,
+              640
+            ],
+            "size": [
+              420,
+              360
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "image",
+                "type": "IMAGE",
+                "link": 16
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "IMAGE",
+                "links": []
+              },
+              {
+                "name": "",
+                "type": "IMAGE",
+                "links": [
+                  38
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVHDRDecodePostprocess",
+              "film_finish_source_id": "9012"
+            },
+            "widgets_values": [
+              "acescct",
+              0,
+              false,
+              "acescg",
+              "output/hdr_exr",
+              "frame",
+              true
+            ]
+          },
+          {
+            "id": 3856135713214468,
+            "type": "LTXVConditioning",
+            "pos": [
+              2180,
+              610
+            ],
+            "size": [
+              410,
+              165
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 17
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 18
+              },
+              {
+                "name": "frame_rate",
+                "type": "FLOAT",
+                "link": 19,
+                "grow_id": 1695175862083764,
+                "widget": {
+                  "name": "frame_rate"
+                }
+              }
+            ],
+            "outputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": [
+                  27
+                ]
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": [
+                  28
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVConditioning",
+              "film_finish_source_id": "9021"
+            },
+            "widgets_values": [
+              25.0
+            ]
+          },
+          {
+            "id": 2429231254440455,
+            "type": "GetVideoComponents",
+            "pos": [
+              30,
+              730
+            ],
+            "size": [
+              390,
+              150
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "video",
+                "type": "VIDEO",
+                "link": 40
+              }
+            ],
+            "outputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "links": [
+                  20,
+                  39
+                ]
+              },
+              {
+                "name": "audio",
+                "type": "AUDIO",
+                "links": [
+                  42
+                ]
+              },
+              {
+                "name": "fps",
+                "type": "FLOAT",
+                "links": [
+                  34,
+                  36,
+                  43
+                ]
+              },
+              {
+                "name": "bit_depth",
+                "type": "COMBO",
+                "links": []
+              },
+              {
+                "name": "color_space",
+                "type": "COMBO",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "GetVideoComponents",
+              "film_finish_source_id": "5105"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 815182055714869,
+            "type": "LTXVSDRToHDRWorkingSpace",
+            "pos": [
+              1690,
+              360
+            ],
+            "size": [
+              410,
+              140
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "image",
+                "type": "IMAGE",
+                "link": 20
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "IMAGE",
+                "links": [
+                  37
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVSDRToHDRWorkingSpace",
+              "film_finish_source_id": "9010"
+            },
+            "widgets_values": [
+              "srgb_gamma"
+            ]
+          },
+          {
+            "id": 3042515946266279,
+            "type": "LTXVVAEForceFloat32",
+            "pos": [
+              1070,
+              650
+            ],
+            "size": [
+              460,
+              100
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "vae",
+                "type": "VAE",
+                "link": 21
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "VAE",
+                "links": [
+                  14,
+                  29
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVVAEForceFloat32",
+              "film_finish_source_id": "9011"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 2035416096348897,
+            "type": "LTXVConcatAVLatent",
+            "pos": [
+              2180,
+              1490
+            ],
+            "size": [
+              410,
+              120
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "video_latent",
+                "type": "LATENT",
+                "link": 22
+              },
+              {
+                "name": "audio_latent",
+                "type": "LATENT",
+                "link": 23
+              }
+            ],
+            "outputs": [
+              {
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  8
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVConcatAVLatent",
+              "film_finish_source_id": "4528"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 3495531663216668,
+            "type": "EmptyLTXVLatentVideo",
+            "pos": [
+              1690,
+              910
+            ],
+            "size": [
+              410,
+              230
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "width",
+                "type": "INT",
+                "link": 24,
+                "grow_id": 2900324347870237,
+                "widget": {
+                  "name": "width"
+                }
+              },
+              {
+                "name": "height",
+                "type": "INT",
+                "link": 25,
+                "grow_id": 2679525826676983,
+                "widget": {
+                  "name": "height"
+                }
+              },
+              {
+                "name": "length",
+                "type": "INT",
+                "link": 26,
+                "grow_id": 993600529145447,
+                "widget": {
+                  "name": "length"
+                }
+              }
+            ],
+            "outputs": [
+              {
+                "name": "LATENT",
+                "type": "LATENT",
+                "links": [
+                  30
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "EmptyLTXVLatentVideo",
+              "film_finish_source_id": "3059"
+            },
+            "widgets_values": [
+              768,
+              512,
+              97,
+              1
+            ]
+          },
+          {
+            "id": 4107130497364466,
+            "type": "LTXAddVideoICLoRAGuide",
+            "pos": [
+              1690,
+              1490
+            ],
+            "size": [
+              440,
+              380
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 27
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 28
+              },
+              {
+                "name": "vae",
+                "type": "VAE",
+                "link": 29
+              },
+              {
+                "name": "latent",
+                "type": "LATENT",
+                "link": 30
+              },
+              {
+                "name": "image",
+                "type": "IMAGE",
+                "link": 31
+              },
+              {
+                "name": "latent_downscale_factor",
+                "type": "FLOAT",
+                "link": 32,
+                "grow_id": 2102124435801151,
+                "widget": {
+                  "name": "latent_downscale_factor"
+                }
+              }
+            ],
+            "outputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": [
+                  2,
+                  10
+                ]
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": [
+                  3,
+                  11
+                ]
+              },
+              {
+                "name": "latent",
+                "type": "LATENT",
+                "links": [
+                  22
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXAddVideoICLoRAGuide",
+              "film_finish_source_id": "5012"
+            },
+            "widgets_values": [
+              0,
+              1,
+              1.0,
+              "disabled",
+              false,
+              256,
+              64
+            ]
+          },
+          {
+            "id": 2334872338969572,
+            "type": "LTXVEmptyLatentAudio",
+            "pos": [
+              2180,
+              910
+            ],
+            "size": [
+              410,
+              200
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "audio_vae",
+                "type": "VAE",
+                "link": 35
+              },
+              {
+                "name": "frames_number",
+                "type": "INT",
+                "link": 33,
+                "grow_id": 186839087192632,
+                "widget": {
+                  "name": "frames_number"
+                }
+              },
+              {
+                "name": "frame_rate",
+                "type": "FLOAT",
+                "link": 34,
+                "grow_id": 254840771652626,
+                "widget": {
+                  "name": "frame_rate"
+                }
+              }
+            ],
+            "outputs": [
+              {
+                "name": "Latent",
+                "type": "LATENT",
+                "links": [
+                  23
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "LTXVEmptyLatentAudio",
+              "film_finish_source_id": "9009"
+            },
+            "widgets_values": [
+              97,
+              25.0,
+              1
+            ]
+          },
+          {
+            "id": 1714266439702642,
+            "type": "ComfyMathExpression",
+            "pos": [
+              1690,
+              610
+            ],
+            "size": [
+              410,
+              180
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "values",
+                "type": "COMFY_AUTOGROW_V3",
+                "link": null
+              },
+              {
+                "name": "values.a",
+                "type": "FLOAT,INT,BOOLEAN",
+                "link": 36,
+                "grow_id": 175241190866636
+              }
+            ],
+            "outputs": [
+              {
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": [
+                  19
+                ]
+              },
+              {
+                "name": "INT",
+                "type": "INT",
+                "links": []
+              },
+              {
+                "name": "BOOL",
+                "type": "BOOLEAN",
+                "links": []
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "ComfyMathExpression",
+              "film_finish_source_id": "9103"
+            },
+            "widgets_values": [
+              "a if a <= 30 else 30"
+            ]
+          },
+          {
+            "id": 3577605399617621,
+            "type": "FilmFinishHDRPad",
+            "pos": [
+              2180,
+              360
+            ],
+            "size": [
+              410,
+              150
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "link": 37
+              }
+            ],
+            "outputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "links": [
+                  31
+                ]
+              },
+              {
+                "name": "width",
+                "type": "INT",
+                "links": [
+                  24
+                ]
+              },
+              {
+                "name": "height",
+                "type": "INT",
+                "links": [
+                  25
+                ]
+              },
+              {
+                "name": "length",
+                "type": "INT",
+                "links": [
+                  26,
+                  33
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "FilmFinishHDRPad",
+              "film_finish_source_id": "6000"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 1578472274374596,
+            "type": "FilmFinishHDRRestore",
+            "pos": [
+              3780,
+              1130
+            ],
+            "size": [
+              420,
+              130
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "link": 38
+              },
+              {
+                "name": "reference",
+                "type": "IMAGE",
+                "link": 39
+              }
+            ],
+            "outputs": [
+              {
+                "name": "hdr_linear",
+                "type": "IMAGE",
+                "links": [
+                  41
+                ]
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "FilmFinishHDRRestore",
+              "film_finish_source_id": "6001"
+            },
+            "widgets_values": []
+          }
+        ],
+        "groups": [
+          {
+            "id": 2,
+            "title": "02 \u00b7 LTX 2.5 models",
+            "bounding": [
+              540,
+              280,
+              1030,
+              1140
+            ],
+            "color": "#67559b",
+            "font_size": 26,
+            "flags": {}
+          },
+          {
+            "id": 3,
+            "title": "03 \u00b7 SDR to ACES / conditioning",
+            "bounding": [
+              1660,
+              280,
+              960,
+              1710
+            ],
+            "color": "#3d7d79",
+            "font_size": 26,
+            "flags": {}
+          },
+          {
+            "id": 4,
+            "title": "04 \u00b7 Eight-step HDR reconstruction",
+            "bounding": [
+              2730,
+              280,
+              910,
+              1140
+            ],
+            "color": "#8d668e",
+            "font_size": 26,
+            "flags": {}
+          },
+          {
+            "id": 5,
+            "title": "05 \u00b7 Decode / restore full range",
+            "bounding": [
+              3750,
+              280,
+              970,
+              1140
+            ],
+            "color": "#926d40",
+            "font_size": 26,
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 1,
+            "origin_id": 2305924178829848,
+            "origin_slot": 0,
+            "target_id": 4206132015266245,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 2,
+            "origin_id": 4107130497364466,
+            "origin_slot": 0,
+            "target_id": 4206132015266245,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 3,
+            "origin_id": 4107130497364466,
+            "origin_slot": 1,
+            "target_id": 4206132015266245,
+            "target_slot": 2,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 4,
+            "origin_id": 208137318105326,
+            "origin_slot": 0,
+            "target_id": 3068795723739698,
+            "target_slot": 0,
+            "type": "NOISE"
+          },
+          {
+            "id": 5,
+            "origin_id": 4206132015266245,
+            "origin_slot": 0,
+            "target_id": 3068795723739698,
+            "target_slot": 1,
+            "type": "GUIDER"
+          },
+          {
+            "id": 6,
+            "origin_id": 2629243286156502,
+            "origin_slot": 0,
+            "target_id": 3068795723739698,
+            "target_slot": 2,
+            "type": "SAMPLER"
+          },
+          {
+            "id": 7,
+            "origin_id": 3361341782889222,
+            "origin_slot": 0,
+            "target_id": 3068795723739698,
+            "target_slot": 3,
+            "type": "SIGMAS"
+          },
+          {
+            "id": 8,
+            "origin_id": 2035416096348897,
+            "origin_slot": 0,
+            "target_id": 3068795723739698,
+            "target_slot": 4,
+            "type": "LATENT"
+          },
+          {
+            "id": 9,
+            "origin_id": 3068795723739698,
+            "origin_slot": 0,
+            "target_id": 663292463568756,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 10,
+            "origin_id": 4107130497364466,
+            "origin_slot": 0,
+            "target_id": 1681716081761363,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 11,
+            "origin_id": 4107130497364466,
+            "origin_slot": 1,
+            "target_id": 1681716081761363,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 12,
+            "origin_id": 663292463568756,
+            "origin_slot": 0,
+            "target_id": 1681716081761363,
+            "target_slot": 2,
+            "type": "LATENT"
+          },
+          {
+            "id": 13,
+            "origin_id": 1681716081761363,
+            "origin_slot": 2,
+            "target_id": 507579890429115,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 14,
+            "origin_id": 3042515946266279,
+            "origin_slot": 0,
+            "target_id": 507579890429115,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 15,
+            "origin_id": 2625548805057373,
+            "origin_slot": 0,
+            "target_id": 2305924178829848,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 16,
+            "origin_id": 507579890429115,
+            "origin_slot": 0,
+            "target_id": 2873915308447822,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 17,
+            "origin_id": 1885835605168275,
+            "origin_slot": 0,
+            "target_id": 3856135713214468,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 18,
+            "origin_id": 1885835605168275,
+            "origin_slot": 0,
+            "target_id": 3856135713214468,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 19,
+            "origin_id": 1714266439702642,
+            "origin_slot": 0,
+            "target_id": 3856135713214468,
+            "target_slot": 2,
+            "type": "FLOAT"
+          },
+          {
+            "id": 20,
+            "origin_id": 2429231254440455,
+            "origin_slot": 0,
+            "target_id": 815182055714869,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 21,
+            "origin_id": 1662421446783234,
+            "origin_slot": 0,
+            "target_id": 3042515946266279,
+            "target_slot": 0,
+            "type": "VAE"
+          },
+          {
+            "id": 22,
+            "origin_id": 4107130497364466,
+            "origin_slot": 2,
+            "target_id": 2035416096348897,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 23,
+            "origin_id": 2334872338969572,
+            "origin_slot": 0,
+            "target_id": 2035416096348897,
+            "target_slot": 1,
+            "type": "LATENT"
+          },
+          {
+            "id": 24,
+            "origin_id": 3577605399617621,
+            "origin_slot": 1,
+            "target_id": 3495531663216668,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 25,
+            "origin_id": 3577605399617621,
+            "origin_slot": 2,
+            "target_id": 3495531663216668,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 26,
+            "origin_id": 3577605399617621,
+            "origin_slot": 3,
+            "target_id": 3495531663216668,
+            "target_slot": 2,
+            "type": "INT"
+          },
+          {
+            "id": 27,
+            "origin_id": 3856135713214468,
+            "origin_slot": 0,
+            "target_id": 4107130497364466,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 28,
+            "origin_id": 3856135713214468,
+            "origin_slot": 1,
+            "target_id": 4107130497364466,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 29,
+            "origin_id": 3042515946266279,
+            "origin_slot": 0,
+            "target_id": 4107130497364466,
+            "target_slot": 2,
+            "type": "VAE"
+          },
+          {
+            "id": 30,
+            "origin_id": 3495531663216668,
+            "origin_slot": 0,
+            "target_id": 4107130497364466,
+            "target_slot": 3,
+            "type": "LATENT"
+          },
+          {
+            "id": 31,
+            "origin_id": 3577605399617621,
+            "origin_slot": 0,
+            "target_id": 4107130497364466,
+            "target_slot": 4,
+            "type": "IMAGE"
+          },
+          {
+            "id": 32,
+            "origin_id": 2305924178829848,
+            "origin_slot": 1,
+            "target_id": 4107130497364466,
+            "target_slot": 5,
+            "type": "FLOAT"
+          },
+          {
+            "id": 33,
+            "origin_id": 3577605399617621,
+            "origin_slot": 3,
+            "target_id": 2334872338969572,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 34,
+            "origin_id": 2429231254440455,
+            "origin_slot": 2,
+            "target_id": 2334872338969572,
+            "target_slot": 2,
+            "type": "FLOAT"
+          },
+          {
+            "id": 35,
+            "origin_id": 1303878523339175,
+            "origin_slot": 0,
+            "target_id": 2334872338969572,
+            "target_slot": 0,
+            "type": "VAE"
+          },
+          {
+            "id": 36,
+            "origin_id": 2429231254440455,
+            "origin_slot": 2,
+            "target_id": 1714266439702642,
+            "target_slot": 1,
+            "type": "FLOAT"
+          },
+          {
+            "id": 37,
+            "origin_id": 815182055714869,
+            "origin_slot": 0,
+            "target_id": 3577605399617621,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 38,
+            "origin_id": 2873915308447822,
+            "origin_slot": 1,
+            "target_id": 1578472274374596,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 39,
+            "origin_id": 2429231254440455,
+            "origin_slot": 0,
+            "target_id": 1578472274374596,
+            "target_slot": 1,
+            "type": "IMAGE"
+          },
+          {
+            "id": 40,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 2429231254440455,
+            "target_slot": 0,
+            "type": "VIDEO"
+          },
+          {
+            "id": 41,
+            "origin_id": 1578472274374596,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 42,
+            "origin_id": 2429231254440455,
+            "origin_slot": 1,
+            "target_id": -20,
+            "target_slot": 1,
+            "type": "AUDIO"
+          },
+          {
+            "id": 43,
+            "origin_id": 2429231254440455,
+            "origin_slot": 2,
+            "target_id": -20,
+            "target_slot": 2,
+            "type": "FLOAT"
+          }
+        ],
+        "extra": {}
+      }
+    ]
+  }
+}

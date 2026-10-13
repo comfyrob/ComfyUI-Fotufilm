@@ -1,3 +1,5 @@
+> UI update: see [grading-controls.md](grading-controls.md). Source correction and still saving now live in graph nodes; thumbnail loading is independent of playback. Performance measurements below describe v0.3.1.
+
 # Studio interaction upgrade
 
 Implemented in the ComfyUI custom node and its expanded dialog. Source:

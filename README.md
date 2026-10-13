@@ -25,6 +25,8 @@ Restart ComfyUI after installation. Do not install this alongside the original l
 | Node ID | Purpose |
 |---|---|
 | `FotufilmStudio` | Expand a video/recipe editor inside a Nodes 2.0 node, or open the larger Studio. |
+| `FotufilmBalanceFrames` | Optional Gear source correction; preserves float range, outputs linear ACEScg. |
+| `FotufilmInspectFrame` | Save Still (EXR): optional full-resolution frame output, outside Studio. |
 | `FotufilmStudioReview` | Return a downstream render to its originating Studio without a graph cycle. |
 | `FotufilmDevelopVideo` | Optional final export of VIDEO or connected linear IMAGE frames; MP4, ProRes or eligible HLG. |
 | `FotufilmDevelopFrames` | Develop IMAGE frame batches; returns **linear Display P3 float** frames. |
@@ -43,7 +45,7 @@ Enable **Settings → Comfy → Modern Node Design (Nodes 2.0)**. Open `Fotufilm
 
 An existing **Load Video** file appears immediately, without executing the graph. A connected **Load HDR Master** can also be previewed before execution. Newly generated HDR must finish once before it can be viewed. Studio resolves source-file widgets and cached outputs, including subgraph outputs; it never presents an unexecuted processing node as a completed result.
 
-Editing **Looks**, **Film** or **Grade** updates a continuous server-rendered stream, independent of the graph queue. No MP4 is regenerated per edit, and no LTX job is submitted by moving a slider. Preview sizes are explicitly **1280px / 1920px long edge**, capped at source resolution. The viewer reports measured delivery fps and processing time; it never silently reduces resolution or skips source frames to advertise a higher rate.
+Editing **Looks**, **Film** or **Color & texture** updates a continuous server-rendered stream, independent of the graph queue. No MP4 is regenerated per edit, and no LTX job is submitted by moving a slider. Preview sizes are explicitly **1280px / 1920px long edge**, capped at source resolution. The viewer reports measured delivery fps and processing time; it never silently reduces resolution or skips source frames to advertise a higher rate.
 
 The server keeps Fotufilm warm, uses float32 Gear grading on CUDA when available, and delivers H.264 monitor frames through a same-origin WebSocket to WebCodecs inside the node. NVIDIA NVENC is preferred; a CPU encoder is available on the server. The acknowledgement window adapts to network latency, capped at 12 frames. New control revisions supersede stale work, and before/after comes from the same source frame. Paused previews use lossless PNG display pixels. The moving monitor stream is compressed SDR, **not a lossless float or calibrated HDR viewer**. Export and EXR inspection always read the original float source, never the monitor stream.
 
@@ -51,23 +53,23 @@ The additive `fotufilm_image_from_rgba32f` extension accepts linear Rec.2020 flo
 
 **Grade → Balance input** grades the float source before Fotufilm. **Grade → Finish look** refines Fotufilm's linear P3 output. The controls use pinned Gear ACEScct math, adapted for wide-gamut float buffers: exposure, warmth/tint, contrast, highlights/shadows, saturation/vibrance, and lift/gamma/gain/offset wheels. There is one terminal display conversion, not a tone map before film simulation. See [Gear attribution and adaptation](vendor/README.md).
 
-Looks are complete recipes. Choosing a different film keeps the look name and marks it **Modified**. Look cards are actual first-frame film renders, generated while playback is paused. Playback supports looping, frame steps, scrubbing, zoom/pan and a draggable before/after divider. The enlarged Studio and inline node share one editor implementation.
+Looks are complete recipes. Choosing a different film keeps the look name and marks it **Modified**. Look cards are actual first-frame film renders, loaded independently of playback, with cached results and retry on failure. Playback supports looping, frame steps, scrubbing, zoom/pan and a draggable before/after divider. The enlarged Studio and inline node share one editor implementation.
 
 **Original / Enhanced HDR** selects the source for interactive finishing and Studio's **Export video**. **Before / after** compares that same source before and after grading plus film. HDR processing reads connected linear frames or a saved float EXR master; browser stills and playback use an explicitly labelled SDR display conversion. This is not a calibrated HDR monitor. Export provides MP4, ProRes 422 HQ, and eligible HLG.
 
-**Save to node** persists the recipe. **Run workflow** saves and queues the connected graph, including any uncached upstream stages; the graph follows its wired source/master, regardless of the interactive comparison source. **Export video** directly renders the current Studio source and recipe at full resolution without rerunning LTX. The optional **Develop Video** branch can connect its `studio` input to Studio to return a graph render without an extra Return node. Existing Return to Studio workflows remain compatible.
+**Save to node** persists the recipe. Use ComfyUI’s **Run** control to queue the connected graph, including uncached upstream stages; the graph follows its wired source/master, regardless of the interactive comparison source. **Export video** directly renders the current Studio source and recipe at full resolution without rerunning LTX. The optional **Develop Video** branch can connect its `studio` input to Studio to return a graph render without an extra Return node. Existing Return to Studio workflows remain compatible.
 
 The same float film and grading operations serve previews and final exports. Film texture can differ with preview resolution; inspect at source resolution when assessing grain. Real-time performance depends on the recipe, hardware and network; cold engine initialization remains separate from warm playback.
 
 ### Full-resolution EXR inspection
 
-Open **Inspect full-resolution frame** below the recipe controls in Studio. Choose **Source**, **After balance grade**, **After Fotufilm**, or **After finishing grade**, then **Save EXR frame**. This captures the playhead and current recipe, processes only that frame at source resolution, and saves an unclipped RGB32F EXR in `output/fotufilm-inspections/`. No LTX job or video render is submitted. Where possible, inspection reuses the full-resolution source/film caches. The saved frame is a snapshot; subsequent slider edits do not change it.
+Stills live in the **Fotufilm · Save Still (EXR)** graph node (`FotufilmInspectFrame`). Connect exactly one HDR master, VIDEO or IMAGE batch, and Studio's `recipe_json` output. Choose a frame, enable the output and run the graph. It writes one full-resolution RGB32F EXR under `output/fotufilm-inspections/`. The example starts this optional save branch disabled.
 
-The new **Fotufilm · Inspect Frame** output node provides the same stages in a graph. Connect exactly one HDR master, VIDEO, or IMAGE batch. For IMAGE, explicitly choose the input color space; use **linear Display P3** for Develop Frames output. Stage **source** inspects the connected pixels without applying the recipe. Connecting an already-developed image and selecting film/finish would apply the film again. The node returns one IMAGE in **linear Rec.2020** and its color-space label. Ordinary graph execution may run uncached upstream nodes; use the Studio button or the saved-master example to avoid an LTX dependency.
+Advanced `stage=finish` applies the full recipe; `source` saves connected pixels unchanged apart from explicit color conversion. Select the actual IMAGE input space. Already-developed frames require `source` and **linear Display P3** to avoid applying film twice. Output is linear Rec.2020 plus its color-space label. Ordinary graph execution can run uncached upstream nodes. Studio no longer contains a histogram, still-saving panel or graph-run button.
 
 [`Fotufilm - Inspect HDR frame.json`](examples/Fotufilm%20-%20Inspect%20HDR%20frame.json) opens an existing master with no LTX nodes. Frame numbering starts at zero.
 
-On compatible ComfyUI backend/frontend builds with Assets enabled ([backend #16898](https://github.com/Comfy-Org/ComfyUI/pull/16898), [frontend #20839](https://github.com/Comfy-Org/ComfyUI_frontend/pull/20839)), open the EXR from **Assets → Outputs** or the inspection node's **History** result. Studio's independent frame jobs appear in Assets, not workflow History. The pack supplies its own color-converted SDR thumbnail through the new preview protocol; the original EXR remains separate. Older builds receive an SDR PNG thumbnail plus the saved EXR for download. Updating this pack alone does not install those core changes.
+On compatible ComfyUI backend/frontend builds with Assets enabled ([backend #16898](https://github.com/Comfy-Org/ComfyUI/pull/16898), [frontend #20839](https://github.com/Comfy-Org/ComfyUI_frontend/pull/20839)), open the EXR from **Assets → Outputs** or the inspection node's **History** result. The pack supplies its own color-converted SDR thumbnail through the new preview protocol; the original EXR remains separate. Older builds receive an SDR PNG thumbnail plus the saved EXR for download. Updating this pack alone does not install those core changes.
 
 Inspection copies are explicitly converted to Rec.2020, including Fotufilm's linear-P3 output, and include EXR chromaticities plus a JSON recipe/frame sidecar. No display transform is baked into the EXR. Core's current inspector reads float pixels but displays SDR; its exposure control changes the view, not the grade. There is no private frontend import or automatic opening of core's dialog. This feature does not change video playback speed or resolution.
 
@@ -79,11 +81,13 @@ The pack does **not** perform neural SDR-to-HDR conversion by itself. The includ
 
 Start with **[Film Finish - Studio + LTX 2.5 HDR.json](examples/Film%20Finish%20-%20Studio%20%2B%20LTX%202.5%20HDR.json)** for one connected workflow:
 
-`Load Video → LTX 2.5 subgraph → Studio (linear HDR frames → Gear → Fotufilm → Gear)`
+`Load Video → LTX 2.5 subgraph → optional Balance Source → Studio (film + finishing color)`
 
 The root has three main nodes plus two optional output branches: **Archive HDR source** and **Export finished video**. Both output branches start with `enabled=false`. Studio's `images` input receives the LTX `hdr_linear` IMAGE output in **linear ACEScg**, with frame rate connected separately. A master archive is not needed for preview. Open the LTX subgraph to inspect its reconstruction stages.
 
 Enable the archive branch to retain float EXRs and source audio for later sessions. Enable the export branch after saving your Studio recipe, or use Studio's Export video button. LTX depends on the original video, not the film recipe. Keep its seed fixed to reuse cached reconstruction; a restart or eviction can require reconstruction again. Direct frame references are bounded to 8 GiB across Studio assets and expire with the server.
+
+For explicit graph-based correction and saving, open **[Fotufilm - Balance + Studio + optional still - Modal.json](examples/Fotufilm%20-%20Balance%20%2B%20Studio%20%2B%20optional%20still%20-%20Modal.json)**. Balance Source applies Gear correction on linear frames before Studio. Changing this graph node requires Run; live finishing adjustments stay in Studio. Save final still is disabled by default and reads the same corrected source and Studio recipe. See [grading controls](docs/grading-controls.md) for wiring and saved-recipe compatibility.
 
 Use **Film Finish - Studio + LTX 2.5 HDR - Modal INT8.json** for the INT8 transformer and `ltx25/` LoRA paths already installed on Rob's Modal volume. The BF16 reference remains separate; the INT8 variant has not been inference-tested by this change.
 

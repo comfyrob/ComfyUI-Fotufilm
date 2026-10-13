@@ -18,23 +18,25 @@ from .recipe import validate_recipe
 class FotufilmInspectFrame(io.ComfyNode):
     @classmethod
     def define_schema(cls):
-        return io.Schema(node_id='FotufilmInspectFrame', display_name='Fotufilm · Inspect Frame',
+        return io.Schema(node_id='FotufilmInspectFrame', display_name='Fotufilm · Save Still (EXR)',
             category='Film Finish', is_output_node=True,
             description='Save one full-resolution float EXR for core HDR inspection. Connect one video, '
                         'HDR master or IMAGE batch. Stage source inspects connected pixels unchanged '
                         'apart from explicit color conversion. Other stages apply this recipe. '
                         'Exposure in core’s viewer changes viewing only, not the saved grade.',
             inputs=[io.Int.Input('frame', default=0, min=0),
-                    io.Combo.Input('stage', options=list(STAGES), default='source'),
+                    io.Combo.Input('stage', options=list(STAGES), default='source', advanced=True),
                     io.String.Input('recipe_json', default=DEFAULT_RECIPE, multiline=True),
                     io.Combo.Input('input_color_space', options=['linear Rec.2020', 'linear Display P3',
                         'linear Rec.709', 'linear ACEScg', 'sRGB'], default='linear Rec.2020', advanced=True),
                     HDRMaster.Input('master', optional=True), io.Video.Input('video', optional=True),
-                    io.Image.Input('images', optional=True)],
+                    io.Image.Input('images', optional=True), io.Boolean.Input('enabled', default=True, optional=True)],
             outputs=[io.Image.Output('linear_rec2020'), io.String.Output('color_space')])
 
     @classmethod
-    def execute(cls, frame, stage, recipe_json, input_color_space, master=None, video=None, images=None):
+    def execute(cls, frame, stage, recipe_json, input_color_space, master=None, video=None, images=None, enabled=True):
+        if not enabled:
+            return io.NodeOutput(None, 'linear Rec.2020')
         if sum(x is not None for x in (master, video, images)) != 1:
             raise ValueError('Connect exactly one of master, video or images.')
         recipe = validate_recipe(json.loads(recipe_json))
