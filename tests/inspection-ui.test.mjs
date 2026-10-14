@@ -156,3 +156,50 @@ test('trial export uses current source frame, original resolution and can be can
   studio.element.querySelector('[data-action="cancel-export"]').click();assert.equal(calls[0].signal.aborted,true);
   finish({after:'trial.mp4'});await flush();studio.dispose();
 });
+
+test('separate film and grade editors preserve presets and only explicitly overridden colors across look changes', () => {
+  const film=createStudio({recipe:baseRecipe(),editorMode:'film'});
+  assert.equal(film.element.querySelector('[data-action="tab-grade"]').hidden,true);
+  assert.equal(film.element.querySelector('.ff-texture-sliders').closest('.ff-customize-panel')!==null,true);
+  const base=baseRecipe();base.grading.finish.saturation=.7;
+  const grade=createStudio({recipe:base,baseRecipe:base,editorMode:'grade'});
+  assert.equal(grade.element.querySelector('.ff-grade-panel').hidden,false);
+  assert.equal(grade.element.querySelector('[data-action="tab-looks"]').hidden,true);
+  const slider=grade.element.querySelector('[data-grade="exposure"]');slider.value='.5';slider.dispatchEvent(new dom.window.Event('input'));
+  const next=baseRecipe();next.stock='portra400';next.grading.finish.saturation=.8;
+  grade.setBaseRecipe(next);
+  assert.equal(grade.getRecipe().stock,'portra400');assert.equal(grade.getRecipe().grading.finish.exposure,.5);
+  assert.equal(grade.getRecipe().grading.finish.saturation,.8);
+  grade.element.querySelector('[data-action="reset-grade"]').click();
+  assert.equal(grade.getRecipe().grading.finish.exposure,0);assert.equal(grade.getRecipe().grading.finish.saturation,.8);
+  film.dispose();grade.dispose();
+});
+
+test('inspection controls change monitor requests, not recipes or exported output', async () => {
+  const updates=[],exports=[];
+  const recipe=baseRecipe();recipe.sdr_output='rolloff';
+  const studio=createStudio({recipe,editorMode:'grade',asset,source:'https://comfy.test/input.mp4',
+    preview:{live:()=>({update:v=>updates.push(v),close(){}}),render:async(id,r,o)=>{exports.push([r,o]);return {after:'export.mp4'};}}});
+  const before=studio.getRecipe(),root=studio.element;
+  for(const [selector,value] of [['.ff-view-mode','clip'],['.ff-view-stage','source'],['.ff-view-ev','-3']]){
+    const input=root.querySelector(selector);input.value=value;input.dispatchEvent(new dom.window.Event('change'));
+  }
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.deepEqual(studio.getRecipe(),before);assert.deepEqual(updates.at(-1).view,{mode:'clip',stage:'source',exposure:-3,comparison:'film'});
+  root.querySelector('[data-action="export"]').click();await flush();
+  assert.deepEqual(exports[0][0],before);assert.equal(exports[0][1].view,undefined);
+  studio.dispose();
+});
+
+test('explicit grade override survives a look with the same value, then a different look', () => {
+  let saved;
+  const original=baseRecipe();
+  const studio=createStudio({recipe:original,baseRecipe:original,editorMode:'grade',onSave:(_r,_l,changes)=>saved=changes});
+  const input=studio.element.querySelector('[data-grade="exposure"]');input.value='.5';input.dispatchEvent(new dom.window.Event('input'));
+  const matching=baseRecipe();matching.grading.finish.exposure=.5;
+  studio.setBaseRecipe(matching);studio.element.querySelector('[data-action="save"]').click();assert.deepEqual(saved,{exposure:.5});
+  const different=baseRecipe();different.grading.finish.exposure=.2;studio.setBaseRecipe(different);
+  assert.equal(studio.getRecipe().grading.finish.exposure,.5);
+  studio.element.querySelector('[data-action="reset-grade"]').click();studio.element.querySelector('[data-action="save"]').click();
+  assert.equal(studio.getRecipe().grading.finish.exposure,.2);assert.deepEqual(saved,{});studio.dispose();
+});

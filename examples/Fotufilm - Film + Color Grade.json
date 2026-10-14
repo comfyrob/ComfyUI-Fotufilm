@@ -1,0 +1,262 @@
+{
+  "id": "172d1bc1-dbc4-4de3-a9f0-b9647fd18cc1",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadVideo",
+      "pos": [
+        50,
+        120
+      ],
+      "size": [
+        340,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            1,
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "FotufilmFilmStudio",
+      "pos": [
+        900,
+        100
+      ],
+      "size": [
+        390,
+        420
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        },
+        {
+          "name": "rendered_preview",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "enhanced_source",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "source_video",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "links": [],
+          "slot_index": 2
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "links": [],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmFilmStudio",
+        "fotufilm_studio_expanded": false
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        24,
+        "linear-acescg"
+      ],
+      "title": "1 \u00b7 Film Emulation"
+    },
+    {
+      "id": 3,
+      "type": "FotufilmColorGrade",
+      "pos": [
+        1380,
+        100
+      ],
+      "size": [
+        1100,
+        850
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        },
+        {
+          "name": "rendered_preview",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "enhanced_source",
+          "type": "VIDEO",
+          "link": null
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "link": null
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 3,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "source_video",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "links": [],
+          "slot_index": 2
+        },
+        {
+          "name": "master",
+          "type": "FOTUFILM_HDR_MASTER",
+          "links": [],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmColorGrade",
+        "fotufilm_studio_expanded": true
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        "{}",
+        24,
+        "linear-acescg"
+      ],
+      "title": "2 \u00b7 Color Grade + Viewer"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "VIDEO"
+    ],
+    [
+      2,
+      1,
+      0,
+      3,
+      0,
+      "VIDEO"
+    ],
+    [
+      3,
+      2,
+      1,
+      3,
+      6,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        30,
+        20
+      ]
+    }
+  },
+  "version": 0.4
+}

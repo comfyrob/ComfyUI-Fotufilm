@@ -38,6 +38,8 @@ def validate_recipe(value):
             raise ValueError(f"Invalid {section} controls.")
         for key, (low, high, _) in schema.items():
             bounded(values[key], low, high, key)
+    if recipe.get('sdr_output','legacy') not in ('legacy','rolloff','clip'):
+        raise ValueError('Unknown SDR output transform.')
     seed = recipe.get("seed")
     if seed is not None:
         bounded(seed, 0, 2147483647, "Grain seed")

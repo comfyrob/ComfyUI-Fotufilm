@@ -1,5 +1,12 @@
 # ComfyUI-Fotufilm
 
+## Separate film and color grading
+
+Use [Film + Color Grade](examples/Fotufilm%20-%20Film%20%2B%20Color%20Grade.json) for an SDR clip or [LTX HDR + Film + Color Grade](examples/Fotufilm%20-%20LTX%20HDR%20%2B%20Film%20%2B%20Color%20Grade%20-%20Modal.json) for the pinned Modal HDR workflow. These are ComfyUI custom nodes with a shared live player, separate film/grade controls, and explicit SDR viewing controls. [Read the color contract and graph guide](docs/split-film-and-grade.md).
+
+Film and Grade output recipes; the optional export applies the final recipe once to the source. No extra HDR archive or full-video render is required just to edit colors. Existing Studio examples remain supported.
+
+
 Film simulation and HDR video finishing nodes for ComfyUI, extracted from Film Finish. Uses the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine), pinned to **v1.11** (`f602857a031a6a9c9b0966284ff989eb3046c323`). This is an independent integration, not an official Fotufilm product.
 
 ## Install

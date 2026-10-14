@@ -14,6 +14,7 @@ from .recipe import validate_recipe
 from .preview_node import FotufilmStudio, FotufilmStudioReview, StudioContext
 from .inspection_node import FotufilmInspectFrame
 from .balance_node import FotufilmBalanceFrames
+from .stage_nodes import FotufilmFilmStudio, FotufilmColorGrade
 
 WEB_DIRECTORY = './web'
 
@@ -28,7 +29,7 @@ class FotufilmDevelopVideo(io.ComfyNode):
             io.Combo.Input("format", options=["mp4", "prores422hq", "hlg"], default="mp4"),
             io.Image.Input('images', optional=True),
             io.Float.Input('fps', default=24, min=1, max=120, optional=True),
-            io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020'], default='linear-acescg', optional=True),
+            io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020','linear-p3'], default='linear-acescg', optional=True),
             io.Boolean.Input('enabled', default=True, optional=True), StudioContext.Input('studio', optional=True)],
             outputs=[io.Video.Output("video"), io.String.Output("resolved_recipe")])
 
@@ -79,7 +80,7 @@ class FotufilmDevelopFrames(io.ComfyNode):
         return io.Schema(node_id="FotufilmDevelopFrames", display_name="Fotufilm · Develop Frames",
             category="Film Finish", description="Film simulation on float frames. Returns display-linear P3 before SDR shoulder; do not apply another film or print tone map.",
             inputs=[io.Image.Input("images"), io.String.Input("recipe_json", multiline=True),
-                io.Combo.Input("input_color_space", options=["sRGB", "linear Rec.709", "linear Rec.2020", "linear Display P3"]),
+                io.Combo.Input("input_color_space", options=["sRGB", "linear Rec.709", "linear Rec.2020", "linear Display P3", "linear ACEScg"]),
                 io.Int.Input("seed", default=0, min=0, max=2147483647),
                 io.Int.Input("start_frame", default=0, min=0)],
             outputs=[io.Image.Output("linear_p3"), io.String.Output("color_space")])
@@ -92,7 +93,7 @@ class FotufilmDevelopFrames(io.ComfyNode):
         from .grading import convert
         recipe['seed'] = base_seed
         spaces={'sRGB':'linear-rec709','linear Rec.709':'linear-rec709',
-                'linear Rec.2020':'linear-rec2020','linear Display P3':'linear-p3'}
+                'linear Rec.2020':'linear-rec2020','linear Display P3':'linear-p3','linear ACEScg':'linear-acescg'}
         frames = []
         with tempfile.TemporaryDirectory(prefix='fotufilm-frames-') as directory:
             finisher=Finisher(recipe,directory)
@@ -117,7 +118,7 @@ class FilmFinishExtension(ComfyExtension):
         install_routes()
 
     async def get_node_list(self):
-        return [FotufilmDevelopVideo, FotufilmDevelopFrames, FilmFinishHDRPad, FilmFinishHDRRestore, FilmFinishSaveHDRVideo, FilmFinishSaveHDRMaster, FotufilmDevelopHDRMaster, FotufilmStudio, FotufilmStudioReview, FotufilmLoadHDRMaster, FotufilmInspectFrame, FotufilmBalanceFrames]
+        return [FotufilmFilmStudio, FotufilmColorGrade, FotufilmDevelopVideo, FotufilmDevelopFrames, FilmFinishHDRPad, FilmFinishHDRRestore, FilmFinishSaveHDRVideo, FilmFinishSaveHDRMaster, FotufilmDevelopHDRMaster, FotufilmStudio, FotufilmStudioReview, FotufilmLoadHDRMaster, FotufilmInspectFrame, FotufilmBalanceFrames]
 
 
 async def comfy_entrypoint():

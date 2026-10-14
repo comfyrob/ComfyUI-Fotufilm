@@ -75,7 +75,8 @@ class FilmFinishHDRPad(io.ComfyNode):
 class FilmFinishHDRRestore(io.ComfyNode):
     @classmethod
     def define_schema(cls):
-        return io.Schema(node_id='FilmFinishHDRRestore', category='Film Finish/HDR',
+        return io.Schema(node_id='FilmFinishHDRRestore', display_name='LTX HDR · Remove Padding', category='Film Finish/HDR',
+            description='Remove the extra edge pixels and repeated end frames required by LTX. Keeps the decoded HDR values and color space unchanged.',
             inputs=[io.Image.Input('images'), io.Image.Input('reference')], outputs=[io.Image.Output('hdr_linear')])
 
     @classmethod

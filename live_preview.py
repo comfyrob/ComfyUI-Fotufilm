@@ -20,29 +20,19 @@ from aiohttp import web
 from PIL import Image
 
 from .finish_pipeline import Finisher
-from .grading import convert, apply_grade
-from .master_export import delivery, P3_TO_709
+from .grading import apply_grade
 from .preview_runtime import PrefetchCursor, digest, render_stats
 from .recipe import validate_recipe
 
 
-def display_rgb(rgb, knee, grade=None, source_space='linear-p3'):
-    if not torch.cuda.is_available():
-        rgb=convert(rgb,source_space,'linear-p3')
-        if grade is not None: rgb=apply_grade(rgb,grade,'linear-p3')
-        return (delivery(rgb, False, knee)/257).round().astype('uint8')
+def display_rgb(rgb, knee, grade=None, source_space='linear-p3', exposure=0):
+    from .display_transform import encode_sdr
     with torch.inference_mode():
-        light = torch.tensor(rgb, device='cuda', dtype=torch.float32)
-        light=convert(light,source_space,'linear-p3')
-        if grade is not None: light=apply_grade(light,grade,'linear-p3')
-        m=torch.tensor(P3_TO_709,device='cuda')
-        light=torch.stack([light[...,0]*m[i,0]+light[...,1]*m[i,1]+light[...,2]*m[i,2] for i in range(3)],dim=-1)
-        if 0 <= knee < 1:
-            over = (light-knee).clamp_min(0)
-            light = torch.where(light>knee, knee+(1-knee)*over/(over+1-knee), light)
-        light = light.clamp(0,1)
-        encoded = torch.where(light<=.0031308, light*12.92, 1.055*light.pow(1/2.4)-.055)
-        return (encoded.clamp(0,1)*255).round().byte().cpu().numpy()
+        light = torch.tensor(rgb, device='cuda', dtype=torch.float32) if torch.cuda.is_available() else rgb
+        if grade is not None: light=apply_grade(light,grade,source_space)
+        encoded=encode_sdr(light,source_space,knee,exposure)
+        if isinstance(encoded,torch.Tensor): return (encoded*255).round().byte().cpu().numpy()
+        return np.rint(encoded*255).astype('uint8')
 
 
 class MonitorEncoder:
@@ -99,29 +89,35 @@ class LiveRenderer:
         self.encoder = None
         self.force_keyframe = False
 
-    def render(self, recipe, index, compare, revision, still=False, queue_ms=0, setup_ms=0):
+    def render(self, recipe, index, compare, revision, still=False, queue_ms=0, setup_ms=0, view=None):
         started = time.perf_counter()
         if recipe != self.recipe:
             if self.finisher: self.finisher.close()
             self.finisher = Finisher(recipe, self.directory.name, self.runtime)
             self.recipe = copy.deepcopy(recipe)
+        from .display_transform import validate_view, view_knee
+        view=validate_view(view)
         stats = render_stats()
         rgb = self.runtime.source_frame(self.cursor, self.asset['fingerprint'], index, stats)
         decoded = time.perf_counter()
         key = digest([self.runtime.key(self.cursor.source, self.asset['fingerprint'], index, self.edge),
                       self.finisher.film_signature])
-        developed = self.runtime.film_cache.get(key)
-        if developed is None:
+        needs_film=view['stage']!='source' or (compare and view['comparison']=='film')
+        developed = self.runtime.film_cache.get(key) if needs_film else None
+        if needs_film and developed is None:
             developed = self.finisher.develop(rgb, index)
             self.runtime.film_cache.put(key, developed, take_ownership=True)
         filmed = time.perf_counter()
-        knee = .7 if self.finisher.hdr else 1
-        after = display_rgb(developed, knee, self.finisher.grading['finish'])
+        knee=view_knee(view,recipe,self.finisher.hdr)
+        stage=view['stage']
+        after = display_rgb(rgb if stage=='source' else developed, knee,
+                            self.finisher.grading['finish'] if stage=='finish' else None,
+                            source_space='linear-rec2020' if stage=='source' else 'linear-p3', exposure=view['exposure'])
         finished = time.perf_counter()
         h, w = after.shape[:2]
         # Both halves always come from this same frame, source and recipe.
         if compare:
-            before = display_rgb(rgb, knee, source_space='linear-rec2020')
+            before = display_rgb(developed if view['comparison']=='film' else rgb, knee, source_space='linear-p3' if view['comparison']=='film' else 'linear-rec2020', exposure=view['exposure'])
             after = np.concatenate((after, before), axis=1)
         after = np.pad(after, ((0,h%2),(0,after.shape[1]%2),(0,0)), mode='edge')
         displayed = time.perf_counter()
@@ -138,7 +134,7 @@ class LiveRenderer:
         end = time.perf_counter()
         meta = dict(revision=revision, frame=index, timestamp=stamp, key=keyframe, reset=reset,
                     width=w, height=h, codedWidth=size[0], codedHeight=size[1], compare=compare,
-                    encoder='png' if still else self.encoder.name, memoryInput=self.runtime.engine.memory_input is not None,
+                    view=view, colorSpace=self.cursor.source.info.get('colorSpace'), display='sRGB / SDR', encoder='png' if still else self.encoder.name, memoryInput=bool(self.runtime._engine is not None and self.runtime._engine.memory_input is not None),
                     ms=dict(queue=round(queue_ms,2), setup=round(setup_ms,2), source=round((decoded-started)*1000,2), film=round((filmed-decoded)*1000,2),
                             grade=round((finished-filmed)*1000,2), display=round((displayed-finished)*1000,2),
                             encode=round((end-displayed)*1000,2), total=round((end-started)*1000,2)))
@@ -175,7 +171,7 @@ async def stream(request, assets, executor, runtime_factory):
             renderer = LiveRenderer(snapshot['_asset'], snapshot['edge'], runtime_factory())
             renderer.identity = identity
         result = renderer.render(snapshot['recipe'], index, snapshot['compare'], snapshot['revision'], still=not (snapshot['playing'] or snapshot['interacting']),
-            queue_ms=(begun-submitted)*1000,setup_ms=(time.perf_counter()-begun)*1000)
+            queue_ms=(begun-submitted)*1000,setup_ms=(time.perf_counter()-begun)*1000,view=snapshot['view'])
         return result
         yield
 
@@ -251,7 +247,8 @@ async def stream(request, assets, executor, runtime_factory):
             if state and revision<=state['revision']: continue
             rate = value.get('rate',1)
             if rate not in (.5,1,1.5,2): raise ValueError('Invalid playback rate.')
-            state = dict(asset=value['asset'], _asset=asset, recipe=validate_recipe(value.get('recipe')),
+            from .display_transform import validate_view
+            state = dict(view=validate_view(value.get('view')),asset=value['asset'], _asset=asset, recipe=validate_recipe(value.get('recipe')),
                          frame=frame,edge=edge,revision=revision,playing=value.get('playing') is True,interacting=value.get('interacting') is True,
                          compare=value.get('compare') is True,loop=value.get('loop') is not False,rate=rate)
             wake.set()

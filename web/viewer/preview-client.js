@@ -13,9 +13,9 @@ export function createPreviewClient(api) {
     fileURL,
     live:callbacks=>openLivePreview(api.apiURL('/fotufilm/live'),callbacks),
     register:file=>request('source',file),
-    async render(asset,recipe,{mode='frame',frame=0,edge=960,format='mp4',stage='finish',start=0,range='full',signal,onProgress,channel='main'}={}){
+    async render(asset,recipe,{mode='frame',frame=0,edge=960,format='mp4',stage='finish',start=0,range='full',signal,onProgress,channel='main',view}={}){
       if(closed||signal?.aborted)throw new DOMException('Cancelled','AbortError');
-      const {job}=await request(mode==='inspect'?'inspect':'preview',{asset,recipe,mode,frame,edge,format,stage,start,range,channel,client:`${client}:${channel}`});
+      const {job}=await request(mode==='inspect'?'inspect':'preview',{asset,recipe,mode,frame,edge,format,stage,start,range,channel,view,client:`${client}:${channel}`});
       if(signal?.aborted||closed){await cancel(job);throw new DOMException('Cancelled','AbortError');}
       jobs.add(job);const abort=()=>cancel(job);signal?.addEventListener('abort',abort,{once:true});
       try{

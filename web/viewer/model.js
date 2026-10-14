@@ -66,6 +66,7 @@ export function lookRecipe(id, seed = 1) {
 // the entire after-film grade; it does not add/multiply preset wheel vectors.
 export function selectLook(current, id, keepFinish = false) {
   const next = lookRecipe(id, current.seed);
+  if(current.sdr_output)next.sdr_output=current.sdr_output;
   next.grading.balance = clone(current.grading.balance);
   if (keepFinish) next.grading.finish = clone(current.grading.finish);
   return next;
@@ -73,12 +74,12 @@ export function selectLook(current, id, keepFinish = false) {
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const filmName = id => films.find(f => f[0] === id)?.[1] || id;
 export function sameRecipe(a, b) {
-  const normalize = value => JSON.stringify([value.stock, value.format, value.medium, value.digitalReference,
+  const normalize = value => JSON.stringify([value.stock, value.format, value.medium, value.digitalReference, value.sdr_output||'legacy',
     ...Object.keys(baseRecipe().params).map(k => value.params[k]), ...Object.keys(baseRecipe().profile).map(k => value.profile[k]),
     ...['balance','finish'].flatMap(stage=>Object.keys(neutralGrade()).map(k=>value.grading?.[stage]?.[k]??neutralGrade()[k]))]);
   return normalize(a) === normalize(b);
 }
-export function matchLook(recipe) { return looks.find(look => sameRecipe(lookRecipe(look.id), recipe)); }
+export function matchLook(recipe) { return looks.find(look => sameRecipe(selectLook(normalizeRecipe(recipe),look.id), recipe)); }
 export function timecode(seconds, fps = 24) {
   const time = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
   const whole = Math.floor(time + .00001);

@@ -21,6 +21,7 @@ from .hdr_master import PRIMARIES, read_manifest
 from .native import Engine
 from .recipe import render_request, validate_recipe
 from .runtime_paths import stocks_path
+from .display_transform import sdr_knee, validate_view, view_knee, encode_sdr
 from .preview_runtime import SourceCursor, digest, render_stats
 
 
@@ -141,26 +142,28 @@ class Finisher:
         if self._engine is not None:self._engine.close();self._engine=None
 
 
-def render_still(source,recipe,destination,before_path,index=0,edge=960,*,runtime=None,fingerprint=None,reuse_before=False):
-    from .master_export import delivery
+def render_still(source,recipe,destination,before_path,index=0,edge=960,*,runtime=None,fingerprint=None,reuse_before=False,view=None):
     started=time.monotonic();stats=render_stats()
     with tempfile.TemporaryDirectory(prefix='fotufilm-still-') as directory:
         finisher=Finisher(recipe,directory,runtime)
         cursor=SourceCursor(source,edge)
         try:
+            view=validate_view(view)
             before_cached=reuse_before and Path(before_path).is_file()
-            if runtime is not None:
-                rgb=None if before_cached else runtime.source_frame(cursor,fingerprint,index,stats)
-                result=runtime.finished_frame(cursor,fingerprint,index,finisher,stats,source_rgb=rgb)
-            else:
-                rgb=cursor.read(index)
-                result=finisher.frame(rgb,index)
+            needs_film=view['stage']!='source' or (not before_cached and view['comparison']=='film')
+            needs_source=view['stage']=='source' or (not before_cached and view['comparison']=='source') or runtime is None
+            rgb=(runtime.source_frame(cursor,fingerprint,index,stats) if runtime else cursor.read(index)) if needs_source else None
+            developed=None
+            if needs_film:
+                developed=runtime.developed_frame(cursor,fingerprint,index,finisher,stats,source_rgb=rgb) if runtime else finisher.develop(rgb,index)
+            result=(convert(rgb,'linear-rec2020','linear-p3') if view['stage']=='source' else
+                    developed if view['stage']=='film' else finisher.finish(developed))
             processed=time.monotonic()
-            knee=.7 if finisher.hdr else 1
+            knee=view_knee(view,recipe,finisher.hdr)
             # PNG compression effort changes byte size, never pixel precision.
-            Image.fromarray((delivery(result,False,knee)/257).round().astype('uint8')).save(destination,compress_level=1)
+            Image.fromarray(np.rint(encode_sdr(result,knee=knee,exposure=view['exposure'])*255).astype('uint8')).save(destination,compress_level=1)
             if not before_cached:
-                Image.fromarray((delivery(convert(rgb,'linear-rec2020','linear-p3'),False,knee)/257).round().astype('uint8')).save(before_path,compress_level=1)
+                Image.fromarray(np.rint(encode_sdr(developed if view['comparison']=='film' else rgb,source_space='linear-p3' if view['comparison']=='film' else 'linear-rec2020',knee=knee,exposure=view['exposure'])*255).astype('uint8')).save(before_path,compress_level=1)
             return {'width':result.shape[1],'height':result.shape[0],'frame':index,'hdrEligible':finisher.hdr,
                     'processingSeconds':round(processed-started,4),'displaySeconds':round(time.monotonic()-processed,4),**stats}
         finally:cursor.close();finisher.close()
@@ -219,7 +222,7 @@ def render_clip_steps(source,recipe,destination,format_id='mp4',edge=None,start=
                         output=convert(rgb,'linear-rec2020','linear-p3') if before else finisher.frame(rgb,index)
                     if not np.isfinite(output).all():raise ValueError('Non-finite rendered pixels.')
                     output=np.pad(output,((0,height-output.shape[0]),(0,width-output.shape[1]),(0,0)),mode='edge')
-                    process.stdin.write(delivery(output,hdr,.7 if eligible else 1).tobytes())
+                    process.stdin.write(delivery(output,hdr,sdr_knee(recipe,eligible)).tobytes())
                     rendered+=1;progress(rendered/total)
                     yield
                 process.stdin.close()

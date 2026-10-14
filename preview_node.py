@@ -64,7 +64,7 @@ class FotufilmStudio(io.ComfyNode):
                     io.Float.Input('fps', default=24, min=1, max=120, advanced=True),
                     io.Video.Input('rendered_preview', optional=True, advanced=True), io.Video.Input('enhanced_source', optional=True, advanced=True),
                     HDRMaster.Input('master', optional=True, advanced=True), io.Image.Input('images', optional=True),
-                    io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020'], default='linear-acescg', optional=True, advanced=True)],
+                    io.Combo.Input('input_color_space', options=['linear-acescg','linear-rec709','linear-rec2020','linear-p3'], default='linear-acescg', optional=True, advanced=True)],
             outputs=[io.Video.Output('source_video'), io.String.Output('recipe_json'), StudioContext.Output('studio'), HDRMaster.Output('master')],
         )
 

@@ -20,12 +20,8 @@ def delivery(linear_p3, hdr, knee):
         light = np.clip(light, 0, 1)
         encoded = np.where(light <= 1 / 12, np.sqrt(3 * light), .17883277 * np.log(np.maximum(12 * light - .28466892, 1e-8)) + .55991073)
     else:
-        light = linear_p3 @ P3_TO_709.T
-        if 0 <= knee < 1:
-            over = np.maximum(light - knee, 0)
-            light = np.where(light > knee, knee + (1 - knee) * over / (over + 1 - knee), light)
-        light = np.clip(light, 0, 1)
-        encoded = np.where(light <= .0031308, light * 12.92, 1.055 * light ** (1 / 2.4) - .055)
+        from .display_transform import encode_sdr
+        encoded = encode_sdr(linear_p3, knee=knee)
     return np.rint(np.clip(encoded, 0, 1) * 65535).astype('<u2')
 
 

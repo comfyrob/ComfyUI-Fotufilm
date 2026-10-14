@@ -29,7 +29,7 @@ JOBS=OrderedDict()
 CLIENTS={}
 LOCK=threading.RLock()
 LIMIT=2*1024**3
-PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','vendor/gear_grading.py'))).hexdigest()
+PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('display_transform.py','finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','vendor/gear_grading.py'))).hexdigest()
 RUNTIME=None
 TENSOR_LIMIT=8*1024**3
 
@@ -149,7 +149,7 @@ def execute_job(job,asset,recipe,mode,edge,index,format_id):
     finally:steps.close()
 
 
-def execute_job_steps(job,asset,recipe,mode,edge,index,format_id,start=0,export_count=None):
+def execute_job_steps(job,asset,recipe,mode,edge,index,format_id,start=0,export_count=None,view=None):
     def interrupt():
         if job['cancel'].is_set():raise InterruptedError('Superseded or cancelled.')
     def progress(value):job['progress']=value
@@ -157,12 +157,14 @@ def execute_job_steps(job,asset,recipe,mode,edge,index,format_id,start=0,export_
         interrupt();job['status']='running';started=time.monotonic()
         job['queueSeconds']=round(started-job.get('submitted',started),3)
         source=asset['source'];root=cache_root()
-        key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],recipe,mode,edge,index if mode=='frame' else 0,format_id,start,export_count],sort_keys=True).encode()).hexdigest()
+        from .display_transform import validate_view
+        view=validate_view(view)
+        key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],recipe,mode,edge,index if mode=='frame' else 0,format_id,start,export_count,view if mode=='frame' else None],sort_keys=True).encode()).hexdigest()
         extension='.png' if mode=='frame' else '.mov' if format_id=='prores422hq' else '.mp4'
         destination=root/(key+extension)
         before_path=root/(key+'-before'+extension)
         if mode=='frame':
-            before_key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],edge,index,hdr_eligible(recipe),'before-frame']).encode()).hexdigest()
+            before_key=hashlib.sha256(json.dumps([PIPELINE_SIGNATURE,asset['fingerprint'],edge,index,recipe if view['comparison']=='film' else [recipe.get('sdr_output','legacy'),hdr_eligible(recipe)],view,'before-frame']).encode()).hexdigest()
             before_path=root/(before_key+'.png')
         if mode=='export':destination=Path(folder_paths.get_output_directory())/f'fotufilm-{uuid.uuid4().hex}{extension}'
         job['_paths']={str(destination),str(before_path)}
@@ -174,7 +176,7 @@ def execute_job_steps(job,asset,recipe,mode,edge,index,format_id,start=0,export_
         if mode=='frame':
             if not destination.is_file() or not before_path.is_file():
                 info.update(render_still(source,recipe,destination,before_path,index,edge,
-                                         runtime=runtime,fingerprint=asset['fingerprint'],reuse_before=True))
+                                         runtime=runtime,fingerprint=asset['fingerprint'],reuse_before=True,view=view))
             interrupt()
             result={'after':descriptor(destination),'before':descriptor(before_path),'frame':index}
         else:
@@ -295,6 +297,8 @@ def install_routes():
             if format_id not in ('mp4','prores422hq','hlg'):raise ValueError('Unsupported export format.')
             from .export_range import export_range
             start,count=export_range(asset['source'].info,value.get('range','full'),value.get('start',0)) if mode=='export' else (0,None)
+            from .display_transform import validate_view
+            view=validate_view(value.get('view'))
             client=value.get('client')
             if not isinstance(client,str) or not 1<=len(client)<=128:raise ValueError('Invalid editor session.')
             with LOCK:
@@ -310,7 +314,7 @@ def install_routes():
                     if JOBS[old]['status'] not in ('queued','running'):JOBS.pop(old)
                 while len(CLIENTS)>128:CLIENTS.pop(next(iter(CLIENTS)))
                 priority=(30 if value.get('channel')=='looks' else 0) if mode=='frame' else 10 if mode=='clip' else 20
-                job['future']=EXECUTOR.submit(priority,execute_job_steps,job,asset,recipe,mode,edge,index,format_id,start,count)
+                job['future']=EXECUTOR.submit(priority,execute_job_steps,job,asset,recipe,mode,edge,index,format_id,start,count,view)
             return web.json_response({'job':job['id']})
         except (ValueError,KeyError,TypeError) as error:return web.json_response({'error':str(error)},status=400)
 

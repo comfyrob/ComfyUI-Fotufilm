@@ -2,11 +2,14 @@ import { app } from '../../scripts/app.js';
 import { api } from '../../scripts/api.js';
 import { createStudio } from './viewer/studio.js';
 import { baseRecipe, filmName } from './viewer/model.js';
+import {composeGrade,gradeOverrides} from './viewer/stage-recipe.js';
 import { createPreviewClient } from './viewer/preview-client.js';
 
 const BASE = new URL('.', import.meta.url);
 const stylesheet = document.createElement('link');
 stylesheet.rel='stylesheet';stylesheet.href=new URL('viewer/studio.css',BASE).href;document.head.append(stylesheet);
+const studioTypes=new Set(['FotufilmStudio','FotufilmFilmStudio','FotufilmColorGrade']);
+const isGrade=node=>node.comfyClass==='FotufilmColorGrade';
 const states=new Map();
 const returns=new Map();
 let active=null;
@@ -58,6 +61,21 @@ async function registerSource(node,mode){
 }
 function discoverSource(node){
   const state=states.get(node);if(!state||state.demo)return;
+  if(isGrade(node)){
+    const parent=inputNode(node,'recipe_json'),upstreamState=states.get(parent);
+    const sameInputs=upstreamState&&['video','images','master'].every(name=>inputNode(node,name)===inputNode(parent,name));
+    if(upstreamState?.media&&sameInputs){
+      const shared=upstreamState.assets[upstreamState.sourceMode];
+      const key=JSON.stringify([upstreamState.media,upstreamState.sourceMode,shared?.asset]);
+      if(key!==state.inheritedMediaKey){
+        state.inheritedMediaKey=key;setMedia(node,upstreamState.media);
+        if(shared){state.sourceMode=upstreamState.sourceMode;state.assets[state.sourceMode]=shared;state.editor?.setAsset(shared);if(active?.node===node)active.editor.setAsset(shared);}
+      }
+    }
+    const base=upstreamRecipe(node),key=JSON.stringify(base);
+    if(key!==state.baseKey){state.baseKey=key;state.editor?.setBaseRecipe(base);if(active?.node===node)active.editor.setBaseRecipe(base);}
+    if(upstreamState?.media&&sameInputs)return;
+  }
   const upstream=inputNode(node,'video');
   const source=(upstream?.comfyClass==='LoadVideo'?fileWidget(upstream):outputFile(upstream));
   const key=JSON.stringify(source);
@@ -76,16 +94,35 @@ function viewURL(file){
   if(!file?.filename||!['temp','input','output'].includes(file.type))return '';
   return api.apiURL(`/view?${new URLSearchParams({filename:file.filename,subfolder:file.subfolder||'',type:file.type})}`);
 }
-function readRecipe(node){
+function storedRecipe(node){
   try{const recipe=JSON.parse(node.widgets?.find(w=>w.name==='recipe_json')?.value);if(recipe.version===2&&recipe.params&&recipe.profile)return recipe;}catch{}
   return baseRecipe();
 }
-function saveRecipe(node,recipe,lookId){
-  const widget=node.widgets?.find(w=>w.name==='recipe_json');
-  if(widget){widget.value=JSON.stringify(recipe);widget.callback?.(widget.value);}
+function upstreamRecipe(node){
+  const source=inputNode(node,'recipe_json');
+  if(source&&studioTypes.has(source.comfyClass))return states.get(source)?.draft||readRecipe(source);
+  return storedRecipe(node);
+}
+function readRecipe(node){
+  if(!isGrade(node))return storedRecipe(node);
+  let changes={};try{changes=JSON.parse(node.widgets?.find(w=>w.name==='adjustments_json')?.value||'{}');}catch{}
+  return composeGrade(upstreamRecipe(node),changes);
+}
+function notifyRecipe(node,recipe,adjustments){
+  const state=states.get(node);if(state){state.draft=recipe;if(adjustments)state.adjustments=adjustments;}
+  for(const [target,child] of states){
+    if(!isGrade(target)||inputNode(target,'recipe_json')!==node)continue;
+    const key=JSON.stringify(recipe);if(key===child.baseKey)continue;child.baseKey=key;
+    child.editor?.setBaseRecipe(recipe);if(active?.node===target)active.editor.setBaseRecipe(recipe);
+  }
+}
+function saveRecipe(node,recipe,lookId,adjustments){
+  if(isGrade(node)){const parent=inputNode(node,'recipe_json');const parentState=states.get(parent);if(parentState?.draft)saveRecipe(parent,parentState.draft,parent.properties?.fotufilm_studio_look);}
+  const widget=node.widgets?.find(w=>w.name===(isGrade(node)?'adjustments_json':'recipe_json'));
+  if(widget){widget.value=JSON.stringify(isGrade(node)?(adjustments||states.get(node)?.adjustments||gradeOverrides(upstreamRecipe(node),recipe)):recipe);widget.callback?.(widget.value);}
   node.properties||={};node.properties.fotufilm_studio_look=lookId;
   const state=states.get(node);if(state)state.caption.textContent=`${filmName(recipe.stock)} · recipe saved`;
-  node.setDirtyCanvas?.(true,true);app.graph?.change?.();
+  notifyRecipe(node,recipe);node.setDirtyCanvas?.(true,true);app.graph?.change?.();
 }
 function mediaOptions(node){
   const media=states.get(node)?.media||{},demo=Boolean(node.properties?.fotufilm_interface_demo);
@@ -98,7 +135,11 @@ function mediaOptions(node){
 }
 function makeEditor(node,onClose,initial={}){
   const state=states.get(node);
-  return createStudio({...mediaOptions(node),...initial,onClose,onSave:(recipe,look)=>saveRecipe(node,recipe,look),
+  return createStudio({...mediaOptions(node),...(state.draft?{recipe:state.draft}:{}),...initial,onClose,onSave:(recipe,look,adjustments)=>saveRecipe(node,recipe,look,adjustments),
+    editorMode:isGrade(node)?'grade':node.comfyClass==='FotufilmFilmStudio'?'film':'studio',
+    baseRecipe:isGrade(node)?upstreamRecipe(node):null,
+    adjustments:isGrade(node)?state.adjustments||JSON.parse(node.widgets?.find(w=>w.name==='adjustments_json')?.value||'{}'):undefined,
+    onChange:(recipe,adjustments)=>notifyRecipe(node,recipe,adjustments),
     preview:state.demo?null:state.preview,
     onSourceMode:mode=>{if(state.sourceMode!==mode)registerSource(node,mode);},
     onUpload:async file=>{
@@ -166,8 +207,8 @@ setInterval(()=>{for(const [node] of states)discoverSource(node);},750);
 app.registerExtension({
   name:'comfyrob.fotufilm.studio',
   nodeCreated(node){
-    if(node.comfyClass!=='FotufilmStudio'||states.has(node))return;
-    const recipe=node.widgets?.find(w=>w.name==='recipe_json');if(recipe)recipe.hidden=true;
+    if(!studioTypes.has(node.comfyClass)||states.has(node))return;
+    for(const name of ['recipe_json','adjustments_json']){const widget=node.widgets?.find(w=>w.name===name);if(widget)widget.hidden=true;}
     const monitor=document.createElement('div');monitor.className='ff-node-monitor';
     const compact=document.createElement('div');compact.className='ff-node-compact';
     const video=document.createElement('video');video.controls=true;video.playsInline=true;video.muted=true;video.loop=true;video.preload='metadata';
@@ -198,8 +239,8 @@ app.registerExtension({
     for(const output of Object.values(outputs))if(output?.fotufilm_review)handleOutput(null,output);
   },
   commands:[{id:'fotufilm.openStudio',label:'Fotufilm: open selected studio',function(){
-    const node=Object.values(app.canvas?.selected_nodes||{}).find(n=>n.comfyClass==='FotufilmStudio');
+    const node=Object.values(app.canvas?.selected_nodes||{}).find(n=>studioTypes.has(n.comfyClass));
     if(node)openStudio(node);else app.extensionManager.toast.add({severity:'info',summary:'Select a Fotufilm Studio node',life:4000});
   }}],
-  getNodeMenuItems(node){return node.comfyClass==='FotufilmStudio'?[{content:'Open Fotufilm studio',callback:()=>openStudio(node)},{content:'Expand film editor in node',callback:()=>expandStudio(node,true)}]:[];},
+  getNodeMenuItems(node){return studioTypes.has(node.comfyClass)?[{content:'Open Fotufilm studio',callback:()=>openStudio(node)},{content:'Expand film editor in node',callback:()=>expandStudio(node,true)}]:[];},
 });
