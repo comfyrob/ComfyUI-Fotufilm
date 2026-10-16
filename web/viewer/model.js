@@ -7,6 +7,15 @@ export const films = [
   ['cinestill800t', 'CineStill 800T', 'Night and mixed light'],
   ['ektachromee100', 'Ektachrome E100', 'Direct-view slide film'],
   ['trix400', 'Tri-X 400', 'Black and white'],
+  ['provia100f', 'Provia 100F', 'Balanced slide color'],
+  ['velvia50', 'Velvia 50', 'Rich landscape color'],
+  ['astia100f', 'Astia 100F', 'Soft slide color'],
+  ['pro400h', 'Pro 400H', 'Gentle portrait color'],
+  ['eterna500', 'Eterna 500', 'Soft cinema contrast'],
+  ['ektar100', 'Ektar 100', 'Vivid, fine-grain negative'],
+  ['superia400', 'Superia 400', 'Everyday negative color'],
+  ['acros100', 'Acros 100', 'Fine monochrome texture'],
+  ['doublex5222', 'Double-X', 'Classic cinema monochrome'],
 ];
 export const formats = [['super8', 'Super 8'], ['16mm', '16mm'], ['super35', 'Super 35'], ['35mm', '35mm'], ['120', 'Medium']];
 export function neutralGrade(){return {exposure:0,temperature:0,tint:0,contrast:1,pivot:.18,shadows:0,highlights:0,saturation:1,vibrance:0,lift:[0,0,0],gamma:[1,1,1],gain:[1,1,1],offset:[0,0,0]};}
@@ -41,17 +50,31 @@ export const looks = [
   { id: 'everyday-35', name: 'Everyday 35', note: 'Punchy color, familiar grain', film:'gold200', format:'35mm', params:{grain:.7}, grading:{finish:{contrast:1.04,saturation:1.08,vibrance:.08}} },
   { id: 'documentary-16', name: 'Documentary 16', note: 'Restrained color, tactile grain', film:'vision250d', format:'16mm', params:{grain:.85}, grading:{finish:{contrast:1.04,saturation:.82,temperature:-.025}} },
   { id: 'soft-silver', name: 'Soft silver', note: 'Gentle monochrome, fine grain', film:'trix400', format:'120', params:{grain:.3}, profile:{screenGrade:1.65}, grading:{finish:{contrast:.92,shadows:.08}} },
+  { id:'balanced-slide',name:'Balanced slide',note:'Natural color, open highlights',film:'provia100f',reference:'reference-exposure',params:{grain:.35} },
+  { id:'lush-landscape',name:'Lush landscape',note:'Rich greens, deep blues',film:'velvia50',reference:'reference-exposure',params:{grain:.3},grading:{finish:{saturation:1.04}} },
+  { id:'soft-slide',name:'Soft slide',note:'Gentle color, smooth contrast',film:'astia100f',reference:'reference-exposure',params:{grain:.3},grading:{finish:{contrast:.96}} },
+  { id:'garden-portrait',name:'Garden portrait',note:'Soft greens, delicate color',film:'pro400h',format:'120',params:{grain:.3},grading:{finish:{contrast:.94,saturation:.94}} },
+  { id:'quiet-cinema',name:'Quiet cinema',note:'Soft contrast, restrained color',film:'eterna500',params:{grain:.4},grading:{finish:{contrast:.96,saturation:.94}} },
+  { id:'vivid-negative',name:'Vivid negative',note:'Bold color, fine texture',film:'ektar100',format:'35mm',params:{grain:.3} },
+  { id:'weekend-400',name:'Weekend 400',note:'Everyday color, visible grain',film:'superia400',format:'35mm',params:{grain:.7} },
+  { id:'small-town',name:'Small-town 16',note:'Soft color, close-up texture',film:'eterna500',format:'16mm',params:{grain:.8},grading:{finish:{saturation:.85}} },
+  { id:'fine-mono',name:'Fine monochrome',note:'Clean detail, quiet grain',film:'acros100',format:'120',params:{grain:.25} },
+  { id:'classic-cinema',name:'Classic cinema',note:'Deep monochrome, cinema grain',film:'doublex5222',params:{grain:.65},grading:{finish:{contrast:1.05}} },
+  { id:'summer-eight',name:'Summer 8',note:'Sunlit color, small-film texture',film:'gold200',format:'super8',params:{temperature:7200,grain:.8},profile:{screenGrade:1.7},grading:{finish:{contrast:.94,saturation:.95}} },
+  { id:'overcast-day',name:'Overcast day',note:'Soft light, subtle cool color',film:'pro400h',params:{grain:.4},grading:{finish:{contrast:.91,temperature:-.025,saturation:.92}} },
 ];
 // Browsing groups only: filtering never changes a recipe or the current look.
 export const lookGroups = [
   ['all','All', looks.map(look=>look.id)],
-  ['cinema','Cinema',['clean','night','print','neon','editorial','chrome-road','silver-print','tungsten-print']],
-  ['portrait','Portrait',['warm','pastel','soft-window','rose-portrait']],
-  ['slide','Slide',['slide','vivid-daylight','cool-slide','amber-slide']],
-  ['vintage','Vintage',['eight','golden','faded-travel','everyday-35','documentary-16']],
-  ['mono','B&W',['silver','noir','soft-silver']],
+  ['cinema','Cinema',['clean','night','print','neon','editorial','chrome-road','silver-print','tungsten-print','quiet-cinema']],
+  ['portrait','Portrait',['warm','pastel','soft-window','rose-portrait','garden-portrait','overcast-day']],
+  ['slide','Slide',['slide','vivid-daylight','cool-slide','amber-slide','balanced-slide','lush-landscape','soft-slide']],
+  ['vintage','Vintage',['eight','golden','faded-travel','everyday-35','documentary-16','weekend-400','small-town','summer-eight','vivid-negative']],
+  ['mono','B&W',['silver','noir','soft-silver','fine-mono','classic-cinema']],
 ];
+export const starterLooks = ['clean','warm','night','eight','balanced-slide','quiet-cinema','garden-portrait','fine-mono'];
 export function looksInGroup(id) {
+  if(id==='starter')return starterLooks.map(id=>looks.find(look=>look.id===id));
   const ids = (lookGroups.find(group=>group[0]===id) || lookGroups[0])[2];
   return looks.filter(look=>ids.includes(look.id));
 }

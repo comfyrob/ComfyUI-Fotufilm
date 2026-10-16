@@ -84,7 +84,8 @@ class FotufilmDevelopFrames(io.ComfyNode):
                 io.Combo.Input("input_color_space", options=["sRGB", "linear Rec.709", "linear Rec.2020", "linear Display P3", "linear ACEScg"]),
                 io.Int.Input("seed", default=0, min=0, max=2147483647),
                 io.Int.Input("start_frame", default=0, min=0)],
-            outputs=[io.Image.Output("linear_p3"), io.String.Output("color_space")])
+            outputs=[io.Image.Output("linear_p3"), io.String.Output("color_space"),
+                io.Image.Output("sdr_images", tooltip="Finished sRGB frames using the same display transform as the normal Studio preview. Connect to core Create Video with color_space sRGB.")])
 
     @classmethod
     def execute(cls, images, recipe_json, input_color_space, seed, start_frame):
@@ -109,7 +110,11 @@ class FotufilmDevelopFrames(io.ComfyNode):
                     rgb=convert(rgb,spaces[input_color_space],'linear-rec2020')
                     frames.append(torch.from_numpy(finisher.frame(rgb,start_frame+index)))
             finally:finisher.close()
-        return io.NodeOutput(torch.stack(frames).to(images.device),'linear Display P3')
+        from .display_transform import encode_sdr, sdr_knee
+        from .finish_pipeline import hdr_eligible
+        linear=torch.stack(frames).to(images.device)
+        sdr=encode_sdr(linear,knee=sdr_knee(recipe,hdr_eligible(recipe)))
+        return io.NodeOutput(linear,'linear Display P3',sdr)
 
 
 

@@ -2,9 +2,11 @@
 
 ## Start with one graph
 
-Open **[SDR / NVIDIA / LTX HDR → Film + Color](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20or%20LTX%20HDR%20-%20Film%20%2B%20Grade.json)**. Choose Original SDR, NVIDIA HDR or the unchanged LTX 2.5 reconstruction, then edit Film and Color separately. Only the selected source branch executes. The graph includes optional native EXR saves and a beginner guide. **[SDR / NVIDIA only](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20HDR%20-%20Film%20%2B%20Grade.json)** avoids requiring LTX models. [Read the workflow guide](docs/hdr-choice-workflow.md).
+Open **[SDR / NVIDIA / LTX HDR → Film + Color](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20or%20LTX%20HDR%20-%20Film%20%2B%20Grade.json)**. Core's **Use HDR?** switch selects SDR or HDR; **Use LTX?** selects NVIDIA (Off) or the unchanged LTX 2.5 reconstruction (On). Only the selected source branch executes. The graph includes optional native **Create Video → Save Video**, native EXR saves and a beginner guide. **[SDR / NVIDIA only](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20HDR%20-%20Film%20%2B%20Grade.json)** avoids requiring LTX models. Requires core with `ComfySwitchNode`, `ImageColorSpace` and the current native video nodes (validated at `98cc0bf`). [Read the workflow guide](docs/hdr-choice-workflow.md).
 
 Film and Color expose only their settings outputs. The shared live renderer applies them to the same source; the optional export renders full-resolution pixels. Existing Studio and split-editor workflows remain supported.
+
+Film opens expanded by default. Start with eight suggested looks, explore **36 curated recipes** or customize one of **16 stock profiles**. The selected look remains visible above the library; selecting another category does not change it. Grading wheels remain in the separate Color node. Native video saving uses the same SDR transform as the normal preview; EXRs retain linear float values. Native batch output uses more memory than the legacy frame-by-frame exporter.
 
 Film simulation and HDR video finishing custom nodes using the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine). Linux CUDA is pinned to **`9242d189`** with matching profiles; the CPU/Vulkan/macOS fallback remains **v1.11 (`f602857a`)**. This is an independent integration, not an official Fotufilm product. [Engine upgrade and validation](docs/engine-9242d189.md).
 
@@ -30,7 +32,7 @@ After updating an existing checkout, rerun `python custom_nodes/ComfyUI-Fotufilm
 
 | Node ID | Purpose |
 |---|---|
-| `FotufilmSelectSource` | Lazy Original SDR / NVIDIA HDR / LTX 2.5 HDR selector; expects linear Rec.709. |
+| `FotufilmSelectSource` | Legacy three-way selector; new workflows use core If/Else Switch nodes. |
 | `FotufilmLTXHDRDecode` | Upstream LTX HDR decode without an independent output/save trigger; enables lazy branch selection. |
 | `FotufilmLinearToRec709` | Explicit unclipped linear gamut conversion for shared processing and native EXR saving. |
 | `FotufilmFilmEditor` | Film/look editor with one `film_settings` output. |
@@ -40,7 +42,7 @@ After updating an existing checkout, rerun `python custom_nodes/ComfyUI-Fotufilm
 | `FotufilmInspectFrame` | Save Still (EXR): optional full-resolution frame output, outside Studio. |
 | `FotufilmStudioReview` | Return a downstream render to its originating Studio without a graph cycle. |
 | `FotufilmDevelopVideo` | Optional final export of VIDEO or connected linear IMAGE frames; MP4, ProRes or eligible HLG. |
-| `FotufilmDevelopFrames` | Develop IMAGE frame batches; returns **linear Display P3 float** frames. |
+| `FotufilmDevelopFrames` | Develop once; returns **linear Display P3 float** frames and separate **sRGB SDR** frames for native Create Video. |
 | `FilmFinishHDRPad` | Pad video to LTX spatial / temporal alignment. |
 | `FilmFinishHDRRestore` | Crop reconstruction back to the original dimensions and frame count. |
 | `FilmFinishSaveHDRVideo` | Save linear frames as Rec.2020 HLG HEVC 10-bit with audio. |

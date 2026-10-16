@@ -146,9 +146,9 @@ test('filtering looks leaves the current recipe intact and requests only the vis
   assert.deepEqual(studio.getRecipe(),before);
   assert.equal(root.querySelector('[data-look-group="mono"]').getAttribute('aria-pressed'),'true');
   const visible=[...root.querySelectorAll('[data-look]')].filter(card=>!card.hidden);
-  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver']);
+  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver','fine-mono','classic-cinema']);
   await new Promise(resolve=>setTimeout(resolve,180));
-  assert.deepEqual(requests,['trix400','trix400','trix400']);
+  assert.deepEqual(requests,['vision250d','trix400','trix400','trix400','acros100','doublex5222']);
   root.querySelector('[data-look="soft-silver"]').click();
   root.querySelector('[data-look-group="cinema"]').click();
   assert.equal(studio.getLookId(),'soft-silver');

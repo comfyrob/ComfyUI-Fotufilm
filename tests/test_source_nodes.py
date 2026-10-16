@@ -76,6 +76,35 @@ class SourceTests(unittest.TestCase):
                 self.assertTrue(executor.success,executor.status_messages)
                 self.assertEqual(calls,[index]);self.assertEqual(captured,[float(index)])
 
+    def test_native_switches_execute_only_the_selected_source(self):
+        import nodes
+        from comfy_extras.nodes_logic import SwitchNode
+        from execution import PromptExecutor
+        calls=[]
+        class Branch:
+            @classmethod
+            def INPUT_TYPES(cls):return {'required':{'value':('INT',)}}
+            RETURN_TYPES=('IMAGE',);FUNCTION='execute'
+            def execute(self,value):calls.append(value);return (torch.full((1,2,2,3),float(value)),)
+        class Sink:
+            @classmethod
+            def INPUT_TYPES(cls):return {'required':{'images':('IMAGE',)}}
+            RETURN_TYPES=();FUNCTION='execute';OUTPUT_NODE=True
+            def execute(self,images):return ()
+        class Server:
+            client_id=None
+            def send_sync(self,*args,**kwargs):pass
+        prompt={str(i):{'class_type':'SourceFixture','inputs':{'value':i}} for i in (1,2,3)}
+        prompt['4']={'class_type':'ComfySwitchNode','inputs':{'switch':False,'on_false':['2',0],'on_true':['3',0]}}
+        prompt['5']={'class_type':'ComfySwitchNode','inputs':{'switch':False,'on_false':['1',0],'on_true':['4',0]}}
+        prompt['6']={'class_type':'SourceSink','inputs':{'images':['5',0]}}
+        with patch.dict(nodes.NODE_CLASS_MAPPINGS,{'SourceFixture':Branch,'SourceSink':Sink,'ComfySwitchNode':SwitchNode}):
+            for hdr,ltx,expected in [(False,False,1),(False,True,1),(True,False,2),(True,True,3)]:
+                calls.clear();prompt['4']['inputs']['switch']=ltx;prompt['5']['inputs']['switch']=hdr
+                executor=PromptExecutor(Server(),cache_type=False,cache_args={'ram':0,'ram_inactive':0})
+                executor.execute(prompt,f'native-{hdr}-{ltx}',{},['6'])
+                self.assertTrue(executor.success,executor.status_messages);self.assertEqual(calls,[expected])
+
     def test_workflow_native_savers_and_ltx_definition(self):
         graph=json.loads((ROOT/'examples/Fotufilm - SDR or NVIDIA or LTX HDR - Film + Grade.json').read_text())
         before=json.loads((ROOT/'examples/Fotufilm - LTX HDR + Film + Color Grade - Modal.json').read_text())
@@ -99,4 +128,8 @@ class SourceTests(unittest.TestCase):
                 self.assertEqual(n['widgets_values'][1:],['exr','32-bit float','linear']);self.assertEqual(n['mode'],2)
         self.assertEqual(byid[12]['widgets_values'],['HDR PQ','linear'])
         self.assertNotIn('FilmFinishSaveHDRMaster',[n['type'] for n in graph['nodes']])
-        self.assertEqual(byid[15]['widgets_values'],['Original SDR'])
+        self.assertEqual(byid[15]['type'],'ComfySwitchNode');self.assertEqual(byid[15]['widgets_values'],[False])
+        self.assertEqual(byid[21]['type'],'ComfySwitchNode')
+        self.assertNotIn('FotufilmDevelopVideo',[n['type'] for n in graph['nodes']])
+        self.assertEqual(byid[20]['type'],'SaveVideo');self.assertEqual(byid[20]['mode'],2)
+        self.assertTrue(byid[2]['properties']['fotufilm_studio_expanded'])

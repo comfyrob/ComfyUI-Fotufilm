@@ -224,12 +224,14 @@ app.registerExtension({
       getMinHeight:()=>state.expanded?620:250,getHeight:()=>state.expanded?645:250});
     widget.onRemove=()=>{if(active?.node===node)active.close();state.editor?.dispose();state.preview.dispose();video.pause();video.removeAttribute('src');video.load();states.delete(node);};
     node.setSize([390,420]);
+    if(['FotufilmFilmEditor','FotufilmFilmStudio'].includes(node.comfyClass)&&node.properties?.fotufilm_studio_expanded!==false)expandStudio(node,true);
   },
   loadedGraphNode(node){
     const state=states.get(node);if(!state)return;
     state.demo=Boolean(node.properties?.fotufilm_interface_demo);
     if(state.demo){state.video.src=new URL('viewer/demo/source.mp4',BASE).href;state.caption.textContent='Interface preview · no generation required';}
-    if(node.properties?.fotufilm_studio_expanded)expandStudio(node,true,false);
+    const expanded=node.properties?.fotufilm_studio_expanded??['FotufilmFilmEditor','FotufilmFilmStudio'].includes(node.comfyClass);
+    if(state.expanded!==expanded)expandStudio(node,expanded,false);
     discoverSource(node);
   },
   onNodeOutputsUpdated(outputs){

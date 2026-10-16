@@ -1,7 +1,7 @@
 {
   "id": "942c0f11-f4c0-474d-a541-b74ab329ca6b",
   "revision": 0,
-  "last_node_id": 19,
+  "last_node_id": 20,
   "last_link_id": 22,
   "groups": [
     {
@@ -23,7 +23,7 @@
       "bounding": [
         1610,
         30,
-        1610,
+        2340,
         1000
       ],
       "color": "#384b43",
@@ -32,11 +32,11 @@
     },
     {
       "id": 3,
-      "title": "3 \u00b7 Optional outputs \u2014 enable only what you want to save",
+      "title": "3 \u00b7 Native outputs \u2014 unmute the save node you need",
       "bounding": [
-        3260,
+        3980,
         30,
-        1250,
+        1220,
         930
       ],
       "color": "#524335",
@@ -77,9 +77,8 @@
           "type": "VIDEO",
           "links": [
             1,
-            7,
-            10,
-            14
+            6,
+            9
           ],
           "slot_index": 0
         }
@@ -99,8 +98,8 @@
         100
       ],
       "size": [
-        390,
-        420
+        1100,
+        850
       ],
       "flags": {},
       "order": 0,
@@ -109,17 +108,17 @@
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 7
+          "link": 6
         },
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 8
+          "link": 7
         },
         {
           "name": "fps",
           "type": "FLOAT",
-          "link": 9,
+          "link": 8,
           "widget": {
             "name": "fps"
           }
@@ -130,14 +129,14 @@
           "name": "film_settings",
           "type": "STRING",
           "links": [
-            13
+            12
           ],
           "slot_index": 0
         }
       ],
       "properties": {
         "Node name for S&R": "FotufilmFilmEditor",
-        "fotufilm_studio_expanded": false
+        "fotufilm_studio_expanded": true
       },
       "widgets_values": [
         "{\"version\": 2, \"engine\": \"9242d189b6f8321a27c6f6a345aeb4e5991da569\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
@@ -147,85 +146,10 @@
       "title": "1 \u00b7 Film Emulation"
     },
     {
-      "id": 5,
-      "type": "FotufilmDevelopVideo",
-      "pos": [
-        3300,
-        100
-      ],
-      "size": [
-        370,
-        340
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "link": 14
-        },
-        {
-          "name": "recipe_json",
-          "type": "STRING",
-          "link": 15,
-          "widget": {
-            "name": "recipe_json"
-          }
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 16
-        },
-        {
-          "name": "fps",
-          "type": "FLOAT",
-          "link": 17,
-          "widget": {
-            "name": "fps"
-          }
-        },
-        {
-          "name": "studio",
-          "type": "FOTUFILM_STUDIO",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video",
-          "type": "VIDEO",
-          "links": [],
-          "slot_index": 0
-        },
-        {
-          "name": "resolved_recipe",
-          "type": "STRING",
-          "links": [],
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "FotufilmDevelopVideo"
-      },
-      "widgets_values": [
-        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
-        1,
-        "fixed",
-        "mp4",
-        24,
-        "linear-rec709",
-        false
-      ],
-      "title": "Optional \u00b7 Export finished video"
-    },
-    {
       "id": 9,
       "type": "FotufilmGradeEditor",
       "pos": [
-        2100,
+        2820,
         100
       ],
       "size": [
@@ -239,17 +163,17 @@
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 10
+          "link": 9
         },
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 11
+          "link": 10
         },
         {
           "name": "fps",
           "type": "FLOAT",
-          "link": 12,
+          "link": 11,
           "widget": {
             "name": "fps"
           }
@@ -257,7 +181,7 @@
         {
           "name": "recipe_json",
           "type": "STRING",
-          "link": 13,
+          "link": 12,
           "widget": {
             "name": "recipe_json"
           }
@@ -268,8 +192,7 @@
           "name": "finished_settings",
           "type": "STRING",
           "links": [
-            15,
-            20
+            19
           ],
           "slot_index": 0
         }
@@ -320,16 +243,18 @@
         {
           "name": "audio",
           "type": "AUDIO",
-          "links": [],
+          "links": [
+            15
+          ],
           "slot_index": 1
         },
         {
           "name": "fps",
           "type": "FLOAT",
           "links": [
-            9,
-            12,
-            17
+            8,
+            11,
+            14
           ],
           "slot_index": 2
         }
@@ -410,7 +335,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            6
+            22
           ],
           "slot_index": 0
         }
@@ -466,10 +391,10 @@
     },
     {
       "id": 15,
-      "type": "FotufilmSelectSource",
+      "type": "ComfySwitchNode",
       "pos": [
         1240,
-        360
+        520
       ],
       "size": [
         340,
@@ -480,42 +405,36 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "original",
+          "name": "on_false",
           "type": "IMAGE",
           "link": 5
         },
         {
-          "name": "nvidia",
+          "name": "on_true",
           "type": "IMAGE",
-          "link": 6
-        },
-        {
-          "name": "ltx",
-          "type": "IMAGE",
-          "link": null
+          "link": 22
         }
       ],
       "outputs": [
         {
-          "name": "linear_rec709",
+          "name": "output",
           "type": "IMAGE",
           "links": [
-            8,
-            11,
-            16,
-            18,
-            19
+            7,
+            10,
+            17,
+            18
           ],
           "slot_index": 0
         }
       ],
       "properties": {
-        "Node name for S&R": "FotufilmSelectSource"
+        "Node name for S&R": "ComfySwitchNode"
       },
       "widgets_values": [
-        "Original SDR"
+        false
       ],
-      "title": "1 \u00b7 Choose HDR method"
+      "title": "Use HDR? \u00b7 Off = original SDR"
     },
     {
       "id": 16,
@@ -535,7 +454,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 18
+          "link": 17
         }
       ],
       "outputs": [
@@ -561,8 +480,8 @@
       "id": 17,
       "type": "FotufilmDevelopFrames",
       "pos": [
-        3300,
-        600
+        4020,
+        100
       ],
       "size": [
         340,
@@ -575,12 +494,12 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 19
+          "link": 18
         },
         {
           "name": "recipe_json",
           "type": "STRING",
-          "link": 20,
+          "link": 19,
           "widget": {
             "name": "recipe_json"
           }
@@ -591,7 +510,7 @@
           "name": "linear_p3",
           "type": "IMAGE",
           "links": [
-            21
+            20
           ],
           "slot_index": 0
         },
@@ -600,6 +519,14 @@
           "type": "STRING",
           "links": [],
           "slot_index": 1
+        },
+        {
+          "name": "sdr_images",
+          "type": "IMAGE",
+          "links": [
+            13
+          ],
+          "slot_index": 2
         }
       ],
       "properties": {
@@ -612,13 +539,13 @@
         "fixed",
         0
       ],
-      "title": "Render finished frames"
+      "title": "Render film + color at full resolution"
     },
     {
       "id": 18,
       "type": "FotufilmLinearToRec709",
       "pos": [
-        3700,
+        4420,
         600
       ],
       "size": [
@@ -632,7 +559,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 21
+          "link": 20
         }
       ],
       "outputs": [
@@ -640,7 +567,7 @@
           "name": "linear_rec709",
           "type": "IMAGE",
           "links": [
-            22
+            21
           ],
           "slot_index": 0
         }
@@ -657,7 +584,7 @@
       "id": 19,
       "type": "SaveImageAdvanced",
       "pos": [
-        4100,
+        4820,
         600
       ],
       "size": [
@@ -671,7 +598,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 22
+          "link": 21
         }
       ],
       "outputs": [
@@ -694,6 +621,94 @@
       "title": "Optional \u00b7 Save finished EXR sequence"
     },
     {
+      "id": 5,
+      "type": "CreateVideo",
+      "pos": [
+        4420,
+        100
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 14,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        24,
+        "auto",
+        "sRGB",
+        "none"
+      ],
+      "title": "Create finished video \u00b7 SDR"
+    },
+    {
+      "id": 20,
+      "type": "SaveVideo",
+      "pos": [
+        4820,
+        100
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 2,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 16
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "fotufilm/finished",
+        "mp4",
+        "h264",
+        "auto"
+      ],
+      "title": "Optional \u00b7 Save finished video"
+    },
+    {
       "id": 8,
       "type": "MarkdownNote",
       "pos": [
@@ -713,7 +728,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Start here: finish your video\n\n## 1. Choose your source\n\nLoad your video, then choose **Original SDR**, **NVIDIA HDR**, or **LTX 2.5 HDR** in **Choose HDR Method**. Run the workflow once to prepare the selected source for both editors.\n\n- **Original SDR:** no HDR generation. Start here for ordinary film finishing.\n- **NVIDIA HDR:** enhances SDR with RTX Video HDR. Its contrast/saturation controls shape the source; the later Color Grade node shapes your finished look.\n- **LTX 2.5 HDR:** our generative reconstruction workflow. It can infer new highlight detail and can also change details. Its models and sampling remain intact. A small on-demand adapter calls the same upstream HDR decoder without its independent save/output trigger, so selecting another source does not run LTX.\n\nOnly the selected image branch is requested. Do not add active save/preview outputs directly to an unselected branch: output nodes can independently make that branch execute. Keep LTX seeds fixed to reuse cached results. Selecting a different method is a source-processing decision, not an instant display toggle. A cache hit can reuse previously processed frames; a restart or cache eviction cannot.\n\nThe combined example requires both NVIDIA and LTX packs and the LTX model files. Use the SDR/NVIDIA-only example if you do not have LTX installed. The HDR method selector does not hide missing-node or missing-model validation errors. Heavy processing belongs on your remote GPU environment, not your Mac.\n\n## 2. Choose a look, then adjust color\n\nOpen **Film Emulation** and choose a Look. A Look is a complete starting recipe: film stock, print response, texture and default colors. Film stock is one ingredient, not another competing preset.\n\nOpen **Color Grade** to adjust the finished result. Exposure changes brightness, warmth/tint balance color, and the wheels tint shadows, midtones and highlights. Small changes are usually enough. Reset restores the selected look's defaults.\n\nFilm and Grade receive the **same prepared image frames**. The wire between them carries **settings**, not rendered video. The shared renderer combines those settings for preview and export; this avoids developing a whole video just to open the next node. Film edits update a directly connected Grade editor. Click **Save to node** before a queued export or saving the workflow so the graph uses your latest choices.\n\nThe new Film node exposes only `film_settings`; Color exposes only `finished_settings`. Both are saved settings (Comfy STRING), not video or pixel buffers. Older Studio/Film Emulation/Color Grade nodes remain available for saved workflows, with their original ports. The new workflow needs neither a session wire nor a custom HDR master type.\n\n## 3. Understand what the viewer shows\n\nChoose **640 Fast** or **960 Balanced** for a smaller preview. **1280 Detailed** and **1920 Inspect** help judge texture. These sizes are the longest edge, capped at the source size. They do not change your saved resolution or source frame rate. Smaller previews make fine grain harder to judge; they do not promise a fixed playback speed.\n\nThe current player displays an **SDR representation**, even when the source contains HDR. HDR data remains in the processing pipeline; a brighter HDR-capable monitor alone does not make this transport HDR.\n\n**Before / after** compares the same source frame. In Color Grade, Before is the film result before finishing adjustments; After is your grade. In Film Emulation, Before is the prepared source. This is not a comparison between NVIDIA and LTX.\n\n**Inspect HDR** contains optional viewing tools. **Processing stage** selects source, film or final result. **Preview brightness** temporarily reveals bright/dark detail without changing your grade or export. **Display mapping** chooses how bright values fit onto the SDR screen. For the ordinary finished preview, use **SDR output**, **Finished result**, and **0 EV**. Actual Exposure in Color Grade does affect the export.\n\n## 4. Save only what you need\n\n- **Export finished video:** enable its `enabled` control and run. It renders the original-resolution selected source with the saved film and grade, retaining the original audio and frame rate. Disable it again when you only want to prepare/edit a source. MP4 is the ordinary SDR choice. HDR HLG currently requires a supported direct-view slide-film finish; an HDR source alone does not guarantee an HDR output.\n- **Save source EXR sequence:** unmute this native Save Image (Advanced) node and run. It saves the selected source before film and grade. It does not archive every HDR method. In Original SDR mode, float EXR does not invent extra highlight detail.\n- **Save finished EXR sequence:** unmute its native save node and run. The render branch applies film and grade at original resolution, then saves linear frames before the SDR display transform. This batch render can use substantial memory on long clips.\n\nThe two EXR save nodes start **muted**. Use the node's mode/menu to enable one, then mute it again afterward. Do not use bypass as an output toggle. EXRs are separate numbered frames, not a playable movie: retain the workflow, original video/audio and frame rate for later reassembly.\n\nBoth native savers are set to **EXR / 32-bit float / linear**. The preceding nodes explicitly convert to linear Rec.709, preserving negative and above-white values. Here Rec.709 describes RGB coordinates; it does not clamp the frames to SDR. Do not change the saver to `HDR`: in this core node that means HLG-encoded input, which these wires are not. NVIDIA uses PQ \u2192 linear through core; LTX uses ACEScg \u2192 linear Rec.709 after padding removal. Their different brightness models can produce different film responses.\n\nThe legacy **Archive HDR source** node bundles float frames, timing and the original video in a custom `.ffhdr.zip`. It remains available for existing workflows, but is unnecessary in this native EXR workflow.\n"
+        "# Start here: finish your video\n\n## 1. Choose your source\n\nLoad your video, then use core's **If/Else Switch** nodes. Run once to prepare the selected source for both editors.\n\n| Source | Use HDR? | Use LTX? |\n| --- | --- | --- |\n| Original SDR | Off | Ignored |\n| NVIDIA HDR | On | Off |\n| LTX 2.5 HDR | On | On |\n\nThe SDR/NVIDIA example has just the first switch. `on_false` means Off; `on_true` means On. These are native, lazy switches: they request only the selected input. The old custom Choose HDR Method node remains compatible with older graphs but is no longer used here.\n\n- **Original SDR:** no HDR generation. Start here for ordinary film finishing.\n- **NVIDIA HDR:** enhances SDR with RTX Video HDR. Its contrast/saturation controls shape the source; the later Color Grade node shapes your finished look.\n- **LTX 2.5 HDR:** our generative reconstruction workflow. It can infer new highlight detail and can also change details. Its models and sampling remain intact. A small on-demand adapter calls the same upstream HDR decoder without its independent save/output trigger, so selecting another source does not run LTX.\n\nOnly the selected image branch is requested. Do not add active save/preview outputs directly to an unselected branch: output nodes can independently make that branch execute. Keep LTX seeds fixed to reuse cached results. Selecting a different method is a source-processing decision, not an instant display toggle. A cache hit can reuse previously processed frames; a restart or cache eviction cannot.\n\nThe combined example requires both NVIDIA and LTX packs and the LTX model files. Use the SDR/NVIDIA-only example if you do not have LTX installed. The HDR method selector does not hide missing-node or missing-model validation errors. Heavy processing belongs on your remote GPU environment, not your Mac.\n\n## 2. Choose a look, then adjust color\n\n**Film Emulation opens expanded.** Choose a Look from **Start here**, then explore the categories or **All**. There are 36 starting looks and 16 directly selectable stocks. These are independently authored Fotufilm recipes, not copies of Osmo presets or camera-manufacturer profiles. First-frame thumbnails are illustrative; use the playing viewer to judge your clip.\n\nA Look is a complete starting recipe: film stock, print response, texture and default colors. Film stock is one ingredient, not another competing preset. The pinned header keeps the selected look visible when you browse another category. **Modified** means you changed its recipe. The reset arrow returns to that look's defaults.\n\nOpen **Color Grade** to adjust the finished result. Exposure changes brightness, warmth/tint balance color, and the wheels tint shadows, midtones and highlights. Small changes are usually enough. Reset restores the selected look's defaults.\n\nFilm and Grade receive the **same prepared image frames**. The wire between them carries **settings**, not rendered video. The shared renderer combines those settings for preview and export; this avoids developing a whole video just to open the next node. Film edits update a directly connected Grade editor. Click **Save to node** before a queued export or saving the workflow so the graph uses your latest choices.\n\nThe new Film node exposes only `film_settings`; Color exposes only `finished_settings`. Both are saved settings (Comfy STRING), not video or pixel buffers. Older Studio/Film Emulation/Color Grade nodes remain available for saved workflows, with their original ports. The new workflow needs neither a session wire nor a custom HDR master type.\n\n## 3. Understand what the viewer shows\n\nChoose **640 Fast** or **960 Balanced** for a smaller preview. **1280 Detailed** and **1920 Inspect** help judge texture. These sizes are the longest edge, capped at the source size. They do not change your saved resolution or source frame rate. Smaller previews make fine grain harder to judge; they do not promise a fixed playback speed.\n\nThe current player displays an **SDR representation**, even when the source contains HDR. HDR data remains in the processing pipeline; a brighter HDR-capable monitor alone does not make this transport HDR.\n\n**Before / after** compares the same source frame. In Color Grade, Before is the film result before finishing adjustments; After is your grade. In Film Emulation, Before is the prepared source. This is not a comparison between NVIDIA and LTX.\n\n**Inspect HDR** contains optional viewing tools. **Processing stage** selects source, film or final result. **Preview brightness** temporarily reveals bright/dark detail without changing your grade or export. **Display mapping** chooses how bright values fit onto the SDR screen. For the ordinary finished preview, use **SDR output**, **Finished result**, and **0 EV**. Actual Exposure in Color Grade does affect the export.\n\n## 4. Save only what you need\n\n- **Save finished video:** unmute the native **Save Video** node and run. **Render film + color at full resolution** applies your saved recipe, then its `sdr_images` output feeds native **Create Video \u2192 Save Video**. The original audio and frame rate are connected. Create Video is set to **sRGB** because these frames already use the same SDR display transform as the normal editor preview. Do not relabel them HDR. This is an SDR delivery, including when you started with HDR.\n- **Save source EXR sequence:** unmute this native Save Image (Advanced) node and run. It saves the selected source before film and grade. It does not archive every HDR method. In Original SDR mode, float EXR does not invent extra highlight detail.\n- **Save finished EXR sequence:** unmute its native save node and run. The render branch applies film and grade at original resolution, then saves linear frames before the SDR display transform. This batch render can use substantial memory on long clips.\n\nAll three native save nodes start **muted**. Enable only the output you need, then mute it again afterward. Muted output branches do not render a final video while you are editing. Do not use bypass as an output toggle. EXRs are separate numbered frames, not a playable movie: retain the workflow, original video/audio and frame rate for later reassembly.\n\nNative video assembly holds the finished frame batch in memory, including linear and SDR copies. For long/high-resolution clips, the legacy **Fotufilm Develop Video** node remains a more memory-efficient frame-by-frame exporter and retains its ProRes/eligible HLG options. It is not required in this graph. Choosing native saving simplifies integration; it does not remove the cost of rendering the final frames.\n\nBoth native savers are set to **EXR / 32-bit float / linear**. The preceding nodes explicitly convert to linear Rec.709, preserving negative and above-white values. Here Rec.709 describes RGB coordinates; it does not clamp the frames to SDR. Do not change the saver to `HDR`: in this core node that means HLG-encoded input, which these wires are not. NVIDIA uses PQ \u2192 linear through core; LTX uses ACEScg \u2192 linear Rec.709 after padding removal. Their different brightness models can produce different film responses.\n\nThe legacy **Archive HDR source** node bundles float frames, timing and the original video in a custom `.ffhdr.zip`. It remains available for existing workflows, but is unnecessary in this native EXR workflow.\n\n## 5. Why the small color conversion remains\n\n\u201cLinear\u201d describes how brightness is encoded; it does not specify which red, green and blue coordinates are used. LTX's ACEScct decoder returns **linear ACEScg**. Core's `linear` means **linear Rec.709**. Our conversion changes those coordinates without clipping the highlight range. Current core accepts encoded ACEScct but does not offer raw linear ACEScg or linear Display P3 as input choices. Selecting ACEScct for an already-decoded linear image would decode it twice and produce wrong colors.\n\nThe [official LTX 2.5 Tiled Fusion HDR example](https://github.com/Lightricks/ComfyUI-LTXVideo/blob/master/example_workflows/2.5/HDR_workflows/LTX-2.5_V2V_TiledFusion_SDR_to_HDR.json) uses SDR \u2192 ACEScct preprocessing, generative sampling, LTX HDR decoding, EXR/HLG output and native Save Video for its preview. It does not contain a dedicated artistic color-grade or film-emulation stage. Its decoding is the basis for our HDR source, not a replacement for Fotufilm or the Color node. Our existing model and sampling settings are preserved; this update changes routing, editing and saving.\n"
       ],
       "title": "Start here \u00b7 Film, color and HDR explained"
     }
@@ -761,30 +776,22 @@
     ],
     [
       6,
-      12,
-      0,
-      15,
       1,
-      "IMAGE"
+      0,
+      2,
+      0,
+      "VIDEO"
     ],
     [
       7,
-      1,
+      15,
       0,
       2,
-      0,
-      "VIDEO"
+      1,
+      "IMAGE"
     ],
     [
       8,
-      15,
-      0,
-      2,
-      1,
-      "IMAGE"
-    ],
-    [
-      9,
       10,
       2,
       2,
@@ -792,23 +799,23 @@
       "FLOAT"
     ],
     [
-      10,
+      9,
       1,
       0,
       9,
       0,
       "VIDEO"
+    ],
+    [
+      10,
+      15,
+      0,
+      9,
+      1,
+      "IMAGE"
     ],
     [
       11,
-      15,
-      0,
-      9,
-      1,
-      "IMAGE"
-    ],
-    [
-      12,
       10,
       2,
       9,
@@ -816,7 +823,7 @@
       "FLOAT"
     ],
     [
-      13,
+      12,
       2,
       0,
       9,
@@ -824,55 +831,55 @@
       "STRING"
     ],
     [
-      14,
-      1,
-      0,
+      13,
+      17,
+      2,
       5,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      10,
+      2,
+      5,
+      1,
+      "FLOAT"
+    ],
+    [
+      15,
+      10,
+      1,
+      5,
+      2,
+      "AUDIO"
+    ],
+    [
+      16,
+      5,
+      0,
+      20,
       0,
       "VIDEO"
     ],
     [
-      15,
-      9,
-      0,
-      5,
-      1,
-      "STRING"
-    ],
-    [
-      16,
-      15,
-      0,
-      5,
-      2,
-      "IMAGE"
-    ],
-    [
       17,
-      10,
-      2,
-      5,
-      3,
-      "FLOAT"
+      15,
+      0,
+      16,
+      0,
+      "IMAGE"
     ],
     [
       18,
       15,
       0,
-      16,
+      17,
       0,
       "IMAGE"
     ],
     [
       19,
-      15,
-      0,
-      17,
-      0,
-      "IMAGE"
-    ],
-    [
-      20,
       9,
       0,
       17,
@@ -880,19 +887,27 @@
       "STRING"
     ],
     [
-      21,
+      20,
       17,
       0,
       18,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      18,
+      0,
+      19,
       0,
       "IMAGE"
     ],
     [
       22,
-      18,
+      12,
       0,
-      19,
-      0,
+      15,
+      1,
       "IMAGE"
     ]
   ]
