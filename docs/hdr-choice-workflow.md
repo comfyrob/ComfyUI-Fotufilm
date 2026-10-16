@@ -22,7 +22,7 @@ The combined example requires both NVIDIA and LTX packs and the LTX model files.
 
 ## 2. Choose a look, then adjust color
 
-**Film Emulation opens expanded.** Choose a Look from **Start here**, then explore the categories or **All**. There are 36 starting looks and 16 directly selectable stocks. These are independently authored Fotufilm recipes, not copies of Osmo presets or camera-manufacturer profiles. First-frame thumbnails are illustrative; use the playing viewer to judge your clip.
+**Film Emulation opens expanded.** The look library opens on **All**; use the categories to narrow it down. There are 36 starting looks and 16 directly selectable stocks. These are independently authored Fotufilm recipes, not copies of Osmo presets or camera-manufacturer profiles. First-frame thumbnails are illustrative; use the playing viewer to judge your clip.
 
 A Look is a complete starting recipe: film stock, print response, texture and default colors. Film stock is one ingredient, not another competing preset. The pinned header keeps the selected look visible when you browse another category. **Modified** means you changed its recipe. The reset arrow returns to that look's defaults.
 

@@ -6,7 +6,7 @@ Open **[SDR / NVIDIA / LTX HDR → Film + Color](examples/Fotufilm%20-%20SDR%20o
 
 Film and Color expose only their settings outputs. The shared live renderer applies them to the same source; the optional export renders full-resolution pixels. Existing Studio and split-editor workflows remain supported.
 
-Film opens expanded by default. Start with eight suggested looks, explore **36 curated recipes** or customize one of **16 stock profiles**. The selected look remains visible above the library; selecting another category does not change it. Grading wheels remain in the separate Color node. Native video saving uses the same SDR transform as the normal preview; EXRs retain linear float values. Native batch output uses more memory than the legacy frame-by-frame exporter.
+Film opens expanded by default. Browse **36 curated recipes** by category or customize one of **16 stock profiles**. The look library opens on **All**. The selected look remains visible above the library; selecting another category does not change it. Grading wheels remain in the separate Color node. Native video saving uses the same SDR transform as the normal preview; EXRs retain linear float values. Native batch output uses more memory than the legacy frame-by-frame exporter.
 
 Film simulation and HDR video finishing custom nodes using the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine). Linux CUDA is pinned to **`9242d189`** with matching profiles; the CPU/Vulkan/macOS fallback remains **v1.11 (`f602857a`)**. This is an independent integration, not an official Fotufilm product. [Engine upgrade and validation](docs/engine-9242d189.md).
 
@@ -104,7 +104,7 @@ Enable the archive branch to retain float EXRs and source audio for later sessio
 
 For explicit graph-based correction and saving, open **[Fotufilm - Balance + Studio + optional still - Modal.json](examples/Fotufilm%20-%20Balance%20%2B%20Studio%20%2B%20optional%20still%20-%20Modal.json)**. Balance Source applies Gear correction on linear frames before Studio. Changing this graph node requires Run; live finishing adjustments stay in Studio. Save final still is disabled by default and reads the same corrected source and Studio recipe. See [grading controls](docs/grading-controls.md) for wiring and saved-recipe compatibility.
 
-Use **Film Finish - Studio + LTX 2.5 HDR - Modal INT8.json** for the INT8 transformer and `ltx25/` LoRA paths already installed on Rob's Modal volume. The BF16 reference remains separate; the INT8 variant has not been inference-tested by this change.
+Use **Film Finish - Studio + LTX 2.5 HDR - Modal INT8.json** for the INT8 transformer and `ltx25/` LoRA paths already installed on Rob's Modal volume. The BF16 reference remains separate. The current combined graph's INT8 LTX branch passed a 97-frame, 1280×720 sampling/decode run after correcting the container's CUDA library search order; see [validation details](docs/cuda-runtime-troubleshooting.md).
 
 `Fotufilm - Finish saved HDR master.json` opens a durable master without any LTX nodes. Enter `folder/name.ffhdr.zip [output]` for an existing server output, or an input-folder path. `Fotufilm - Studio.json` is the smaller connected SDR-finishing workflow. The older grouped LTX lab and saved-master workflows remain available. For a durable handoff after a restart, upload a saved `.ffhdr.zip` to ComfyUI's input folder and set the Develop HDR Master `file` field under advanced inputs. A connected `master` takes precedence over `file`.
 
@@ -117,6 +117,8 @@ The pack includes same-origin `/fotufilm/` preview/export routes on your existin
 Clone a **commit SHA**, install `requirements.txt`, then execute `install.py` during image build. Installing only Python dependencies is insufficient: Fotufilm needs its native libraries and stock resources. The files live beside the pack in `linux-runtime/`; downloads are cached in `.runtime/`. Both directories are gitignored. The installer performs no model inference.
 
 Run `python scripts/check_runtime.py` for a build-time ABI check. On a GPU worker, `python scripts/check_runtime.py --render` also verifies engine initialization and video decoding. Run `python -m unittest discover -s tests` with ComfyUI's Python (plus `colour-science`) for float-master checks.
+
+If LTX fails before its first step with `CUBLAS_STATUS_NOT_INITIALIZED`, check for mixed CUDA libraries in the container image. See [CUDA runtime troubleshooting](docs/cuda-runtime-troubleshooting.md), which also distinguishes incomplete model downloads from sampling failures.
 
 ## License and attribution
 

@@ -72,9 +72,7 @@ export const lookGroups = [
   ['vintage','Vintage',['eight','golden','faded-travel','everyday-35','documentary-16','weekend-400','small-town','summer-eight','vivid-negative']],
   ['mono','B&W',['silver','noir','soft-silver','fine-mono','classic-cinema']],
 ];
-export const starterLooks = ['clean','warm','night','eight','balanced-slide','quiet-cinema','garden-portrait','fine-mono'];
 export function looksInGroup(id) {
-  if(id==='starter')return starterLooks.map(id=>looks.find(look=>look.id===id));
   const ids = (lookGroups.find(group=>group[0]===id) || lookGroups[0])[2];
   return looks.filter(look=>ids.includes(look.id));
 }
