@@ -180,3 +180,7 @@
 .ff-view-settings select,.ff-view-settings input{background:#27272a;color:#e4e4e7;border:1px solid #46464b;border-radius:7px;padding:5px 7px;font:inherit}
 .ff-view-settings input{width:60px}.ff-view-note{margin-left:auto}
 .ff-studio [hidden]{display:none!important}
+.ff-view-inspector{font-size:12px;color:var(--muted);padding:7px 0}
+.ff-view-inspector summary{cursor:pointer;padding:5px 0;color:var(--text)}
+.ff-view-inspector summary span{color:var(--muted);margin-left:8px;font-weight:400}
+.ff-view-inspector .ff-view-note{width:100%;margin-left:0}

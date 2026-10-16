@@ -29,7 +29,7 @@ JOBS=OrderedDict()
 CLIENTS={}
 LOCK=threading.RLock()
 LIMIT=2*1024**3
-PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('display_transform.py','finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','vendor/gear_grading.py'))).hexdigest()
+PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('display_transform.py','finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','runtime_paths.py','runtime/float-engine-lock.json','vendor/gear_grading.py'))).hexdigest()
 RUNTIME=None
 TENSOR_LIMIT=8*1024**3
 

@@ -1,13 +1,12 @@
 # ComfyUI-Fotufilm
 
-## Separate film and color grading
+## Start with one graph
 
-Use [Film + Color Grade](examples/Fotufilm%20-%20Film%20%2B%20Color%20Grade.json) for an SDR clip or [LTX HDR + Film + Color Grade](examples/Fotufilm%20-%20LTX%20HDR%20%2B%20Film%20%2B%20Color%20Grade%20-%20Modal.json) for the pinned Modal HDR workflow. These are ComfyUI custom nodes with a shared live player, separate film/grade controls, and explicit SDR viewing controls. [Read the color contract and graph guide](docs/split-film-and-grade.md).
+Open **[SDR / NVIDIA / LTX HDR → Film + Color](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20or%20LTX%20HDR%20-%20Film%20%2B%20Grade.json)**. Choose Original SDR, NVIDIA HDR or the unchanged LTX 2.5 reconstruction, then edit Film and Color separately. Only the selected source branch executes. The graph includes optional native EXR saves and a beginner guide. **[SDR / NVIDIA only](examples/Fotufilm%20-%20SDR%20or%20NVIDIA%20HDR%20-%20Film%20%2B%20Grade.json)** avoids requiring LTX models. [Read the workflow guide](docs/hdr-choice-workflow.md).
 
-Film and Grade output recipes; the optional export applies the final recipe once to the source. No extra HDR archive or full-video render is required just to edit colors. Existing Studio examples remain supported.
+Film and Color expose only their settings outputs. The shared live renderer applies them to the same source; the optional export renders full-resolution pixels. Existing Studio and split-editor workflows remain supported.
 
-
-Film simulation and HDR video finishing nodes for ComfyUI, extracted from Film Finish. Uses the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine), pinned to **v1.11** (`f602857a031a6a9c9b0966284ff989eb3046c323`). This is an independent integration, not an official Fotufilm product.
+Film simulation and HDR video finishing custom nodes using the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine). Linux CUDA is pinned to **`9242d189`** with matching profiles; the CPU/Vulkan/macOS fallback remains **v1.11 (`f602857a`)**. This is an independent integration, not an official Fotufilm product. [Engine upgrade and validation](docs/engine-9242d189.md).
 
 ## Install
 
@@ -19,7 +18,7 @@ python -m pip install -r custom_nodes/ComfyUI-Fotufilm/requirements.txt
 python custom_nodes/ComfyUI-Fotufilm/install.py
 ```
 
-Restart ComfyUI after installation. Do not install this alongside the original local `film_finish` pack: their node IDs overlap.
+After updating an existing checkout, rerun `python custom_nodes/ComfyUI-Fotufilm/install.py` to update the native engine and profiles. Restart ComfyUI after installation. Do not install this alongside the original local `film_finish` pack: their node IDs overlap.
 
 **Linux:** x86-64, Ubuntu 24.04 / compatible glibc 2.39 environment. The installer downloads checksum-pinned Fotufilm, FFmpeg and system libraries, extracts the required runtime and film profiles, and verifies the native dependency closure. It does not download model weights or install a desktop application. CUDA hosts use this pack’s additive float-memory engine; Vulkan/CPU hosts retain the upstream engine. The build-time check validates loading without rendering; test execution on the GPU worker too.
 
@@ -31,6 +30,10 @@ Restart ComfyUI after installation. Do not install this alongside the original l
 
 | Node ID | Purpose |
 |---|---|
+| `FotufilmSelectSource` | Lazy Original SDR / NVIDIA HDR / LTX 2.5 HDR selector; expects linear Rec.709. |
+| `FotufilmLinearToRec709` | Explicit unclipped linear gamut conversion for shared processing and native EXR saving. |
+| `FotufilmFilmEditor` | Film/look editor with one `film_settings` output. |
+| `FotufilmGradeEditor` | Separate color editor with one `finished_settings` output. |
 | `FotufilmStudio` | Expand a video/recipe editor inside a Nodes 2.0 node, or open the larger Studio. |
 | `FotufilmBalanceFrames` | Optional Gear source correction; preserves float range, outputs linear ACEScg. |
 | `FotufilmInspectFrame` | Save Still (EXR): optional full-resolution frame output, outside Studio. |
@@ -52,7 +55,7 @@ Enable **Settings → Comfy → Modern Node Design (Nodes 2.0)**. Open `Fotufilm
 
 An existing **Load Video** file appears immediately, without executing the graph. A connected **Load HDR Master** can also be previewed before execution. Newly generated HDR must finish once before it can be viewed. Studio resolves source-file widgets and cached outputs, including subgraph outputs; it never presents an unexecuted processing node as a completed result.
 
-Editing **Looks**, **Film** or **Color & texture** updates a continuous server-rendered stream, independent of the graph queue. No MP4 is regenerated per edit, and no LTX job is submitted by moving a slider. Preview sizes are explicitly **1280px / 1920px long edge**, capped at source resolution. The viewer reports measured delivery fps and processing time; it never silently reduces resolution or skips source frames to advertise a higher rate.
+Editing **Looks**, **Film** or **Color & texture** updates a continuous server-rendered stream, independent of the graph queue. No MP4 is regenerated per edit, and no LTX job is submitted by moving a slider. Preview sizes are explicitly **640 / 960 / 1280 / 1920px long edge**, capped at source resolution. The viewer reports measured delivery fps and processing time; it never silently reduces resolution or skips source frames to advertise a higher rate.
 
 The server keeps Fotufilm warm, uses float32 Gear grading on CUDA when available, and delivers H.264 monitor frames through a same-origin WebSocket to WebCodecs inside the node. NVIDIA NVENC is preferred; a CPU encoder is available on the server. The acknowledgement window adapts to network latency, capped at 12 frames. New control revisions supersede stale work, and before/after comes from the same source frame. Paused previews use lossless PNG display pixels. The moving monitor stream is compressed SDR, **not a lossless float or calibrated HDR viewer**. Export and EXR inspection always read the original float source, never the monitor stream.
 
@@ -86,9 +89,9 @@ See [Nodes 2.0 integration notes](docs/nodes-2-studio.md).
 
 The pack does **not** perform neural SDR-to-HDR conversion by itself. The included LTX 2.5 workflow requires [ComfyUI-LTXVideo](https://github.com/Lightricks/ComfyUI-LTXVideo) at `3bf3ca62595f1764c47d01c35c8e5dfe47e1a88f`, the model files named in that workflow, and `colour-science==0.4.7`. Install model weights on your remote models volume, not in this repository or the container image.
 
-## Workflows and color
+## Older workflows and color
 
-Start with **[Film Finish - Studio + LTX 2.5 HDR.json](examples/Film%20Finish%20-%20Studio%20%2B%20LTX%202.5%20HDR.json)** for one connected workflow:
+For the earlier combined Studio layout, use **[Film Finish - Studio + LTX 2.5 HDR.json](examples/Film%20Finish%20-%20Studio%20%2B%20LTX%202.5%20HDR.json)** for one connected workflow:
 
 `Load Video → LTX 2.5 subgraph → optional Balance Source → Studio (film + finishing color)`
 
@@ -118,4 +121,4 @@ The ComfyUI adapter is **GPL-3.0-only**, retaining the Film Finish source licens
 
 Gear grading code is MIT, copyright 2026 Mohamed Oumoumad, with its license retained in `vendor/GEAR-LICENSE`.
 
-Native binaries are downloaded directly from upstream distributions during installation, not redistributed in this Git repository. FFmpeg and its codecs retain their own licenses; the installer changes only FFmpeg dynamic-library name references to match Fotufilm's ABI. See [`runtime/README.md`](runtime/README.md).
+The additive CUDA engine is distributed as a checksum-pinned GitHub release asset; other runtime binaries are downloaded from their upstream distributions. Binary files are not committed to this Git repository. FFmpeg and its codecs retain their own licenses; the installer changes only FFmpeg dynamic-library name references to match Fotufilm's ABI. See [`runtime/README.md`](runtime/README.md).

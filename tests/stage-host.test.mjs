@@ -7,7 +7,8 @@ import {baseRecipe,filmName} from '../web/viewer/model.js';
 import {composeGrade,gradeOverrides} from '../web/viewer/stage-recipe.js';
 const {JSDOM}=createRequire(import.meta.url)('jsdom');
 
-test('Comfy host propagates live film changes and commits both connected nodes for queued export',()=>{
+for (const [filmType,gradeType] of [['FotufilmFilmStudio','FotufilmColorGrade'],['FotufilmFilmEditor','FotufilmGradeEditor']])
+test(`${filmType} propagates live film changes and commits both connected nodes for queued export`,()=>{
   const dom=new JSDOM('<body></body>',{url:'https://comfy.test'}),editors=[],nodes=[];let extension,poll;
   for(const key of ['pause','load'])dom.window.HTMLMediaElement.prototype[key]=function(){};
   const app={graph:{change(){},getNodeById:id=>nodes.find(n=>n.id===id)},registerExtension:e=>extension=e};
@@ -28,7 +29,7 @@ test('Comfy host propagates live film changes and commits both connected nodes f
     const n={id,comfyClass:type,graph:app.graph,properties:{fotufilm_studio_expanded:true},widgets:[{name:'recipe_json',value:JSON.stringify(baseRecipe())},{name:'adjustments_json',value:'{}'}],inputs:[{name:'recipe_json'}],getInputNode:()=>parent,setSize(){},setDirtyCanvas(){},addDOMWidget:()=>({})};
     nodes.push(n);extension.nodeCreated(n);extension.loadedGraphNode(n);return n;
   }
-  const film=node(1,'FotufilmFilmStudio'),grade=node(2,'FotufilmColorGrade',film);
+  const film=node(1,filmType),grade=node(2,gradeType,film);
   const f=editors[0],g=editors[1];
   const adjusted=g.getRecipe();adjusted.grading.finish.exposure=.5;g.edit(adjusted);
   const newLook=baseRecipe();newLook.stock='portra400';newLook.grading.finish.saturation=.8;f.edit(newLook);

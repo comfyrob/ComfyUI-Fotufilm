@@ -14,7 +14,8 @@ from .recipe import validate_recipe
 from .preview_node import FotufilmStudio, FotufilmStudioReview, StudioContext
 from .inspection_node import FotufilmInspectFrame
 from .balance_node import FotufilmBalanceFrames
-from .stage_nodes import FotufilmFilmStudio, FotufilmColorGrade
+from .stage_nodes import FotufilmFilmStudio, FotufilmColorGrade, FotufilmFilmEditor, FotufilmGradeEditor
+from .source_nodes import FotufilmSelectSource, FotufilmLinearToRec709
 
 WEB_DIRECTORY = './web'
 
@@ -118,7 +119,7 @@ class FilmFinishExtension(ComfyExtension):
         install_routes()
 
     async def get_node_list(self):
-        return [FotufilmFilmStudio, FotufilmColorGrade, FotufilmDevelopVideo, FotufilmDevelopFrames, FilmFinishHDRPad, FilmFinishHDRRestore, FilmFinishSaveHDRVideo, FilmFinishSaveHDRMaster, FotufilmDevelopHDRMaster, FotufilmStudio, FotufilmStudioReview, FotufilmLoadHDRMaster, FotufilmInspectFrame, FotufilmBalanceFrames]
+        return [FotufilmFilmEditor, FotufilmGradeEditor, FotufilmSelectSource, FotufilmLinearToRec709, FotufilmFilmStudio, FotufilmColorGrade, FotufilmDevelopVideo, FotufilmDevelopFrames, FilmFinishHDRPad, FilmFinishHDRRestore, FilmFinishSaveHDRVideo, FilmFinishSaveHDRMaster, FotufilmDevelopHDRMaster, FotufilmStudio, FotufilmStudioReview, FotufilmLoadHDRMaster, FotufilmInspectFrame, FotufilmBalanceFrames]
 
 
 async def comfy_entrypoint():

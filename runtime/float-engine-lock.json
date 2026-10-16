@@ -1,11 +1,12 @@
 {
-  "filename": "fotufilm-float-v1.11-linux-x86_64.tar.gz",
-  "url": "https://github.com/comfyrob/ComfyUI-Fotufilm/releases/download/v0.3.0/fotufilm-float-v1.11-linux-x86_64.tar.gz",
-  "sha256": "7108ac05e6a25e803feb407582e302d4b7895b5e64a8efd3780e3a42ed1db7c9",
-  "librarySha256": "eb4e95597ddcfc41bbed6fefe9d7e9416ca348618055c47526b3efbae7e96016",
-  "upstreamCommit": "f602857a031a6a9c9b0966284ff989eb3046c323",
+  "filename": "fotufilm-float-9242d189-linux-x86_64.tar.gz",
+  "url": "https://github.com/comfyrob/ComfyUI-Fotufilm/releases/download/v0.5.0/fotufilm-float-9242d189-linux-x86_64.tar.gz",
+  "sha256": "72b762acb80f442b8fa4e57befc9d6e156b07bba662651a38b1c8626551e3470",
+  "librarySha256": "970b679de7bd731c39a908d1a13a9714d36dd16c9874dc76b898b7ff8a1b8ef1",
+  "upstreamCommit": "9242d189b6f8321a27c6f6a345aeb4e5991da569",
   "swift": "6.2",
   "halide": "21.0.0",
   "target": "Linux x86_64 glibc 2.39; CUDA AOT StrictFloat; upstream film math",
-  "extension": "fotufilm_image_from_rgba32f"
+  "extension": "fotufilm_image_from_rgba32f",
+  "includesResources": true
 }

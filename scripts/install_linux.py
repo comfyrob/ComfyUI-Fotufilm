@@ -94,6 +94,19 @@ def install():
                 raise ValueError('Invalid float engine library.')
             with bundle.extractfile(member) as source, (stage / member.name).open('wb') as output:
                 shutil.copyfileobj(source, output)
+            # The CUDA engine carries matching profiles and notices. Keep the original
+            # AppImage resources separately for its unchanged CPU/Vulkan fallback.
+            for resource in bundle.getmembers():
+                if not resource.name.startswith('resources/') or not resource.isfile():
+                    continue
+                target = stage / 'float-resources' / resource.name.removeprefix('resources/')
+                if not target.resolve().is_relative_to((stage / 'float-resources').resolve()):
+                    raise ValueError('Unsafe engine resource path.')
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with bundle.extractfile(resource) as source, target.open('wb') as output:
+                    shutil.copyfileobj(source, output)
+            if float_lock.get('includesResources') and not (stage / 'float-resources/Stocks/vision250d.json').is_file():
+                raise ValueError('The upgraded engine is missing its matching film profiles.')
         with (stage / 'libfotufilm-float.so').open('rb') as source:
             if hashlib.file_digest(source, 'sha256').hexdigest() != float_lock['librarySha256']:
                 raise ValueError('Float engine library checksum mismatch.')
@@ -116,7 +129,7 @@ def install():
         if destination.exists():
             shutil.rmtree(destination)
         stage.replace(destination)
-    print('Installed Fotufilm v1.11, CUDA float-input engine, profiles and codec dependencies. No AI models downloaded.')
+    print('Installed pinned Fotufilm CUDA engine, matching profiles, legacy fallback and codec dependencies. No AI models downloaded.')
 
 
 if __name__ == '__main__':

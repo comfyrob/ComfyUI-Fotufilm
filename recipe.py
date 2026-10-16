@@ -1,7 +1,8 @@
 import copy
 import math
 
-from .native import REVISION
+from .native import REVISION, LEGACY_REVISION
+from .runtime_paths import runtime_revision
 
 PARAMS = {
     "ev": (-3, 3, 0), "temperature": (2000, 12000, 6504), "tint": (-100, 100, 0),
@@ -20,9 +21,11 @@ def bounded(value, low, high, label):
 
 
 def validate_recipe(value):
-    if not isinstance(value, dict) or value.get("version") != 2 or value.get("engine") != REVISION:
-        raise ValueError("This recipe requires Film Finish v2 and Fotufilm 1.11.")
+    if not isinstance(value, dict) or value.get("version") != 2 or value.get("engine") not in (REVISION, LEGACY_REVISION):
+        raise ValueError("This recipe requires Film Finish v2 and a supported Fotufilm engine revision.")
     recipe = copy.deepcopy(value)
+    # Preserve where the look was authored, but never label a new render as the old engine.
+    recipe['render_engine'] = runtime_revision()
     stock = recipe.get("stock", "")
     if not isinstance(stock, str) or not stock or not stock.replace("-", "").replace("_", "").isalnum():
         raise ValueError("Invalid film stock.")

@@ -10,9 +10,11 @@ import shutil
 import subprocess
 import sys
 
-PIN='f602857a031a6a9c9b0966284ff989eb3046c323'
+PINS={'f602857a031a6a9c9b0966284ff989eb3046c323',
+      '9242d189b6f8321a27c6f6a345aeb4e5991da569'}
 root=Path(sys.argv[1]).resolve()
-if subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()!=PIN:
+PIN=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+if PIN not in PINS:
     raise SystemExit('The float input patch requires the pinned Fotufilm revision.')
 if (root/'.comfy-float-input-v1').is_file():
     raise SystemExit('This checkout is already patched; run cef/build-engine-linux.sh directly to rebuild.')

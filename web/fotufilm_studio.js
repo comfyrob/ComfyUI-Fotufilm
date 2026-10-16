@@ -8,8 +8,8 @@ import { createPreviewClient } from './viewer/preview-client.js';
 const BASE = new URL('.', import.meta.url);
 const stylesheet = document.createElement('link');
 stylesheet.rel='stylesheet';stylesheet.href=new URL('viewer/studio.css',BASE).href;document.head.append(stylesheet);
-const studioTypes=new Set(['FotufilmStudio','FotufilmFilmStudio','FotufilmColorGrade']);
-const isGrade=node=>node.comfyClass==='FotufilmColorGrade';
+const studioTypes=new Set(['FotufilmStudio','FotufilmFilmStudio','FotufilmColorGrade','FotufilmFilmEditor','FotufilmGradeEditor']);
+const isGrade=node=>['FotufilmColorGrade','FotufilmGradeEditor'].includes(node.comfyClass);
 const states=new Map();
 const returns=new Map();
 let active=null;
@@ -41,7 +41,7 @@ async function registerSource(node,mode){
   if(mode==='hdr'&&state.media?.direct){
     state.sourceMode=mode;state.assets.hdr=state.media.direct;
     state.editor?.setAsset(state.media.direct);if(active?.node===node)active.editor.setAsset(state.media.direct);
-    state.caption.textContent='Linear HDR frames ready · no archive required';return;
+    state.caption.textContent='Prepared linear frames ready';return;
   }
   const file=mode==='hdr'?state.media?.master:state.media?.source;
   if(!file)return;
@@ -136,7 +136,7 @@ function mediaOptions(node){
 function makeEditor(node,onClose,initial={}){
   const state=states.get(node);
   return createStudio({...mediaOptions(node),...(state.draft?{recipe:state.draft}:{}),...initial,onClose,onSave:(recipe,look,adjustments)=>saveRecipe(node,recipe,look,adjustments),
-    editorMode:isGrade(node)?'grade':node.comfyClass==='FotufilmFilmStudio'?'film':'studio',
+    editorMode:isGrade(node)?'grade':['FotufilmFilmStudio','FotufilmFilmEditor'].includes(node.comfyClass)?'film':'studio',
     baseRecipe:isGrade(node)?upstreamRecipe(node):null,
     adjustments:isGrade(node)?state.adjustments||JSON.parse(node.widgets?.find(w=>w.name==='adjustments_json')?.value||'{}'):undefined,
     onChange:(recipe,adjustments)=>notifyRecipe(node,recipe,adjustments),

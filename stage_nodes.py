@@ -44,3 +44,38 @@ class FotufilmColorGrade(FotufilmStudio):
     def execute(cls,video,recipe_json=DEFAULT_RECIPE,fps=24,adjustments_json='{}',**kwargs):
         recipe=compose_grade(recipe_json,adjustments_json)
         return super().execute(video,json.dumps(recipe),fps,**kwargs)
+
+
+class FotufilmFilmEditor(FotufilmFilmStudio):
+    @classmethod
+    def define_schema(cls):
+        schema=super().define_schema()
+        schema.node_id='FotufilmFilmEditor'
+        schema.display_name='Fotufilm · Film'
+        schema.description='Choose film, print and texture. Receives the prepared source for preview; outputs film settings, not rendered pixels. Connect settings to Color and save through the output nodes.'
+        schema.inputs=[i for i in schema.inputs if i.id not in ('rendered_preview','enhanced_source','master')]
+        schema.outputs=[io.String.Output('film_settings')]
+        return schema
+
+    @classmethod
+    def execute(cls,video,recipe_json=DEFAULT_RECIPE,fps=24,**kwargs):
+        result=FotufilmStudio.execute(video,recipe_json,fps,**kwargs)
+        return io.NodeOutput(result.result[1],ui=result.ui)
+
+
+class FotufilmGradeEditor(FotufilmColorGrade):
+    @classmethod
+    def define_schema(cls):
+        schema=super().define_schema()
+        schema.node_id='FotufilmGradeEditor'
+        schema.display_name='Fotufilm · Color'
+        schema.description='Refine the connected film settings on the same prepared source. Outputs finished settings for full-resolution rendering. Save to node before running an output branch.'
+        schema.inputs=[i for i in schema.inputs if i.id not in ('rendered_preview','enhanced_source','master')]
+        schema.outputs=[io.String.Output('finished_settings')]
+        return schema
+
+    @classmethod
+    def execute(cls,video,recipe_json=DEFAULT_RECIPE,fps=24,adjustments_json='{}',**kwargs):
+        recipe=compose_grade(recipe_json,adjustments_json)
+        result=FotufilmStudio.execute(video,json.dumps(recipe),fps,**kwargs)
+        return io.NodeOutput(result.result[1],ui=result.ui)

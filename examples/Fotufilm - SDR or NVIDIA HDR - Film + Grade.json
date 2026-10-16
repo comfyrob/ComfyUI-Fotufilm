@@ -1,0 +1,899 @@
+{
+  "id": "942c0f11-f4c0-474d-a541-b74ab329ca6b",
+  "revision": 0,
+  "last_node_id": 19,
+  "last_link_id": 22,
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 \u00b7 Prepare source \u2014 only the selected HDR branch runs",
+      "bounding": [
+        -30,
+        30,
+        1630,
+        1020
+      ],
+      "color": "#354963",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 \u00b7 Film and color \u2014 settings update the shared preview",
+      "bounding": [
+        1610,
+        30,
+        1610,
+        1000
+      ],
+      "color": "#384b43",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 \u00b7 Optional outputs \u2014 enable only what you want to save",
+      "bounding": [
+        3260,
+        30,
+        1250,
+        930
+      ],
+      "color": "#524335",
+      "font_size": 22,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        30,
+        20
+      ]
+    }
+  },
+  "version": 0.4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadVideo",
+      "pos": [
+        0,
+        100
+      ],
+      "size": [
+        340,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            1,
+            7,
+            10,
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "FotufilmFilmEditor",
+      "pos": [
+        1650,
+        100
+      ],
+      "size": [
+        390,
+        420
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 7
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 9,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "film_settings",
+          "type": "STRING",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmFilmEditor",
+        "fotufilm_studio_expanded": false
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"9242d189b6f8321a27c6f6a345aeb4e5991da569\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        24,
+        "linear-rec709"
+      ],
+      "title": "1 \u00b7 Film Emulation"
+    },
+    {
+      "id": 5,
+      "type": "FotufilmDevelopVideo",
+      "pos": [
+        3300,
+        100
+      ],
+      "size": [
+        370,
+        340
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 14
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 15,
+          "widget": {
+            "name": "recipe_json"
+          }
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 17,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "studio",
+          "type": "FOTUFILM_STUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "resolved_recipe",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmDevelopVideo"
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"f602857a031a6a9c9b0966284ff989eb3046c323\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}}",
+        1,
+        "fixed",
+        "mp4",
+        24,
+        "linear-rec709",
+        false
+      ],
+      "title": "Optional \u00b7 Export finished video"
+    },
+    {
+      "id": 9,
+      "type": "FotufilmGradeEditor",
+      "pos": [
+        2100,
+        100
+      ],
+      "size": [
+        1100,
+        850
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 10
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 12,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 13,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "finished_settings",
+          "type": "STRING",
+          "links": [
+            15,
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmGradeEditor",
+        "fotufilm_studio_expanded": true
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"9242d189b6f8321a27c6f6a345aeb4e5991da569\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        "{}",
+        24,
+        "linear-rec709"
+      ],
+      "title": "2 \u00b7 Color Grade + Viewer"
+    },
+    {
+      "id": 10,
+      "type": "GetVideoComponents",
+      "pos": [
+        0,
+        460
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            2,
+            4
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "links": [
+            9,
+            12,
+            17
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GetVideoComponents"
+      },
+      "widgets_values": [],
+      "title": "Decode original video"
+    },
+    {
+      "id": 11,
+      "type": "RTXTrueHDR",
+      "pos": [
+        430,
+        430
+      ],
+      "size": [
+        340,
+        300
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "hdr_images",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RTXTrueHDR"
+      },
+      "widgets_values": [
+        100,
+        100,
+        50,
+        650,
+        true,
+        "HDR PQ"
+      ],
+      "title": "NVIDIA \u00b7 Enhance to HDR"
+    },
+    {
+      "id": 12,
+      "type": "ImageColorSpace",
+      "pos": [
+        830,
+        430
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageColorSpace"
+      },
+      "widgets_values": [
+        "HDR PQ",
+        "linear"
+      ],
+      "title": "NVIDIA PQ \u2192 linear Rec.709"
+    },
+    {
+      "id": 13,
+      "type": "ImageColorSpace",
+      "pos": [
+        830,
+        780
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageColorSpace"
+      },
+      "widgets_values": [
+        "sRGB",
+        "linear"
+      ],
+      "title": "SDR \u2192 linear (no HDR generation)"
+    },
+    {
+      "id": 15,
+      "type": "FotufilmSelectSource",
+      "pos": [
+        1240,
+        360
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "original",
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "nvidia",
+          "type": "IMAGE",
+          "link": 6
+        },
+        {
+          "name": "ltx",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_rec709",
+          "type": "IMAGE",
+          "links": [
+            8,
+            11,
+            16,
+            18,
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmSelectSource"
+      },
+      "widgets_values": [
+        "Original SDR"
+      ],
+      "title": "1 \u00b7 Choose HDR method"
+    },
+    {
+      "id": 16,
+      "type": "SaveImageAdvanced",
+      "pos": [
+        1240,
+        800
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 2,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImageAdvanced"
+      },
+      "widgets_values": [
+        "fotufilm/source",
+        "exr",
+        "32-bit float",
+        "linear"
+      ],
+      "title": "Optional \u00b7 Save source EXR sequence"
+    },
+    {
+      "id": 17,
+      "type": "FotufilmDevelopFrames",
+      "pos": [
+        3300,
+        600
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 20,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_p3",
+          "type": "IMAGE",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "color_space",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmDevelopFrames"
+      },
+      "widgets_values": [
+        "{}",
+        "linear Rec.709",
+        0,
+        "fixed",
+        0
+      ],
+      "title": "Render finished frames"
+    },
+    {
+      "id": 18,
+      "type": "FotufilmLinearToRec709",
+      "pos": [
+        3700,
+        600
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "linear_rec709",
+          "type": "IMAGE",
+          "links": [
+            22
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmLinearToRec709"
+      },
+      "widgets_values": [
+        "linear-p3"
+      ],
+      "title": "Finished P3 \u2192 linear Rec.709"
+    },
+    {
+      "id": 19,
+      "type": "SaveImageAdvanced",
+      "pos": [
+        4100,
+        600
+      ],
+      "size": [
+        340,
+        210
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 2,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImageAdvanced"
+      },
+      "widgets_values": [
+        "fotufilm/finished",
+        "exr",
+        "32-bit float",
+        "linear"
+      ],
+      "title": "Optional \u00b7 Save finished EXR sequence"
+    },
+    {
+      "id": 8,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        1100
+      ],
+      "size": [
+        1000,
+        1000
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# Start here: finish your video\n\n## 1. Choose your source\n\nLoad your video, then choose **Original SDR**, **NVIDIA HDR**, or **LTX 2.5 HDR** in **Choose HDR Method**. Run the workflow once to prepare the selected source for both editors.\n\n- **Original SDR:** no HDR generation. Start here for ordinary film finishing.\n- **NVIDIA HDR:** enhances SDR with RTX Video HDR. Its contrast/saturation controls shape the source; the later Color Grade node shapes your finished look.\n- **LTX 2.5 HDR:** our generative reconstruction workflow. It can infer new highlight detail and can also change details. Its existing models, sampling and HDR decode remain intact.\n\nOnly the selected image branch is requested. Do not add active save/preview outputs directly to an unselected branch: output nodes can independently make that branch execute. Keep LTX seeds fixed to reuse cached results. Selecting a different method is a source-processing decision, not an instant display toggle. A cache hit can reuse previously processed frames; a restart or cache eviction cannot.\n\nThe combined example requires both NVIDIA and LTX packs and the LTX model files. Use the SDR/NVIDIA-only example if you do not have LTX installed. The HDR method selector does not hide missing-node or missing-model validation errors. Heavy processing belongs on your remote GPU environment, not your Mac.\n\n## 2. Choose a look, then adjust color\n\nOpen **Film Emulation** and choose a Look. A Look is a complete starting recipe: film stock, print response, texture and default colors. Film stock is one ingredient, not another competing preset.\n\nOpen **Color Grade** to adjust the finished result. Exposure changes brightness, warmth/tint balance color, and the wheels tint shadows, midtones and highlights. Small changes are usually enough. Reset restores the selected look's defaults.\n\nFilm and Grade receive the **same prepared image frames**. The wire between them carries **settings**, not rendered video. The shared renderer combines those settings for preview and export; this avoids developing a whole video just to open the next node. Film edits update a directly connected Grade editor. Click **Save to node** before a queued export or saving the workflow so the graph uses your latest choices.\n\nThe new Film node exposes only `film_settings`; Color exposes only `finished_settings`. Both are saved settings (Comfy STRING), not video or pixel buffers. Older Studio/Film Emulation/Color Grade nodes remain available for saved workflows, with their original ports. The new workflow needs neither a session wire nor a custom HDR master type.\n\n## 3. Understand what the viewer shows\n\nChoose **640 Fast** or **960 Balanced** for a smaller preview. **1280 Detailed** and **1920 Inspect** help judge texture. These sizes are the longest edge, capped at the source size. They do not change your saved resolution or source frame rate. Smaller previews make fine grain harder to judge; they do not promise a fixed playback speed.\n\nThe current player displays an **SDR representation**, even when the source contains HDR. HDR data remains in the processing pipeline; a brighter HDR-capable monitor alone does not make this transport HDR.\n\n**Before / after** compares the same source frame. In Color Grade, Before is the film result before finishing adjustments; After is your grade. In Film Emulation, Before is the prepared source. This is not a comparison between NVIDIA and LTX.\n\n**Inspect HDR** contains optional viewing tools. **Processing stage** selects source, film or final result. **Preview brightness** temporarily reveals bright/dark detail without changing your grade or export. **Display mapping** chooses how bright values fit onto the SDR screen. For the ordinary finished preview, use **SDR output**, **Finished result**, and **0 EV**. Actual Exposure in Color Grade does affect the export.\n\n## 4. Save only what you need\n\n- **Export finished video:** enable its `enabled` control and run. It renders the original-resolution selected source with the saved film and grade, retaining the original audio and frame rate. Disable it again when you only want to prepare/edit a source. MP4 is the ordinary SDR choice. HDR HLG currently requires a supported direct-view slide-film finish; an HDR source alone does not guarantee an HDR output.\n- **Save source EXR sequence:** unmute this native Save Image (Advanced) node and run. It saves the selected source before film and grade. It does not archive every HDR method. In Original SDR mode, float EXR does not invent extra highlight detail.\n- **Save finished EXR sequence:** unmute its native save node and run. The render branch applies film and grade at original resolution, then saves linear frames before the SDR display transform. This batch render can use substantial memory on long clips.\n\nThe two EXR save nodes start **muted**. Use the node's mode/menu to enable one, then mute it again afterward. Do not use bypass as an output toggle. EXRs are separate numbered frames, not a playable movie: retain the workflow, original video/audio and frame rate for later reassembly.\n\nBoth native savers are set to **EXR / 32-bit float / linear**. The preceding nodes explicitly convert to linear Rec.709, preserving negative and above-white values. Here Rec.709 describes RGB coordinates; it does not clamp the frames to SDR. Do not change the saver to `HDR`: in this core node that means HLG-encoded input, which these wires are not. NVIDIA uses PQ \u2192 linear through core; LTX uses ACEScg \u2192 linear Rec.709 after padding removal. Their different brightness models can produce different film responses.\n\nThe legacy **Archive HDR source** node bundles float frames, timing and the original video in a custom `.ffhdr.zip`. It remains available for existing workflows, but is unnecessary in this native EXR workflow.\n"
+      ],
+      "title": "Start here \u00b7 Film, color and HDR explained"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      10,
+      0,
+      "VIDEO"
+    ],
+    [
+      2,
+      10,
+      0,
+      11,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      11,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      10,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      13,
+      0,
+      15,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      12,
+      0,
+      15,
+      1,
+      "IMAGE"
+    ],
+    [
+      7,
+      1,
+      0,
+      2,
+      0,
+      "VIDEO"
+    ],
+    [
+      8,
+      15,
+      0,
+      2,
+      1,
+      "IMAGE"
+    ],
+    [
+      9,
+      10,
+      2,
+      2,
+      2,
+      "FLOAT"
+    ],
+    [
+      10,
+      1,
+      0,
+      9,
+      0,
+      "VIDEO"
+    ],
+    [
+      11,
+      15,
+      0,
+      9,
+      1,
+      "IMAGE"
+    ],
+    [
+      12,
+      10,
+      2,
+      9,
+      2,
+      "FLOAT"
+    ],
+    [
+      13,
+      2,
+      0,
+      9,
+      3,
+      "STRING"
+    ],
+    [
+      14,
+      1,
+      0,
+      5,
+      0,
+      "VIDEO"
+    ],
+    [
+      15,
+      9,
+      0,
+      5,
+      1,
+      "STRING"
+    ],
+    [
+      16,
+      15,
+      0,
+      5,
+      2,
+      "IMAGE"
+    ],
+    [
+      17,
+      10,
+      2,
+      5,
+      3,
+      "FLOAT"
+    ],
+    [
+      18,
+      15,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ],
+    [
+      19,
+      15,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      9,
+      0,
+      17,
+      1,
+      "STRING"
+    ],
+    [
+      21,
+      17,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      18,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ]
+  ]
+}

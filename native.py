@@ -6,9 +6,10 @@ import threading
 from pathlib import Path
 
 from .presentation import FrameCapture, Presenter
-from .runtime_paths import library_path, stocks_path
+from .runtime_paths import library_path, stocks_path, resources_path
 
-REVISION = "f602857a031a6a9c9b0966284ff989eb3046c323"
+LEGACY_REVISION = "f602857a031a6a9c9b0966284ff989eb3046c323"
+REVISION = "9242d189b6f8321a27c6f6a345aeb4e5991da569"
 
 
 class Answer(C.Structure):
@@ -30,11 +31,20 @@ PROGRESS = C.CFUNCTYPE(None, C.c_void_p, C.c_char_p)
 class Engine:
     def __init__(self):
         path = library_path()
+        packaged = Path(__file__).parent / 'linux-runtime'
+        if path == (packaged / 'libfotufilm-float.so').resolve():
+            import hashlib
+            lock = json.loads((Path(__file__).parent / 'runtime/float-engine-lock.json').read_text())
+            if not path.is_file() or not resources_path().is_dir():
+                raise RuntimeError('The pinned CUDA engine or matching profiles are missing. Run python install.py and restart ComfyUI.')
+            with path.open('rb') as source:
+                if hashlib.file_digest(source, 'sha256').hexdigest() != lock['librarySha256']:
+                    raise RuntimeError('The CUDA engine is from a different release. Run python install.py and restart ComfyUI.')
         os.environ.setdefault("FOTUFILM_STOCKS", str(stocks_path()))
         if sys.platform == 'linux':
             packaged = Path(__file__).parent / 'linux-runtime'
             if packaged.is_dir():
-                os.environ.setdefault('FOTUFILM_RESOURCES', str(packaged / 'resources'))
+                os.environ.setdefault('FOTUFILM_RESOURCES', str(resources_path()))
                 os.environ.setdefault('FOTUFILM_STOCKS', str(packaged / 'resources/Stocks'))
                 os.environ.setdefault('LIBHEIF_PLUGIN_PATH', str(packaged / 'heif-plugins'))
                 pending = list(path.parent.glob('lib*.so*'))

@@ -112,7 +112,7 @@ class Finisher:
         self._engine=None
         self.path=Path(directory)/'working.exr'
         self.request=render_request(self.recipe,self.recipe.get('seed') or 0,edge=None)
-        self.film_signature=digest([self.request,self.grading['balance']])
+        self.film_signature=digest([self.recipe['render_engine'],self.request,self.grading['balance']])
         self.hdr=hdr_eligible(self.recipe)
 
     @property

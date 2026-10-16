@@ -14,6 +14,18 @@ const { baseRecipe } = await import('../web/viewer/model.js');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const asset = { asset:'first', info:{width:3840,height:2160,frames:240,fps:24,hdr:true} };
 
+test('split editors offer smaller previews and put monitor controls in optional inspection', () => {
+  const studio=createStudio({recipe:baseRecipe(),editorMode:'grade'});
+  const root=studio.element;
+  assert.deepEqual([...root.querySelector('.ff-quality').options].map(o=>o.value),['640','960','1280','1920']);
+  assert.equal(root.querySelector('.ff-quality').value,'1280');
+  assert.equal(root.querySelector('.ff-view-inspector').open,false);
+  assert.equal(root.querySelector('.ff-export-row').hidden,true);
+  assert.equal(root.querySelector('.ff-trial-row').hidden,true);
+  assert.match(root.querySelector('.ff-view-settings').textContent,/Preview brightness/);
+  studio.dispose();
+});
+
 test('Studio leaves still saving, scopes and source correction to graph nodes', () => {
   const studio=createStudio({recipe:baseRecipe()});document.body.append(studio.element);
   assert.equal(studio.element.querySelector('.ff-inspection'),null);

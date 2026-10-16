@@ -86,12 +86,13 @@ export function createStudio(options = {}) {
           <div class="ff-filmstrip" aria-hidden="true">${Array.from({length:12},()=>'<span></span>').join('')}</div>
           <div class="ff-playhead" aria-hidden="true"></div><input class="ff-scrubber" type="range" aria-label="Video timeline" min="0" max="1" step="0.001" value="0">
         </div>
+        <details class="ff-view-inspector"><summary>Inspect HDR <span>Viewing tools · export unchanged</span></summary>
         <div class="ff-view-settings" aria-label="Monitor settings">
-          <label>View <select class="ff-view-mode" title="Monitor only. Does not change the HDR pixels or exported grade."><option value="output">SDR output</option><option value="rolloff">HDR range → SDR</option><option value="clip">Uncompressed → SDR</option></select></label>
-          <label>Show <select class="ff-view-stage"><option value="finish">Finished result</option><option value="film">Film before color grade</option><option value="source">Connected source</option></select></label>
-          <label title="Temporary viewing exposure; never saved into your grade.">View EV <input class="ff-view-ev" type="number" min="-10" max="10" step=".25" value="0" aria-label="Viewer exposure"/></label>
-          <span class="ff-view-note">Monitor only · SDR display</span>
-        </div>
+          <label>Display mapping <select class="ff-view-mode" title="Fits HDR brightness onto this SDR preview. Does not change your grade or export."><option value="output">SDR output</option><option value="rolloff">Compress highlights</option><option value="clip">Show clipping</option></select></label>
+          <label>Processing stage <select class="ff-view-stage"><option value="finish">Finished result</option><option value="film">Film before color grade</option><option value="source">Connected source</option></select></label>
+          <label title="Temporary viewing exposure. Lower it to inspect bright detail; use Exposure in Color Grade to change the finished video.">Preview brightness <input class="ff-view-ev" type="number" min="-10" max="10" step=".25" value="0" aria-label="Viewer exposure"/> EV</label>
+          <span class="ff-view-note">Return to SDR output · Finished result · 0 EV for the normal view.</span>
+        </div></details>
         <div class="ff-monitor-status"><span class="ff-display">SDR video preview</span><span class="ff-render-state">Source playback</span></div>
       </main>
       <aside class="ff-sidebar" aria-label="Film recipe">
@@ -121,7 +122,7 @@ export function createStudio(options = {}) {
           </section>
 
         </div>
-        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="1280">1280px · Live</option><option value="1920">1920px · Detailed</option></select></label>${button('undo','Undo','undo')}</div><div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><div class="ff-trial-row">${button('test-export','Test 5 seconds','','title="Export up to five seconds from the playhead, at full resolution and the selected format."')}${button('cancel-export','Cancel export','','hidden')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
+        <footer class="ff-sidebar-footer"><div class="ff-preview-settings"><label>Preview <select class="ff-quality" aria-label="Preview quality"><option value="640">640px · Fast</option><option value="960">960px · Balanced</option><option value="1280" selected>1280px · Detailed</option><option value="1920">1920px · Inspect</option></select></label>${button('undo','Undo','undo')}</div><div class="ff-export-row"><select class="ff-export-format" aria-label="Export format"><option value="mp4">MP4 · SDR</option><option value="prores422hq">ProRes 422 HQ · SDR</option><option value="hlg">HEVC · HDR HLG</option></select>${button('export','Export video')}</div><div class="ff-trial-row">${button('test-export','Test 5 seconds','','title="Export up to five seconds from the playhead, at full resolution and the selected format."')}${button('cancel-export','Cancel export','','hidden')}</div><a class="ff-download" hidden download>Download finished video ↗</a><p>Automatic previews use native Fotufilm and Gear grading.</p></footer>
       </aside>
     </div><div class="ff-toast" role="status" hidden></div><input class="ff-file-input" type="file" accept="video/mp4,video/webm,video/quicktime" hidden>`;
   const $ = s => root.querySelector(s);
@@ -407,8 +408,8 @@ export function createStudio(options = {}) {
     else {video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();}
     action('source-original').setAttribute('aria-pressed',String(mode==='original'));action('source-hdr').setAttribute('aria-pressed',String(mode==='hdr'));
     action('source-hdr').disabled=!hasHDR&&!sources.hdr;action('compare').disabled=!after;
-    $('.ff-stage-right').textContent=after?'Existing Fotufilm render':mode==='hdr'?'Preparing HDR preview…':'Original source';
-    $('.ff-display').textContent=mode==='hdr'?'HDR source · browser video preview, not a calibrated HDR monitor':'SDR video preview';
+    $('.ff-stage-right').textContent=after?'Existing Fotufilm render':mode==='hdr'?'Preparing linear preview…':'Original source';
+    $('.ff-display').textContent=mode==='hdr'?'Linear source · SDR display preview':'SDR video preview';
     const restore=()=>{if(!destroyed){seek(time);if(wasPlaying&&!pendingHDR)video.play().catch(()=>{});}video.removeEventListener('loadedmetadata',restore);};
     video.addEventListener('loadedmetadata',restore,{once:true,signal:abort.signal});
     updateRecipeUI();updateTransport();
@@ -507,7 +508,10 @@ export function createStudio(options = {}) {
     else if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();video.pause();seek(video.currentTime+(event.key==='ArrowRight'?1:-1)/fps);}
     else if(event.key.toLowerCase()==='l')action('loop').click();
   });
-  if(editorMode!=='studio')$('.ff-source-switch').hidden=true;
+  if(editorMode!=='studio'){
+    $('.ff-source-switch').hidden=true;
+    $('.ff-export-row').hidden=true;$('.ff-trial-row').hidden=true;
+  }
   if(editorMode==='film'){
     action('tab-grade').hidden=true;
     $('.ff-customize-panel').append($('.ff-texture-sliders'));
@@ -526,7 +530,7 @@ export function createStudio(options = {}) {
   }
   updateRecipeUI();setZoom(1);setSource(sourceMode,false);compare(false);
   $('.ff-prototype').textContent='ComfyUI';
-  $('.ff-sidebar-footer p').textContent=editorMode==='film'?'Live film preview. Finish colors and export in Color Grade.':'Live adjustments. Save to node before queueing the export branch.';
+  $('.ff-sidebar-footer p').textContent=editorMode==='film'?'Live film preview. Adjust colors in Color Grade; save using the output nodes.':'Live adjustments. Save to node before queueing the export branch.';
   return {element:root,
     setBaseRecipe(value){baseGradeRecipe=normalizeRecipe(value);recipe=composeGrade(baseGradeRecipe,gradeChanges);previousGrade=clone(recipe.grading.finish);startingRecipe=clone(recipe);history.length=0;history.push(snapshot());updateRecipeUI();},
     getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,getPreviewMetrics:()=>live?.getMetrics?.()||[],pause(){video.pause();before.pause();},
