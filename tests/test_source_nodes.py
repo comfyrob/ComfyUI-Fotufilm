@@ -9,11 +9,25 @@ import torch
 
 ROOT=Path(__file__).resolve().parents[1]
 p=types.ModuleType('film_finish');p.__path__=[str(ROOT)];sys.modules.setdefault('film_finish',p)
-from film_finish.source_nodes import FotufilmSelectSource, FotufilmLinearToRec709, METHODS
+from film_finish.source_nodes import FotufilmSelectSource, FotufilmLinearToRec709, FotufilmLTXHDRDecode, METHODS
 from film_finish.grading import convert
 
 
 class SourceTests(unittest.TestCase):
+    def test_ltx_adapter_delegates_decode_without_becoming_output_root(self):
+        import nodes
+        image=torch.tensor([-.1,.18,7.]).expand(1,2,2,3)
+        calls=[]
+        class Decoder:
+            FUNCTION='postprocess';OUTPUT_NODE=True
+            def postprocess(self,**kwargs):
+                calls.append(kwargs);return (image,image)
+        with patch.dict(nodes.NODE_CLASS_MAPPINGS,{'LTXVHDRDecodePostprocess':Decoder}):
+            out=FotufilmLTXHDRDecode.execute(image,'acescct',.5)
+        self.assertIs(out.result[1],image)
+        self.assertEqual(calls,[{'image':image,'transfer':'acescct','exposure':.5,'save_exr':False}])
+        self.assertFalse(FotufilmLTXHDRDecode.define_schema().is_output_node)
+
     def test_selector_requests_only_chosen_input_and_returns_same_buffer(self):
         image=torch.tensor([-.1,.18,7.]).expand(2,4,6,3)
         for method,key in METHODS.items():
@@ -65,6 +79,16 @@ class SourceTests(unittest.TestCase):
     def test_workflow_native_savers_and_ltx_definition(self):
         graph=json.loads((ROOT/'examples/Fotufilm - SDR or NVIDIA or LTX HDR - Film + Grade.json').read_text())
         before=json.loads((ROOT/'examples/Fotufilm - LTX HDR + Film + Color Grade - Modal.json').read_text())
+        # Only replace the decoder's independent-save-root behavior. Preserve all
+        # inference nodes, parameters, model pins, links and subgraph sockets.
+        for sub in graph['definitions']['subgraphs']:
+            original={n['id']:n for s in before['definitions']['subgraphs'] for n in s['nodes']}
+            for n in sub['nodes']:
+                if n['type']=='FotufilmLTXHDRDecode':
+                    self.assertEqual(original[n['id']]['type'],'LTXVHDRDecodePostprocess')
+                    self.assertEqual(n['widgets_values'],original[n['id']]['widgets_values'][:2])
+                    n.update({key:original[n['id']][key] for key in ('type','properties','title','widgets_values') if key in original[n['id']]})
+                    if 'title' not in original[n['id']]:n.pop('title',None)
         self.assertEqual(graph['definitions'],before['definitions'])
         byid={n['id']:n for n in graph['nodes']}
         for id,a,o,b,i,t in graph['links']:

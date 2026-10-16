@@ -6,6 +6,26 @@ from .grading import convert
 METHODS = {'Original SDR': 'original', 'NVIDIA HDR': 'nvidia', 'LTX 2.5 HDR': 'ltx'}
 
 
+class FotufilmLTXHDRDecode(io.ComfyNode):
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(node_id='FotufilmLTXHDRDecode', display_name='LTX HDR Decode · On demand',
+            category='Film Finish/Source',
+            description='Calls the installed LTX HDR decoder with saving disabled. Unlike the upstream optional saver, this is not an output root, so an unselected LTX branch stays idle. ACEScct yields linear ACEScg; legacy LogC3 yields linear Rec.709.',
+            inputs=[io.Image.Input('image'),io.Combo.Input('transfer',options=['acescct','logc3'],default='acescct'),
+                    io.Float.Input('exposure',default=0,min=-10,max=10,step=.1,tooltip='Affects only the tonemapped output, not hdr_linear.')],
+            outputs=[io.Image.Output('tonemapped'),io.Image.Output('hdr_linear')])
+
+    @classmethod
+    def execute(cls,image,transfer='acescct',exposure=0):
+        import nodes
+        upstream=nodes.NODE_CLASS_MAPPINGS.get('LTXVHDRDecodePostprocess')
+        if upstream is None:
+            raise RuntimeError('Install the workflow-pinned ComfyUI-LTXVideo pack to decode LTX HDR.')
+        result=getattr(upstream(),upstream.FUNCTION)(image=image,transfer=transfer,exposure=exposure,save_exr=False)
+        return io.NodeOutput(*result)
+
+
 class FotufilmSelectSource(io.ComfyNode):
     @classmethod
     def define_schema(cls):

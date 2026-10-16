@@ -31,6 +31,7 @@ After updating an existing checkout, rerun `python custom_nodes/ComfyUI-Fotufilm
 | Node ID | Purpose |
 |---|---|
 | `FotufilmSelectSource` | Lazy Original SDR / NVIDIA HDR / LTX 2.5 HDR selector; expects linear Rec.709. |
+| `FotufilmLTXHDRDecode` | Upstream LTX HDR decode without an independent output/save trigger; enables lazy branch selection. |
 | `FotufilmLinearToRec709` | Explicit unclipped linear gamut conversion for shared processing and native EXR saving. |
 | `FotufilmFilmEditor` | Film/look editor with one `film_settings` output. |
 | `FotufilmGradeEditor` | Separate color editor with one `finished_settings` output. |

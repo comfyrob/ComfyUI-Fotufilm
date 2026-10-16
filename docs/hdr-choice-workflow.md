@@ -6,7 +6,7 @@ Load your video, then choose **Original SDR**, **NVIDIA HDR**, or **LTX 2.5 HDR*
 
 - **Original SDR:** no HDR generation. Start here for ordinary film finishing.
 - **NVIDIA HDR:** enhances SDR with RTX Video HDR. Its contrast/saturation controls shape the source; the later Color Grade node shapes your finished look.
-- **LTX 2.5 HDR:** our generative reconstruction workflow. It can infer new highlight detail and can also change details. Its existing models, sampling and HDR decode remain intact.
+- **LTX 2.5 HDR:** our generative reconstruction workflow. It can infer new highlight detail and can also change details. Its models and sampling remain intact. A small on-demand adapter calls the same upstream HDR decoder without its independent save/output trigger, so selecting another source does not run LTX.
 
 Only the selected image branch is requested. Do not add active save/preview outputs directly to an unselected branch: output nodes can independently make that branch execute. Keep LTX seeds fixed to reuse cached results. Selecting a different method is a source-processing decision, not an instant display toggle. A cache hit can reuse previously processed frames; a restart or cache eviction cannot.
 

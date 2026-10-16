@@ -20,7 +20,15 @@ def build(include_ltx=True):
     nodes=[copy.deepcopy(old[id]) for id in ids]
     graph={k:copy.deepcopy(v) for k,v in original.items() if k not in ('nodes','links','definitions')}
     graph.update(nodes=nodes,links=[],groups=[],extra={'ds':{'scale':.65,'offset':[30,20]}})
-    if include_ltx:graph['definitions']=copy.deepcopy(original['definitions'])
+    if include_ltx:
+        graph['definitions']=copy.deepcopy(original['definitions'])
+        for subgraph in graph['definitions']['subgraphs']:
+            for n in subgraph['nodes']:
+                if n['type']=='LTXVHDRDecodePostprocess':
+                    n['type']='FotufilmLTXHDRDecode'
+                    n['properties']['Node name for S&R']=n['type']
+                    n['title']='Decode LTX HDR · Only when selected'
+                    n['widgets_values']=n['widgets_values'][:2]
     byid={n['id']:n for n in nodes}
     for n in nodes:
         for i in n.get('inputs',[]):i['link']=None
