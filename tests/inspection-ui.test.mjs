@@ -146,9 +146,11 @@ test('filtering looks leaves the current recipe intact and requests only the vis
   assert.deepEqual(studio.getRecipe(),before);
   assert.equal(root.querySelector('[data-look-group="mono"]').getAttribute('aria-pressed'),'true');
   const visible=[...root.querySelectorAll('[data-look]')].filter(card=>!card.hidden);
-  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver','fine-mono','classic-cinema']);
+  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver','fine-mono','classic-cinema','studio-mono','grainy-night','soft-documentary']);
   await new Promise(resolve=>setTimeout(resolve,180));
-  assert.deepEqual(requests,['vision250d','trix400','trix400','trix400','acros100','doublex5222']);
+  // Without layout (jsdom), the editor requests at most the first six cards
+  // plus its pinned selection; offscreen cards do not fill the worker queue.
+  assert.deepEqual(requests,['vision250d','trix400','trix400','trix400','acros100','doublex5222','tmax100']);
   root.querySelector('[data-look="soft-silver"]').click();
   root.querySelector('[data-look-group="cinema"]').click();
   assert.equal(studio.getLookId(),'soft-silver');

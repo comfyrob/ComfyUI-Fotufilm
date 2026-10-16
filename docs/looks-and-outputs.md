@@ -1,33 +1,75 @@
-# Looks and optional output branches
+# Looks and output branches
 
-Updated 2026-10-12 for 0.3.3.
+Updated 2026-10-16 on `explore/film-look-library`.
 
-## 24 editable looks
+## 54 editable looks and 28 stocks
 
-Studio now offers Cinema, Portrait, Slide, Vintage and B&W filters. A filter only
-changes the cards shown; it never changes the active recipe. Only the selected
-family's thumbnails are requested, and completed thumbnails remain cached.
+The library opens on All. Collections are Cinema, Portrait, Slide, Vintage,
+B&W and Experimental. Search includes look names, stock names and descriptions.
+Star a card to save it to Favorites on this browser; favorites and search do
+not alter the active recipe. The selected look remains pinned above the cards.
 
-The original 12 recipes are unchanged. Added: Chrome road, Silver print,
-Tungsten print, Window light, Rose portrait, Vivid daylight, Blue hour slide,
-Amber slide, Faded travel, Everyday 35, Documentary 16 and Soft silver.
+The first 36 recipes and their IDs are unchanged. This branch adds:
 
-These are original combinations of existing Fotufilm profiles, print choices,
-film sizes and Gear finishing controls. They are not new measured film stocks
-or exact Fuji camera simulations. Silver print uses contrast/desaturation to
-suggest a bleach-bypass look; it does not simulate retained silver chemistry.
-The three new slide looks retain Reference exposure and are eligible for the
-existing HLG export path. Preview remains SDR. The other looks finish to SDR,
-including when developing an HDR source.
+| Collection | New looks |
+| --- | --- |
+| Cinema | Reala dailies, Dense release print, Muted thriller |
+| Portrait | Daylight portrait, Warm interior, Clean beauty |
+| Slide | Travel chrome, Quiet landscape, Summer chrome |
+| Vintage | Faded home movie, Seventies print, Cool telecine |
+| B&W | Studio monochrome, Grainy night, Soft documentary |
+| Experimental | Instant memory, Silver retention, Phoenix shift |
 
-Selecting a look preserves source correction. “Keep my color settings” also
-preserves the current finishing grade instead of loading the preset's grade.
-Reset restores that look's finishing defaults. Old workflows keep their recipe
-and seed; adding a catalogue entry does not replace saved settings.
+Twelve additional **existing Fotufilm profiles** are exposed: Kodachrome 25/64,
+CineStill 400D, UltraMax 400, Pro 160NS, Reala 500D, Eterna Vivid 500,
+HP5 Plus 400, T-Max 100, Delta 3200, Instax Mini and Phoenix 200.
+These are bundled upstream simulations, not new measurements made by this pack.
+
+A stock is an ingredient; a look combines stock, film size, print/scan, texture
+and optional finishing color. Changing a stock keeps the selected look name
+with a Modified indicator. Color remains editable in the separate Color Grade
+node. Selecting a look preserves input correction. Keep my color settings
+preserves the current finishing grade; otherwise the look supplies its defaults.
+
+Silver retention is a creative bleach-inspired contrast/desaturation treatment.
+Phoenix shift is a creative cross-process-inspired grade. Neither claims a
+chemical processing simulation. Instant memory uses the Instax profile with
+our existing Medium film-size setting for texture scale; it adds no border or
+physical Instax frame geometry. No Osmo presets, tables or shaders are included.
+
+The new Kodachrome slide looks use Reference exposure and the existing eligible
+HDR output path. Instant reflection-print and negative-print looks finish to
+SDR even from HDR input. Playback continues to show an SDR display conversion.
+
+## Preview and compatibility
+
+Only visible look cards and the pinned selected look request first-frame
+renders. The editor cancels stale batches on source/filter changes and reuses
+cached images by source, complete recipe and installed engine. Playback retains
+scheduler priority. Thumbnail size is unchanged at 384px; main preview and
+export resolution/frame settings are unchanged.
+
+`GET /fotufilm/catalogue` reports the profiles in the server's configured stock
+bundle. Missing profiles remain visible but disabled. A failed inventory check
+explains that the editor must be reopened after updating the server. Rendering
+a missing profile also raises an explicit error; it cannot silently become a
+different stock. CPU/macOS fallback runtimes may have a different catalogue.
+
+`web/viewer/catalogue.js` is the versioned data module; `model.js` retains recipe
+composition. Stock metadata records profile provenance and candidate defaults.
+The Film selector changes just that ingredient, preserving the other controls;
+finished look cards apply their complete recipe.
 
 [`examples/studio-looks.json`](../examples/studio-looks.json) contains every full
-recipe for graph/API use. Copy an entry's `recipe` object into a recipe input.
-Regenerate with `node scripts/export_looks.mjs`; verify with `--check`.
+recipe for graph/API use. Regenerate with `node scripts/export_looks.mjs`; verify
+with `--check`. Old workflow recipe values are not migrated or overwritten.
+
+## Current outputs
+
+The current combined Film + Color Grade workflows already use native optional
+save branches. See [the current HDR-choice workflow guide](hdr-choice-workflow.md).
+This catalogue experiment does not change those branches or require an archive
+between HDR reconstruction and film processing.
 
 ### External sources considered
 
@@ -44,6 +86,12 @@ Regenerate with `node scripts/export_looks.mjs`; verify with `--check`.
   not a preset JSON format Fotufilm can load. Reusing those assets would require
   adapting the table domain, tone mapping and effects to our engine. Current
   additions do not copy Redlamp code, tables or tuned values.
+
+## Historical output design (0.3.3)
+
+The following records the older custom exporters and the rationale for moving
+to native outputs. Its proposed refactor is now reflected in the current
+workflow guide above; it is not an outstanding requirement of this experiment.
 
 ## What the optional nodes actually do
 
@@ -106,16 +154,3 @@ stage must apply the recipe exactly once.
 The isolated Studio test build exposes these core save options. The user's
 model-serving build must be checked before changing its workflow. No core pin,
 archive format, existing output node or workflow wiring changed in 0.3.3.
-
-## Verification
-
-- 52 Python checks passed on the remote Modal GPU, including all 24 recipes on
-  a color ramp with SDR and 8× HDR-range input; representative new recipes were
-  checked to produce distinct, finite output.
-- 17 JavaScript checks passed, including filter isolation, visible-family
-  thumbnail requests, preserved input correction, undo and independent defaults.
-- The isolated Studio deployment serves the exact updated catalogue (SHA-256
-  matches the local module). Main model environment pins were not changed.
-- A new visual check in ComfyUI could not complete because browser automation
-  timed out. Native render and DOM tests passed; this is not a visual approval
-  of each look on production footage or a new playback benchmark.

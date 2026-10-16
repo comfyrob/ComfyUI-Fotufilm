@@ -2,6 +2,7 @@ import { baseRecipe, clone, films, formats, looks, lookGroups, looksInGroup, loo
 import {composeGrade,gradeOverrides} from './stage-recipe.js';
 import {attachNumericControl} from './numeric-control.js';
 import {createLookPreviews} from './look-previews.js';
+import {filterLooks, previewLooks, readFavorites, writeFavorites} from './catalogue-browser.js';
 
 const icons = {
   play: '<path d="m8 5 11 7-11 7z"/>', pause: '<path d="M8 5v14M16 5v14"/>',
@@ -37,7 +38,14 @@ export function createStudio(options = {}) {
   let startingRecipe = clone(recipe);
   let selectedLook = looks.some(look=>look.id===options.lookId) ? options.lookId : matchLook(recipe)?.id || null;
   let startingLook = selectedLook;
-  let lookGroup = 'all';
+  let lookGroup = 'all', lookQuery = '', favoritesOnly = false;
+  let favoriteStorage;try{favoriteStorage=window.localStorage;}catch{}
+  const favorites=readFavorites(favoriteStorage);
+  let availableStocks=null, catalogueReady=!options.preview?.catalogue, catalogueError='', renderEngine='';
+  const stockAvailable=id=>catalogueReady && (availableStocks===null || availableStocks.has(id));
+  const visibleLookIds=new Set();
+  let lookObserver=null, viewportTimer=0;
+
   let tab = 'looks', sourceMode = options.asset?.info?.hdr ? 'hdr' : 'original', comparing = false, zoom = 1, rate = 1;
   let sources = {original: options.source || '', hdr: options.enhanced || ''};
   let rendered = options.rendered || '';
@@ -99,7 +107,7 @@ export function createStudio(options = {}) {
         <div class="ff-current"><div class="ff-current-preview" aria-hidden="true"><img alt="" hidden/>${icon('film')}</div><div class="ff-current-copy"><span class="ff-current-label">Selected look</span><div class="ff-look-title"><h1 aria-live="polite"></h1><span class="ff-modified" hidden>Modified</span></div><p class="ff-recipe-summary"></p></div>${iconButton('reset', 'Reset this look', 'undo')}</div>
         <nav class="ff-tabs" aria-label="Recipe editor">${button('tab-looks', 'Looks', '', 'aria-pressed="true"')}${button('tab-customize', 'Film', '', 'aria-pressed="false"')}${button('tab-grade','Color & texture','','aria-pressed="false"')}</nav>
         <div class="ff-panel-content">
-          <section class="ff-looks-panel"><p class="ff-intro">One look. Film, color and texture together.</p><label class="ff-keep-color" title="Keep your current finishing color adjustments when choosing a look."><input type="checkbox" class="ff-keep-finish"> Keep my color settings</label><div class="ff-look-filters" role="group" aria-label="Filter looks">${lookGroups.map(([id,label])=>`<button type="button" data-look-group="${id}" aria-pressed="${id===lookGroup}">${label}</button>`).join('')}</div><div class="ff-look-grid">${looks.map(look=>`<button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><span class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">Connect a video</span><span class="ff-look-check">${icon('check')}<span>Selected</span></span></span><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button>`).join('')}</div><div class="ff-thumbnail-status"><p class="ff-thumbnail-note" role="status">First-frame previews</p>${button('retry-looks','Retry previews','','hidden')}</div></section>
+          <section class="ff-looks-panel"><p class="ff-intro">One look. Film, color and texture together.</p><label class="ff-keep-color" title="Keep your current finishing color adjustments when choosing a look."><input type="checkbox" class="ff-keep-finish"> Keep my color settings</label><div class="ff-look-search-row"><input class="ff-look-search" type="search" aria-label="Search looks or film stocks" placeholder="Search looks or stocks"/><button type="button" data-action="favorite-filter" aria-pressed="false" title="Show your favorite looks">☆ Favorites</button></div><div class="ff-look-filters" role="group" aria-label="Filter looks">${lookGroups.map(([id,label])=>`<button type="button" data-look-group="${id}" aria-pressed="${id===lookGroup}">${label}</button>`).join('')}</div><p class="ff-catalogue-note" role="status"></p><p class="ff-look-empty" hidden>No matching looks. Try another search or collection.</p><div class="ff-look-grid">${looks.map(look=>`<div class="ff-look-entry" data-entry="${look.id}"><button class="ff-look" type="button" data-look="${look.id}" aria-pressed="false"><span class="ff-look-image"><img alt="" hidden/><span class="ff-thumb-empty">Connect a video</span><span class="ff-look-check">${icon('check')}<span>Selected</span></span></span><span class="ff-look-name">${look.name}</span><span class="ff-look-note">${look.note}</span></button><button type="button" class="ff-favorite" data-favorite="${look.id}" aria-label="Favorite ${look.name}" aria-pressed="${favorites.has(look.id)}" title="Favorite ${look.name}">${favorites.has(look.id)?'★':'☆'}</button></div>`).join('')}</div><div class="ff-thumbnail-status"><p class="ff-thumbnail-note" role="status">First-frame previews</p>${button('retry-looks','Retry previews','','hidden')}</div></section>
           <section class="ff-customize-panel" hidden>
             <div class="ff-section"><div class="ff-section-heading"><h2>Film</h2><span>The foundation of your look</span></div><div class="ff-films">${films.map(([id,name,note])=>`<button type="button" data-film="${id}" aria-pressed="false"><span>${name}</span><small>${note}</small>${icon('check')}</button>`).join('')}</div>
               <h3>Film size</h3><div class="ff-chips">${formats.map(([id,name])=>`<button type="button" data-format="${id}" aria-pressed="false">${name}</button>`).join('')}</div><p class="ff-help">Changes the scale of grain and halation, not the crop.</p>
@@ -174,7 +182,7 @@ export function createStudio(options = {}) {
         if(state==='loading'&&card.querySelector('img').hidden)placeholder.textContent='Rendering…';
         if(state==='error'){card.querySelector('img').hidden=true;placeholder.hidden=false;placeholder.textContent='Preview unavailable';}
       }else{
-        if(state==='loading')$$('.ff-look-image img').forEach(img=>{if(img.hidden)img.nextElementSibling.textContent='Waiting for preview…';});
+        if(state==='loading')$$('.ff-look:not(:disabled) .ff-look-image img').forEach(img=>{if(img.hidden)img.nextElementSibling.textContent='First-frame preview';});
         $('.ff-thumbnail-note').textContent=state==='loading'?'Rendering first-frame previews…':state==='error'?'Some previews could not load. Try again.':'First-frame previews · Fotufilm';action('retry-looks').hidden=state!=='error';
       }
     }
@@ -183,9 +191,54 @@ export function createStudio(options = {}) {
   function candidateLook(id){const next=selectLook(recipe,id,$('.ff-keep-finish').checked);if(recipe.sdr_output)next.sdr_output=recipe.sdr_output;return next;}
   function scheduleLookPreviews(force=false){
     if(!options.preview||!asset||destroyed||tab!=='looks'||interacting)return;
-    const visible=looksInGroup(lookGroup),selected=looks.find(look=>look.id===selectedLook);
-    const items=selected&&!visible.includes(selected)?[selected,...visible]:visible;
-    lookPreviews.update(asset.asset,items.map(look=>({id:look.id,recipe:candidateLook(look.id)})),force);
+    const entries=filteredLooks();
+    const items=previewLooks(entries,visibleLookIds,selectedLook,stockAvailable);
+    lookPreviews.update(asset.asset,items.map(look=>({id:look.id,recipe:candidateLook(look.id)})),force,renderEngine);
+  }
+  function filteredLooks(){return filterLooks({group:lookGroup,query:lookQuery,favorites,favoritesOnly});}
+  function refreshVisibleLooks(){
+    clearTimeout(viewportTimer);
+    // IntersectionObserver handles normal layouts. The geometry fallback also
+    // works while an inline node is being resized or before its first observer tick.
+    const panel=$('.ff-panel-content'),bounds=panel.getBoundingClientRect();
+    visibleLookIds.clear();
+    const entries=$$('.ff-look-entry').filter(card=>!card.hidden);
+    for(const card of entries){const rect=card.getBoundingClientRect();if(rect.height>0&&rect.bottom>bounds.top&&rect.top<bounds.bottom)visibleLookIds.add(card.dataset.entry);}
+    if(!bounds.height)entries.slice(0,6).forEach(card=>visibleLookIds.add(card.dataset.entry));
+    scheduleLookPreviews();
+  }
+  function filterLookCards(){
+    const visible=new Set(filteredLooks().map(look=>look.id));
+    $$('.ff-look-entry').forEach(card=>{card.hidden=!visible.has(card.dataset.entry);card.querySelector('[data-look]').hidden=card.hidden;});
+    $$('[data-look-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lookGroup===lookGroup)));
+    $('.ff-look-empty').hidden=visible.size>0;
+    action('favorite-filter').setAttribute('aria-pressed',String(favoritesOnly));
+    refreshVisibleLooks();
+  }
+  function updateCatalogueAvailability(){
+    for(const button of $$('[data-film]')){button.disabled=!stockAvailable(button.dataset.film);button.title=button.disabled?(catalogueError||'Stock not available in this server runtime.'):'';}
+    for(const button of $$('[data-look]')){
+      const look=looks.find(look=>look.id===button.dataset.look);button.disabled=!stockAvailable(look.film);
+      button.title=button.disabled?(catalogueError||'Required stock not available in this server runtime.'):look.note;
+      if(button.disabled){const image=button.querySelector('img'),placeholder=button.querySelector('.ff-thumb-empty');image.hidden=true;placeholder.hidden=false;placeholder.textContent=catalogueReady?'Stock unavailable':'Checking stocks…';}
+    }
+    const missing=films.filter(([id])=>!stockAvailable(id)).length;
+    $('.ff-catalogue-note').textContent=catalogueError||(!catalogueReady?'Checking server stocks…':missing?`${missing} stocks unavailable. Update the server's Fotufilm pack to enable them.`:'');
+    $('.ff-catalogue-note').hidden=!$('.ff-catalogue-note').textContent;
+    filterLookCards();
+  }
+  on($('.ff-look-search'),'input',event=>{lookQuery=event.target.value;filterLookCards();});
+  on($('.ff-panel-content'),'scroll',()=>{clearTimeout(viewportTimer);viewportTimer=setTimeout(refreshVisibleLooks,90);});
+  if(typeof IntersectionObserver!=='undefined'){
+    lookObserver=new IntersectionObserver(()=>refreshVisibleLooks(),{root:$('.ff-panel-content')});
+    $$('.ff-look-entry').forEach(card=>lookObserver.observe(card));
+  }
+  if(options.preview?.catalogue){
+    options.preview.catalogue().then(value=>{
+      if(destroyed)return;
+      if(!Array.isArray(value.stocks))throw new Error('Invalid stock catalogue.');
+      availableStocks=new Set(value.stocks);renderEngine=value.engine||'';catalogueReady=true;updateCatalogueAvailability();
+    }).catch(()=>{if(destroyed)return;catalogueReady=true;availableStocks=new Set();catalogueError='Could not check server stocks. Reopen the editor after updating the node pack.';updateCatalogueAvailability();});
   }
   function updateLive(){
     if(!asset||destroyed)return;
@@ -357,7 +410,7 @@ export function createStudio(options = {}) {
     tab=next; $('.ff-looks-panel').hidden=tab!=='looks'; $('.ff-customize-panel').hidden=tab!=='customize'; $('.ff-grade-panel').hidden=tab!=='grade';
     action('tab-looks').setAttribute('aria-pressed',String(tab==='looks'));action('tab-customize').setAttribute('aria-pressed',String(tab==='customize'));action('tab-grade').setAttribute('aria-pressed',String(tab==='grade'));
     $('.ff-panel-content').scrollTop=0;
-    if(tab==='looks')scheduleLookPreviews();else lookPreviews.cancel();
+    if(tab==='looks')refreshVisibleLooks();else lookPreviews.cancel();
   }
   function setZoom(value) {
     zoom=Math.min(4,Math.max(1,value)); if(zoom===1)pan={x:0,y:0};
@@ -469,16 +522,18 @@ export function createStudio(options = {}) {
     const target=event.target.closest('button');if(!target||target.disabled)return;
     if(target.dataset.lookGroup){
       lookGroup=target.dataset.lookGroup;
-      const visible=new Set(looksInGroup(lookGroup).map(look=>look.id));
-      $$('[data-look]').forEach(card=>{card.hidden=!visible.has(card.dataset.look);});
-      $$('[data-look-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lookGroup===lookGroup)));
-      scheduleLookPreviews();return;
+      filterLookCards();return;
+    }
+    if(target.dataset.favorite){
+      const id=target.dataset.favorite;if(favorites.has(id))favorites.delete(id);else favorites.add(id);
+      writeFavorites(favoriteStorage,favorites);target.setAttribute('aria-pressed',String(favorites.has(id)));target.textContent=favorites.has(id)?'★':'☆';filterLookCards();return;
     }
     if(target.dataset.look){commitHistory();selectedLook=target.dataset.look;recipe=candidateLook(selectedLook);updateRecipeUI();commitHistory();return;}
     if(target.dataset.film){recipe.stock=target.dataset.film;updateRecipeUI();return;}
     if(target.dataset.format){recipe.format=target.dataset.format;updateRecipeUI();return;}
     if(target.dataset.medium){recipe.medium=target.dataset.medium;updateRecipeUI();return;}
     switch(target.dataset.action){
+      case 'favorite-filter':favoritesOnly=!favoritesOnly;filterLookCards();break;
       case 'play':await play();break;
       case 'back':video.pause();seek(video.currentTime-1/fps);break;
       case 'next':video.pause();seek(video.currentTime+1/fps);break;
@@ -537,7 +592,7 @@ export function createStudio(options = {}) {
     $('.ff-legacy-balance').hidden=true;
     setTab('grade');
   }
-  const initialLooks=new Set(looksInGroup(lookGroup).map(look=>look.id));$$('.ff-look').forEach(card=>card.hidden=!initialLooks.has(card.dataset.look));
+  updateCatalogueAvailability();
   updateRecipeUI();setZoom(1);setSource(sourceMode,false);compare(false);
   $('.ff-prototype').textContent='ComfyUI';
   $('.ff-sidebar-footer p').textContent=editorMode==='film'?'Live film preview. Adjust colors in Color Grade; save using the output nodes.':'Live adjustments. Save to node before queueing the export branch.';
@@ -546,5 +601,5 @@ export function createStudio(options = {}) {
     getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,getPreviewMetrics:()=>live?.getMetrics?.()||[],pause(){video.pause();before.pause();},
     setAsset(value){if(asset?.asset===value?.asset)return;closeLive();asset=value;$$('.ff-look-image img').forEach(img=>{img.hidden=true;img.nextElementSibling.hidden=false;});syncCurrentLookPreview();hasHDR=hasHDR||Boolean(value?.info?.hdr);fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=value?.info?.hdr?'hdr':'original';setSource(sourceMode);},
     updateMedia(media){const newSource=media.source!==sources.original;sources={original:media.source||'',hdr:media.enhanced||''};hasHDR=Boolean(media.hasHDR);if(newSource){closeLive();previewController?.abort();clipController?.abort();lookPreviews.cancel();asset=null;stillReady=false;showStill(false);rendered='';previewKey='';previewClipKey='';}if(media.rendered){rendered=media.rendered;renderedRecipe=media.renderedRecipe||null;}label=media.label||label;setSource(sourceMode==='hdr'&&hasHDR?'hdr':'original');},
-    dispose(){destroyed=true;lookPreviews.dispose();exportController?.abort();closeLive();previewController?.abort();clipController?.abort();clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
+    dispose(){destroyed=true;lookObserver?.disconnect();clearTimeout(viewportTimer);lookPreviews.dispose();exportController?.abort();closeLive();previewController?.abort();clipController?.abort();clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
 }

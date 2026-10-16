@@ -51,3 +51,16 @@ def stocks_path():
     default = (resources_path() / 'Stocks' if sys.platform == 'linux'
                else ROOT / '.runtime/fotufilm/Sources/FotufilmCore/Stocks')
     return configured_path('FOTUFILM_STOCKS', default)
+
+
+def stock_catalogue():
+    """Inventory the installed profile bundle without starting the native renderer."""
+    profiles = []
+    for path in sorted(stocks_path().glob('*.json')):
+        try:
+            data = json.loads(path.read_text())
+            if data.get('id') == path.stem:
+                profiles.append(path.stem)
+        except (OSError, ValueError, AttributeError):
+            continue
+    return {'engine': runtime_revision(), 'stocks': profiles}

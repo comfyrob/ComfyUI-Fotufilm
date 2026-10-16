@@ -250,6 +250,10 @@ async def body(request):
 def install_routes():
     from server import PromptServer
     routes=PromptServer.instance.routes
+    @routes.get('/fotufilm/catalogue')
+    async def catalogue(request):
+        from .runtime_paths import stock_catalogue
+        return web.json_response(await asyncio.to_thread(stock_catalogue))
     @routes.get('/fotufilm/live')
     async def live(request):
         from .live_preview import stream

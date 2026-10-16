@@ -10,7 +10,7 @@ export function createLookPreviews({render, show, status, delay = 120, cache = n
     let failures = 0;
     for (const item of batch.items) {
       if (current.signal.aborted || disposed) return;
-      const itemKey = JSON.stringify([batch.asset, item.recipe]);
+      const itemKey = JSON.stringify([batch.asset, batch.engine, item.recipe]);
       try {
         status(item.id, 'loading');
         const url = ready.get(itemKey) || (await render(batch.asset, item.recipe, {
@@ -20,7 +20,7 @@ export function createLookPreviews({render, show, status, delay = 120, cache = n
         await show(item.id, url, current.signal);
         if (current.signal.aborted || disposed) return;
         ready.set(itemKey, url);
-        while (ready.size > 48) ready.delete(ready.keys().next().value);
+        while (ready.size > 128) ready.delete(ready.keys().next().value);
         status(item.id, 'ready');
       } catch (error) {
         if (current.signal.aborted || disposed) return;
@@ -32,12 +32,12 @@ export function createLookPreviews({render, show, status, delay = 120, cache = n
     if (controller === current) { controller = null; status(null, failures ? 'error' : 'ready'); }
   }
   return {
-    update(asset, items, force = false) {
+    update(asset, items, force = false, engine = '') {
       if (disposed) return;
-      const nextKey = JSON.stringify([asset, items]);
+      const nextKey = JSON.stringify([asset, engine, items]);
       if (!force && key === nextKey) return;
       controller?.abort(); clearTimeout(timer); key = nextKey;
-      latest = {asset, items};
+      latest = {asset, engine, items};
       status(null, 'loading');
       timer = setTimeout(run, delay);
     },

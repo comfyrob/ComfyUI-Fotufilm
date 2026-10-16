@@ -44,3 +44,10 @@ test('enlarging the same node reuses its decoded-thumbnail URLs', async () => {
   const dialog=createLookPreviews(options);dialog.update('clip',items);await turn();
   assert.equal(renders,2);dialog.dispose();
 });
+
+test('installed engine changes invalidate cached look previews',async()=>{
+  let renders=0;const loader=createLookPreviews({delay:0,status(){},show:async()=>{},render:async()=>{renders++;return {after:'a.png'};}});
+  loader.update('clip',items,false,'engine-one');await turn();
+  loader.update('clip',items,false,'engine-two');await turn();
+  assert.equal(renders,4);loader.dispose();
+});

@@ -1,7 +1,7 @@
 import {openLivePreview} from './live-client.js';
 /** Cancellable native Fotufilm previews; never submits the workflow graph. */
 export function createPreviewClient(api) {
-  const client=crypto.randomUUID();let closed=false;const jobs=new Set(),lookCache=new Map();
+  const client=crypto.randomUUID();let closed=false,catalogueRequest;const jobs=new Set(),lookCache=new Map();
   async function request(path,data,signal){
     const response=await api.fetchApi(`/fotufilm/${path}`,data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal}:{signal});
     const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||'Preview request failed.');return result;
@@ -10,6 +10,7 @@ export function createPreviewClient(api) {
   async function cancel(job){try{await request(`jobs/${job}/cancel`,{});}catch{}}
   return {
     lookCache,
+    catalogue:()=>catalogueRequest ||= request('catalogue').catch(error=>{catalogueRequest=null;throw error;}),
     fileURL,
     live:callbacks=>openLivePreview(api.apiURL('/fotufilm/live'),callbacks),
     register:file=>request('source',file),

@@ -1,8 +1,11 @@
 # Film and look library experiment
 
-Status: proposed, 2026-10-15. Branch: `explore/film-look-library`, based on
-`2dcacf5`. This document is an implementation brief; no catalogue entries,
-renderer settings, workflow wiring or deployment pins have changed.
+Status: implemented on the experimental branch, 2026-10-16. Branch: `explore/film-look-library`, based on
+`2dcacf5`. The first catalogue milestone is implemented: 28 stocks, 54 looks, search,
+favorites, visible-card previews and installed-stock checks. Engine settings and
+workflow wiring are unchanged. Native GPU validation is pending; the production
+deployment has not been repinned. The sections below retain the implementation
+brief and explain the decisions.
 
 ## Goal
 
