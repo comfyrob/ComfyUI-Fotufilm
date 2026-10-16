@@ -3,8 +3,7 @@
 Status: implemented on the experimental branch, 2026-10-16. Branch: `explore/film-look-library`, based on
 `2dcacf5`. The first catalogue milestone is implemented: 28 stocks, 54 looks, search,
 favorites, visible-card previews and installed-stock checks. Engine settings and
-workflow wiring are unchanged. Native GPU validation is pending; the production
-deployment has not been repinned. The sections below retain the implementation
+workflow wiring are unchanged. Native GPU validation passed; the production deployment has not been repinned. The sections below retain the implementation
 brief and explain the decisions.
 
 ## Goal
@@ -146,3 +145,32 @@ branch and update deployment pins after the working catalogue is ready.
   stock resources; avoid changing colour/engine contracts for a catalogue edit.
 - Documentation: update `docs/looks-and-outputs.md` when implementing; it still
   describes an older 24-look release and must not define the current baseline.
+
+## Validation record — 2026-10-16
+
+- 31 JavaScript checks passed, including search/favorites, missing-profile
+  handling, viewport-limited thumbnail selection, cache invalidation by engine,
+  recipe preservation and separate Film / Color Grade handoff.
+- All 36 prior exported catalogue entries compare exactly with the branch base.
+- 72 Python/native checks passed on the remote RTX PRO 6000 in 31.38 seconds.
+  The catalogue test rendered all 54 recipes on SDR and 8x float-range ramps,
+  checked finite/nonconstant output, and checked representative recipe pairs
+  for distinct results. This is numerical validation, not film-stock accuracy.
+- A separate native visual pass rendered all 18 additions on one real video
+  frame and on that frame boosted by three stops. The contact sheets use the
+  same SDR display transform as the editor. The boost is a highlight stress
+  fixture, not an LTX reconstruction or an HDR display screenshot. Dense print
+  and experimental recipes intentionally have strong contrast/color shifts.
+- Browser layout, Kodachrome search and favorite active state were checked on
+  the shared custom-node editor in a temporary local UI fixture. No inference
+  ran locally. A full end-to-end ComfyUI playback/latency benchmark has not been
+  run for this branch; no improved delivered-fps claim is made.
+- Native tests used a separate temporary checkout on an idle remote server,
+  reusing its installed native libraries. Its active node installation and
+  model pins were not replaced. The unused separate validation app was stopped.
+- The native test process emitted OpenImageIO/nanobind shutdown leak warnings
+  and exited successfully. These warnings were not investigated in this
+  catalogue change.
+
+Implementation and tests are pushed on this branch. Promotion to the main
+node pack and a production deployment remains a separate step after feedback.

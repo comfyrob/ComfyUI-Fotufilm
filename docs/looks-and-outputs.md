@@ -87,6 +87,13 @@ between HDR reconstruction and film processing.
   adapting the table domain, tone mapping and effects to our engine. Current
   additions do not copy Redlamp code, tables or tuned values.
 
+## Validation
+
+31 JavaScript checks and 72 remote Python/native checks passed. Every new look
+was also rendered on a real video frame for a visual contact sheet. See the
+[experiment validation record](film-look-library-plan.md#validation-record--2026-10-16)
+for scope and limitations. Production pins are unchanged.
+
 ## Historical output design (0.3.3)
 
 The following records the older custom exporters and the rationale for moving
