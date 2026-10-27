@@ -96,6 +96,8 @@ The pack does **not** perform neural SDR-to-HDR conversion by itself. The includ
 
 Use [Fotufilm - Open HDR video.json](examples/Fotufilm%20-%20Open%20HDR%20video.json) for an already-HDR MP4/MOV. Tagged BT.2020 HLG/PQ is decoded to float for film and grading; a compatible SDR copy supplies playback/audio without replacing the processing source. No LTX pass or EXR archive is required. See [import details and limitations](docs/encoded-hdr-video.md).
 
+HLG/PQ conversion and linear-light resizing use CUDA when available. The HDR import performance fix preserves the selected preview size and all source frames; [RTX measurements](docs/hdr-import-performance.md) distinguish server throughput from displayed FPS. The [latest upstream review](docs/upstream-review-2026-10-27.md) covers which newer engine changes apply to this node pack.
+
 ## Older workflows and color
 
 For the earlier combined Studio layout, use **[Film Finish - Studio + LTX 2.5 HDR.json](examples/Film%20Finish%20-%20Studio%20%2B%20LTX%202.5%20HDR.json)** for one connected workflow:

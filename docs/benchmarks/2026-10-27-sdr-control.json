@@ -1,0 +1,253 @@
+{
+  "source": {
+    "width": 1280,
+    "height": 726,
+    "fps": 48.0,
+    "frames": 409,
+    "colorSpace": "linear-rec709",
+    "hdr": false,
+    "duration": 8.520833333333334
+  },
+  "runs": [
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 40.01,
+      "medianMs": 24.34,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 261.22,
+      "medianMs": 3.63,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 42.17,
+      "medianMs": 22.2,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 272.51,
+      "medianMs": 3.57,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 26.98,
+      "medianMs": 35.75,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 185.41,
+      "medianMs": 5.3,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 29.76,
+      "medianMs": 32.12,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 0,
+      "serverFPS": 197.66,
+      "medianMs": 4.91,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 44.8,
+      "medianMs": 21.34,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 293.82,
+      "medianMs": 3.35,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 45.26,
+      "medianMs": 21.26,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 290.15,
+      "medianMs": 3.33,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 29.65,
+      "medianMs": 31.89,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 201.86,
+      "medianMs": 4.78,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 28.19,
+      "medianMs": 33.72,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 1,
+      "serverFPS": 190.9,
+      "medianMs": 5.11,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 41.19,
+      "medianMs": 20.69,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 291.25,
+      "medianMs": 3.37,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 44.44,
+      "medianMs": 21.4,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 273.06,
+      "medianMs": 3.6,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 29.81,
+      "medianMs": 32.08,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "baseline",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 190.72,
+      "medianMs": 5.05,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 29.75,
+      "medianMs": 32.73,
+      "encoder": "h264_nvenc"
+    },
+    {
+      "path": "candidate",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 128,
+      "trial": 2,
+      "serverFPS": 195.16,
+      "medianMs": 4.99,
+      "encoder": "h264_nvenc"
+    }
+  ]
+}

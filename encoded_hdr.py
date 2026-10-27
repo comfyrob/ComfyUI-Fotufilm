@@ -42,6 +42,50 @@ def decode_rgb(frame, transfer, *, width=None, height=None):
     return linearize_hdr(rgb.astype(np.float32) / 65535, transfer)
 
 
+def linearize_hdr_tensor(encoded, transfer):
+    """The reference HLG/PQ math in float32, without returning to the CPU."""
+    import torch
+    value = encoded.to(dtype=torch.float32).clamp_min(0)
+    if transfer == 18:
+        scene = torch.where(value <= .5, value * value / 3,
+                            (torch.exp((value - HLG_C) / HLG_A) + HLG_B) / 12)
+        luminance = scene[..., 0] * .2627 + scene[..., 1] * .6780 + scene[..., 2] * .0593
+        return scene * luminance.clamp_min(0).unsqueeze(-1).pow(.2) / HLG_WHITE ** 1.2
+    if transfer == 16:
+        power = value.pow(1 / (2523 / 32))
+        light = ((power - 3424 / 4096).clamp_min(0) /
+                 (2413 / 128 - (2392 / 128) * power).clamp_min(1e-8)).pow(1 / (2610 / 16384))
+        return light * (10000 / 203)
+    raise ValueError('Expected tagged HLG or PQ video.')
+
+
+def processing_rgb(frame, transfer, edge=None):
+    """Linearize at source resolution; resize linear light on CUDA when present.
+
+    Upload the compact uint16 RGB codes once. Only the selected-size float
+    result returns to the host for Fotufilm's current memory-input ABI. This
+    preserves the existing decode matrix, area filter, dimensions and range.
+    The playback proxy is never a processing input.
+    """
+    import torch
+    from .finish_pipeline import resize_float
+    if not torch.cuda.is_available():
+        return resize_float(decode_rgb(frame, transfer), edge)
+    encoded = frame.reformat(format='rgb48le', src_colorspace=9, dst_colorspace=9,
+                             src_color_range=int(frame.color_range) or 1,
+                             dst_color_range=2).to_ndarray()
+    with torch.inference_mode():
+        codes = torch.from_numpy(encoded).to(device='cuda').to(dtype=torch.float32) / 65535
+        rgb = linearize_hdr_tensor(codes, transfer)
+        height, width = rgb.shape[:2]
+        if edge and max(width, height) > edge:
+            scale = edge / max(width, height)
+            rgb = torch.nn.functional.interpolate(rgb.permute(2, 0, 1)[None],
+                size=(max(1, round(height * scale)), max(1, round(width * scale))),
+                mode='area')[0].permute(1, 2, 0)
+        return rgb.contiguous().cpu().numpy()
+
+
 def playback_proxy(source, destination, edge=768):
     """SDR transport/audio copy only; never used as a processing source.
 

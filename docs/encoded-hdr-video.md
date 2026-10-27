@@ -10,6 +10,8 @@ For HDR movies, the node prepares a cached 768px SDR H.264 copy at the original 
 
 Constant-frame-rate videos seek to a preceding keyframe when a new frame reader starts away from frame zero. This avoids decoding the entire earlier clip on backwards scrubs. Source frames are streamed, not collected into one giant IMAGE batch. At 3840×2176, a 409-frame RGB float32 batch alone is roughly 38 GiB; keep file input connected for interactive finishing.
 
+On CUDA servers, full-resolution HLG/PQ conversion and linear-light preview resizing run on the GPU. The CPU path remains available for lightweight compatibility checks. This fixes a severe HDR-only slowdown in the initial importer without reducing preview size, precision or frame count. The same-worker RTX measurements and reproduction command are in [HDR import performance](hdr-import-performance.md).
+
 ## Local validation — 2026-10-27
 
 Tested with the supplied 3840×2176, 48 fps, 409-frame H.264 High 10 HLG movie. Import metadata, headroom, compatible playback preparation, native film preview and the separate Color editor are checked locally in Comfy Desktop. No AI model inference is needed. A 640px source-frame read took about one second on the Mac; one-time playback preparation took about nine seconds. The expanded editor correctly uses the 48 fps source timeline instead of its 24 fps widget default. A brief moving 640px preview reached about 8 fps on this Mac; this is a local check, not an RTX benchmark or a real-time guarantee.

@@ -1,0 +1,348 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "source": {
+    "width": 3840,
+    "height": 2176,
+    "fps": 48.0,
+    "frames": 409,
+    "colorSpace": "linear-rec2020",
+    "encoding": "HLG",
+    "referenceWhiteNits": 203,
+    "encodedHDR": true,
+    "hdr": true,
+    "duration": 8.520833333333334
+  },
+  "engine": "9242d189b6f8321a27c6f6a345aeb4e5991da569",
+  "recipe": {
+    "version": 2,
+    "engine": "f602857a031a6a9c9b0966284ff989eb3046c323",
+    "stock": "vision250d",
+    "format": "super35",
+    "medium": "screen",
+    "digitalReference": "graded-print",
+    "seed": 1,
+    "params": {
+      "ev": 0,
+      "temperature": 6504,
+      "tint": 0,
+      "highlights": 0,
+      "shadows": 0,
+      "saturation": 1,
+      "vibrance": 0,
+      "grain": 0.55,
+      "gradeShadowsWarmth": 0,
+      "gradeHighlightsWarmth": 0
+    },
+    "profile": {
+      "halation": 0,
+      "screenGrade": 2,
+      "screenExposure": 0
+    }
+  },
+  "torchThreads": 16,
+  "memoryCacheMiB": 4096,
+  "runs": [
+    {
+      "path": "cpu-reference",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 9412.12,
+      "serverFPS": 5.05,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 178.93,
+        "film": 17.38,
+        "grade": 1.58,
+        "display": 0.32,
+        "encode": 1.99,
+        "total": 200.93
+      },
+      "p95Ms": 231.07,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cpu-reference",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 3.95,
+      "serverFPS": 261.0,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.07,
+        "film": 0.01,
+        "grade": 1.38,
+        "display": 0.46,
+        "encode": 1.82,
+        "total": 3.71
+      },
+      "p95Ms": 4.55,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cpu-reference",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 827.0,
+      "serverFPS": 5.11,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 180.15,
+        "film": 8.85,
+        "grade": 1.35,
+        "display": 0.25,
+        "encode": 1.38,
+        "total": 193.34
+      },
+      "p95Ms": 210.7,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cpu-reference",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 3.16,
+      "serverFPS": 409.18,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.04,
+        "film": 0.01,
+        "grade": 0.82,
+        "display": 0.28,
+        "encode": 1.09,
+        "total": 2.25
+      },
+      "p95Ms": 3.17,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 589.44,
+      "serverFPS": 42.43,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.15,
+        "film": 16.38,
+        "grade": 1.44,
+        "display": 0.3,
+        "encode": 2.12,
+        "total": 20.44
+      },
+      "p95Ms": 38.58,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 3.79,
+      "serverFPS": 256.31,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.05,
+        "film": 0.01,
+        "grade": 1.17,
+        "display": 0.46,
+        "encode": 1.95,
+        "total": 3.63
+      },
+      "p95Ms": 5.42,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 560.2,
+      "serverFPS": 61.37,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.14,
+        "film": 10.96,
+        "grade": 1.23,
+        "display": 0.27,
+        "encode": 1.42,
+        "total": 14.37
+      },
+      "p95Ms": 19.49,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 32,
+      "timedFrames": 30,
+      "firstFrameMs": 3.13,
+      "serverFPS": 372.19,
+      "medianMs": {
+        "queue": 0.0,
+        "setup": 0.0,
+        "source": 0.04,
+        "film": 0.01,
+        "grade": 0.83,
+        "display": 0.28,
+        "encode": 1.23,
+        "total": 2.4
+      },
+      "p95Ms": 3.76,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda-full-clip",
+      "edge": 1280,
+      "passName": "first-pass",
+      "framesVerified": 409,
+      "timedFrames": 407,
+      "firstFrameMs": 582.99,
+      "serverFPS": 50.15,
+      "medianMs": {
+        "queue": 0,
+        "setup": 0,
+        "source": 0.16,
+        "film": 15.57,
+        "grade": 1.47,
+        "display": 0.37,
+        "encode": 1.83,
+        "total": 19.5
+      },
+      "p95Ms": 21.93,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda-full-clip",
+      "edge": 1280,
+      "passName": "replay",
+      "framesVerified": 409,
+      "timedFrames": 407,
+      "firstFrameMs": 96.34,
+      "serverFPS": 51.75,
+      "medianMs": {
+        "queue": 0,
+        "setup": 0,
+        "source": 0.19,
+        "film": 15.27,
+        "grade": 1.47,
+        "display": 0.28,
+        "encode": 1.89,
+        "total": 19.16
+      },
+      "p95Ms": 20.41,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda-full-clip",
+      "edge": 960,
+      "passName": "first-pass",
+      "framesVerified": 409,
+      "timedFrames": 407,
+      "firstFrameMs": 982.85,
+      "serverFPS": 66.73,
+      "medianMs": {
+        "queue": 0,
+        "setup": 0,
+        "source": 0.15,
+        "film": 10.95,
+        "grade": 1.22,
+        "display": 0.25,
+        "encode": 1.42,
+        "total": 14.14
+      },
+      "p95Ms": 18.73,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    },
+    {
+      "path": "cuda-full-clip",
+      "edge": 960,
+      "passName": "replay",
+      "framesVerified": 409,
+      "timedFrames": 407,
+      "firstFrameMs": 12.69,
+      "serverFPS": 78.57,
+      "medianMs": {
+        "queue": 0,
+        "setup": 0,
+        "source": 0.07,
+        "film": 9.63,
+        "grade": 1.24,
+        "display": 0.22,
+        "encode": 1.43,
+        "total": 12.62
+      },
+      "p95Ms": 13.41,
+      "encoder": "h264_nvenc",
+      "memoryInput": true
+    }
+  ],
+  "parity": [
+    {
+      "frame": 0,
+      "edge": 960,
+      "maxAbsError": 2.6226043701171875e-06,
+      "peak": 4.5202436447143555
+    },
+    {
+      "frame": 0,
+      "edge": 1280,
+      "maxAbsError": 2.384185791015625e-06,
+      "peak": 4.723927974700928
+    },
+    {
+      "frame": 8,
+      "edge": 960,
+      "maxAbsError": 2.384185791015625e-06,
+      "peak": 4.6833882331848145
+    },
+    {
+      "frame": 8,
+      "edge": 1280,
+      "maxAbsError": 1.9073486328125e-06,
+      "peak": 4.748109817504883
+    },
+    {
+      "frame": 16,
+      "edge": 960,
+      "maxAbsError": 1.3113021850585938e-06,
+      "peak": 4.5905070304870605
+    },
+    {
+      "frame": 16,
+      "edge": 1280,
+      "maxAbsError": 1.430511474609375e-06,
+      "peak": 4.666602611541748
+    }
+  ]
+}

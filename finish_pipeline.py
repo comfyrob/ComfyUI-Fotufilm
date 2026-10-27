@@ -86,8 +86,8 @@ class Source:
                     if index>=stop:break
                     if index<start:continue
                     if self.is_hdr:
-                        from .encoded_hdr import decode_rgb
-                        yield index,resize_float(decode_rgb(frame,self.transfer),edge)
+                        from .encoded_hdr import processing_rgb
+                        yield index,processing_rgb(frame,self.transfer,edge)
                         continue
                     encoded=frame.to_ndarray(format='rgb48le')
                     if torch.cuda.is_available():

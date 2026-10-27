@@ -9,15 +9,40 @@ from pathlib import Path
 import av
 import imageio_ffmpeg
 import numpy as np
+import torch
 
 APP = Path(__file__).resolve().parents[1]
 package = types.ModuleType('film_finish'); package.__path__ = [str(APP)]
 sys.modules.setdefault('film_finish', package)
-from film_finish.encoded_hdr import linearize_hdr, playback_proxy
+from film_finish.encoded_hdr import linearize_hdr, linearize_hdr_tensor, decode_rgb, processing_rgb, playback_proxy
 from film_finish.finish_pipeline import Source
 
 
 class EncodedHDRTests(unittest.TestCase):
+    def test_tensor_transfer_matches_float32_reference_for_colored_highlights(self):
+        codes = np.random.default_rng(51).uniform(0, 1, (18, 32, 3)).astype(np.float32)
+        codes[0, :3] = [[0, 0, 0], [.75, .75, .75], [1, 1, 1]]
+        for transfer in (16, 18):
+            with self.subTest(transfer=transfer):
+                result = linearize_hdr_tensor(torch.from_numpy(codes), transfer).numpy()
+                self.assertEqual(result.dtype, np.float32)
+                np.testing.assert_allclose(result, linearize_hdr(codes, transfer), rtol=1e-4, atol=2e-5)
+
+    @unittest.skipUnless(torch.cuda.is_available(), 'CUDA HDR decode parity')
+    def test_cuda_processing_preserves_full_and_resized_hdr_pixels(self):
+        from film_finish.finish_pipeline import resize_float
+        codes = np.random.default_rng(37).integers(0, 65536, (36, 64, 3), dtype=np.uint16)
+        frame = av.VideoFrame.from_ndarray(codes, format='rgb48le')
+        for transfer in (16, 18):
+            for edge in (None, 32, 19):
+                with self.subTest(transfer=transfer, edge=edge):
+                    reference = resize_float(decode_rgb(frame, transfer), edge)
+                    actual = processing_rgb(frame, transfer, edge)
+                    self.assertEqual(actual.dtype, np.float32)
+                    self.assertEqual(actual.shape, reference.shape)
+                    self.assertGreater(actual.max(), 1)
+                    np.testing.assert_allclose(actual, reference, rtol=1e-4, atol=2e-5)
+
     def test_reference_white_and_headroom(self):
         hlg = np.array([[[0, 0, 0], [.75, .75, .75], [1, 1, 1]]], np.float32)
         decoded = linearize_hdr(hlg, 18)
