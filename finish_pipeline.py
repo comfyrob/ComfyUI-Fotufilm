@@ -36,26 +36,31 @@ def resize_float(rgb, edge):
 class Source:
     def __init__(self, path):
         self.path=Path(path)
-        self.is_hdr=self.path.name.endswith('.ffhdr.zip')
-        if self.is_hdr:
+        self.is_archive=self.path.name.endswith('.ffhdr.zip')
+        self.is_hdr=self.is_archive
+        self.transfer=None
+        if self.is_archive:
             self.info=read_manifest(self.path)
         else:
             with av.open(str(self.path)) as container:
                 video=container.streams.video[0]
-                if int(video.codec_context.color_trc) in (16,18):
-                    raise ValueError('For HDR finishing connect the float HDR master, not an encoded HLG/PQ playback file.')
-                if int(video.codec_context.color_primaries) not in (0,1,2):
+                self.transfer=int(video.codec_context.color_trc)
+                self.is_hdr=self.transfer in (16,18)
+                if self.is_hdr and (int(video.codec_context.color_primaries)!=9 or int(video.codec_context.colorspace)!=9):
+                    raise ValueError('HLG/PQ input must be tagged BT.2020 with the BT.2020 non-constant-luminance matrix.')
+                if not self.is_hdr and int(video.codec_context.color_primaries) not in (0,1,2):
                     raise ValueError('This encoded video is not tagged Rec.709. Use a float HDR master with explicit primaries.')
                 fps=float(video.average_rate or video.guessed_rate or 24)
                 duration=float(video.duration*video.time_base) if video.duration else float(container.duration or 0)/1e6
-                self.info={'width':video.width,'height':video.height,'fps':fps,'frames':video.frames or round(duration*fps),'colorSpace':'linear-rec709'}
+                self.info={'width':video.width,'height':video.height,'fps':fps,'frames':video.frames or round(duration*fps),'colorSpace':'linear-rec2020' if self.is_hdr else 'linear-rec709'}
+                if self.is_hdr:self.info.update(encoding='HLG' if self.transfer==18 else 'PQ',referenceWhiteNits=203,encodedHDR=True)
         self.info={**self.info,'hdr':self.is_hdr,'duration':self.info['frames']/self.info['fps']}
         if not 0<self.info['frames']<=100_000 or self.info['width']*self.info['height']>40_000_000:
             raise ValueError('Unsupported video duration or dimensions.')
 
     def frames(self, start=0, count=None, edge=None):
         stop=min(self.info['frames'],start+(count or self.info['frames']))
-        if self.is_hdr:
+        if self.is_archive:
             with zipfile.ZipFile(self.path) as bundle, tempfile.TemporaryDirectory(prefix='fotufilm-read-') as directory:
                 frame_path=Path(directory)/'source.exr'
                 for index in range(start,stop):
@@ -70,9 +75,20 @@ class Source:
         else:
             with av.open(str(self.path)) as container:
                 stream=container.streams.video[0]
+                stream.thread_type='AUTO'
+                # CFR files can seek to a preceding keyframe on backwards scrubs.
+                seeked=start>0 and stream.average_rate==stream.base_rate and stream.time_base is not None
+                if seeked:container.seek(int((stream.start_time or 0)+start/self.info['fps']/stream.time_base),stream=stream,backward=True)
                 for index,frame in enumerate(container.decode(stream)):
+                    if seeked:
+                        if frame.pts is None:raise ValueError('Cannot seek video without frame timestamps.')
+                        index=round(float((frame.pts-(stream.start_time or 0))*stream.time_base)*self.info['fps'])
                     if index>=stop:break
                     if index<start:continue
+                    if self.is_hdr:
+                        from .encoded_hdr import decode_rgb
+                        yield index,resize_float(decode_rgb(frame,self.transfer),edge)
+                        continue
                     encoded=frame.to_ndarray(format='rgb48le')
                     if torch.cuda.is_available():
                         with torch.inference_mode():
@@ -90,7 +106,7 @@ class Source:
                         yield index,resize_float(convert(rgb,'linear-rec709','linear-rec2020'),edge)
 
     def audio_path(self,directory):
-        if not self.is_hdr:return self.path
+        if not self.is_archive:return self.path
         path=Path(directory)/self.info['playback']
         with zipfile.ZipFile(self.path) as bundle:
             info=bundle.getinfo(self.info['playback'])
@@ -235,6 +251,9 @@ def render_clip_steps(source,recipe,destination,format_id='mp4',edge=None,start=
                 if process.returncode:
                     log.seek(0);raise RuntimeError('Encoding failed: '+log.read(1000).decode(errors='replace'))
                 if rendered!=total:raise ValueError('Source ended before its reported frame count.')
+            if format_id=='mp4':
+                from .video_delivery import repair_h264_color
+                repair_h264_color(destination)
             Path(destination).with_suffix('.recipe.json').write_text(json.dumps(recipe,indent=2))
             return {'frames':rendered,'fps':float(fps),'width':width,'height':height,'start':start/float(fps),'hdrEligible':eligible,**stats}
         except BaseException:

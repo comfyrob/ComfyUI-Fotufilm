@@ -70,7 +70,7 @@ Looks are complete recipes. Choosing a different film keeps the look name and ma
 
 **54 default looks** are grouped into Cinema, Portrait, Slide, Vintage, B&W and Experimental. Search by look or stock name, and star favorites to keep a personal shortlist. All remain editable; filtering does not change the active look. See [look catalogue and optional output nodes](docs/looks-and-outputs.md) for the new defaults, external profile research, and native ComfyUI save-node alternatives.
 
-**Original / Enhanced HDR** selects the source for interactive finishing and Studio's **Export video**. **Before / after** compares that same source before and after grading plus film. HDR processing reads connected linear frames or a saved float EXR master; browser stills and playback use an explicitly labelled SDR display conversion. This is not a calibrated HDR monitor. Export provides MP4, ProRes 422 HQ, and eligible HLG.
+**Original / Enhanced HDR** selects the source for interactive finishing and Studio's **Export video**. **Before / after** compares that same source before and after grading plus film. HDR processing reads connected linear frames, a saved float EXR master, or a tagged HLG/PQ video; browser stills and playback use an explicitly labelled SDR display conversion. This is not a calibrated HDR monitor. Export provides MP4, ProRes 422 HQ, and eligible HLG.
 
 **Save to node** persists the recipe. Use ComfyUI’s **Run** control to queue the connected graph, including uncached upstream stages; the graph follows its wired source/master, regardless of the interactive comparison source. **Export video** directly renders the current Studio source and recipe at full resolution without rerunning LTX. The optional **Develop Video** branch can connect its `studio` input to Studio to return a graph render without an extra Return node. Existing Return to Studio workflows remain compatible.
 
@@ -91,6 +91,10 @@ Inspection copies are explicitly converted to Rec.2020, including Fotufilm's lin
 See [Nodes 2.0 integration notes](docs/nodes-2-studio.md).
 
 The pack does **not** perform neural SDR-to-HDR conversion by itself. The included LTX 2.5 workflow requires [ComfyUI-LTXVideo](https://github.com/Lightricks/ComfyUI-LTXVideo) at `3bf3ca62595f1764c47d01c35c8e5dfe47e1a88f`, the model files named in that workflow, and `colour-science==0.4.7`. Install model weights on your remote models volume, not in this repository or the container image.
+
+## Existing HDR movies
+
+Use [Fotufilm - Open HDR video.json](examples/Fotufilm%20-%20Open%20HDR%20video.json) for an already-HDR MP4/MOV. Tagged BT.2020 HLG/PQ is decoded to float for film and grading; a compatible SDR copy supplies playback/audio without replacing the processing source. No LTX pass or EXR archive is required. See [import details and limitations](docs/encoded-hdr-video.md).
 
 ## Older workflows and color
 

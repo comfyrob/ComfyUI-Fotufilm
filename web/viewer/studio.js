@@ -46,15 +46,16 @@ export function createStudio(options = {}) {
   const visibleLookIds=new Set();
   let lookObserver=null, viewportTimer=0;
 
-  let tab = 'looks', sourceMode = options.asset?.info?.hdr ? 'hdr' : 'original', comparing = false, zoom = 1, rate = 1;
+  const assetMode=value=>value?.info?.hdr&&!value.info.encodedHDR?'hdr':'original';
+  let tab = 'looks', sourceMode = assetMode(options.asset), comparing = false, zoom = 1, rate = 1;
   let sources = {original: options.source || '', hdr: options.enhanced || ''};
   let rendered = options.rendered || '';
   let renderedRecipe = options.renderedRecipe || null;
   let label = options.label || 'Your video';
-  let fps = Math.max(1, options.fps || 24);
+  let fps = Math.max(1, options.asset?.info?.fps || options.fps || 24);
   let asset=options.asset||null, previewController=null, previewTimer=0, previewKey='', previewStatus='', previewEdge=1280, stillReady=false;
   let activeRenderedSource=sourceMode, previewClipKey='', pendingClipKey='', clipController=null, stillFrame=-1, swappingMedia=false;
-  let hasHDR=Boolean(options.hasHDR||asset?.info?.hdr), exporting=false, exportController=null;
+  let hasHDR=Boolean(options.hasHDR||assetMode(asset)==='hdr'), exporting=false, exportController=null;
   let live=null, liveFrame=-1, liveStatsStart=0, liveFrames=0, deliveredFPS=0;
   const snapshot = () => ({recipe:clone(recipe),lookId:selectedLook});
   const history=[snapshot()]; let historyTimer=0, interacting=false, editStarted=0;
@@ -471,14 +472,15 @@ export function createStudio(options = {}) {
     action('source-original').setAttribute('aria-pressed',String(mode==='original'));action('source-hdr').setAttribute('aria-pressed',String(mode==='hdr'));
     action('source-hdr').disabled=!hasHDR&&!sources.hdr;action('compare').disabled=!after;
     $('.ff-stage-right').textContent=after?'Existing Fotufilm render':mode==='hdr'?'Preparing linear preview…':'Original source';
-    $('.ff-display').textContent=mode==='hdr'?'Linear source · SDR display preview':'SDR video preview';
+    $('.ff-display').textContent=asset?.info?.hdr?`${asset.info.encoding||'Linear'} HDR source · SDR display preview`:'SDR video preview';
+    action('source-original').textContent=asset?.info?.encodedHDR?'Original HDR':'Original';
     const restore=()=>{if(!destroyed){seek(time);if(wasPlaying&&!pendingHDR)video.play().catch(()=>{});}video.removeEventListener('loadedmetadata',restore);};
     video.addEventListener('loadedmetadata',restore,{once:true,signal:abort.signal});
     updateRecipeUI();updateTransport();
     for(const name of ['play','back','next','loop','audio','fullscreen'])action(name).disabled=!current||pendingHDR;
     $('.ff-scrubber').disabled=!current;
     if(current&&!pendingHDR)makeThumbnails(current);
-    if(asset&&Boolean(asset.info.hdr)!==(mode==='hdr')){asset=null;previewController?.abort();clipController?.abort();lookPreviews.cancel();clearTimeout(previewTimer);stillReady=false;showStill(false);}
+    if(asset&&assetMode(asset)!==mode){asset=null;previewController?.abort();clipController?.abort();lookPreviews.cancel();clearTimeout(previewTimer);stillReady=false;showStill(false);}
     action('export').disabled=!asset||exporting;action('test-export').disabled=!asset||exporting;schedulePreview();
   }
   async function makeThumbnails(url) {
@@ -507,7 +509,7 @@ export function createStudio(options = {}) {
     finally{probe.removeAttribute('src');probe.load();}
   }
   on(video,'loadedmetadata',()=>{
-    $('.ff-file-info').textContent=`${video.videoWidth} × ${video.videoHeight} / ${fps} fps`;
+    $('.ff-file-info').textContent=`Source · ${asset?.info?.width||video.videoWidth} × ${asset?.info?.height||video.videoHeight} / ${fps} fps`;
     $$('.ff-ticks span').forEach((el,i)=>el.textContent=timecode(video.duration*i/5,fps).slice(0,5));updateTransport();
   });
   on(video,'play',()=>{showStill(false);stopTick();tick();if(options.preview?.live)schedulePreview(true);});on(video,'pause',()=>{stopTick();before.pause();updateTransport();if(!swappingMedia){showStill(stillReady&&Math.abs(video.currentTime*fps-stillFrame)<1);schedulePreview(true);}});
@@ -599,7 +601,7 @@ export function createStudio(options = {}) {
   return {element:root,
     setBaseRecipe(value){baseGradeRecipe=normalizeRecipe(value);recipe=composeGrade(baseGradeRecipe,gradeChanges);previousGrade=clone(recipe.grading.finish);startingRecipe=clone(recipe);history.length=0;history.push(snapshot());updateRecipeUI();},
     getRecipe:()=>clone(recipe),getLookId:()=>selectedLook,getPreviewMetrics:()=>live?.getMetrics?.()||[],pause(){video.pause();before.pause();},
-    setAsset(value){if(asset?.asset===value?.asset)return;closeLive();asset=value;$$('.ff-look-image img').forEach(img=>{img.hidden=true;img.nextElementSibling.hidden=false;});syncCurrentLookPreview();hasHDR=hasHDR||Boolean(value?.info?.hdr);fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=value?.info?.hdr?'hdr':'original';setSource(sourceMode);},
+    setAsset(value){if(asset?.asset===value?.asset)return;closeLive();asset=value;$$('.ff-look-image img').forEach(img=>{img.hidden=true;img.nextElementSibling.hidden=false;});syncCurrentLookPreview();hasHDR=hasHDR||assetMode(value)==='hdr';fps=value?.info?.fps||fps;previewKey='';previewClipKey='';rendered='';stillReady=false;showStill(false);sourceMode=assetMode(value);setSource(sourceMode);},
     updateMedia(media){const newSource=media.source!==sources.original;sources={original:media.source||'',hdr:media.enhanced||''};hasHDR=Boolean(media.hasHDR);if(newSource){closeLive();previewController?.abort();clipController?.abort();lookPreviews.cancel();asset=null;stillReady=false;showStill(false);rendered='';previewKey='';previewClipKey='';}if(media.rendered){rendered=media.rendered;renderedRecipe=media.renderedRecipe||null;}label=media.label||label;setSource(sourceMode==='hdr'&&hasHDR?'hdr':'original');},
     dispose(){destroyed=true;lookObserver?.disconnect();clearTimeout(viewportTimer);lookPreviews.dispose();exportController?.abort();closeLive();previewController?.abort();clipController?.abort();clearTimeout(previewTimer);clearTimeout(historyTimer);thumbnailToken++;stopTick();abort.abort();clearTimeout(toastTimer);video.pause();before.pause();video.removeAttribute('src');before.removeAttribute('src');video.load();before.load();ownedURLs.forEach(URL.revokeObjectURL);root.remove();}};
 }
