@@ -32,7 +32,7 @@ class FotufilmLoadHDRMaster(io.ComfyNode):
         if not match:raise ValueError('Invalid master filename.')
         path=resolve_file({'filename':match[1].strip(),'type':match[2] or 'input'})
         source=Source(path)
-        if not source.is_hdr:raise ValueError('Choose a .ffhdr.zip master.')
+        if not source.is_archive:raise ValueError('Choose a .ffhdr.zip master. Use Load Video for HDR MP4/MOV files.')
         import uuid
         with tempfile.TemporaryDirectory() as directory:
             original=source.audio_path(directory)

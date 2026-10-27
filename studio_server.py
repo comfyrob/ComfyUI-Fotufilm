@@ -29,7 +29,7 @@ JOBS=OrderedDict()
 CLIENTS={}
 LOCK=threading.RLock()
 LIMIT=2*1024**3
-PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('display_transform.py','finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','runtime_paths.py','runtime/float-engine-lock.json','vendor/gear_grading.py'))).hexdigest()
+PIPELINE_SIGNATURE=hashlib.sha256(b''.join((Path(__file__).parent/name).read_bytes() for name in ('encoded_hdr.py','video_delivery.py','display_transform.py','finish_pipeline.py','preview_runtime.py','grading.py','master_export.py','native.py','recipe.py','runtime_paths.py','runtime/float-engine-lock.json','vendor/gear_grading.py'))).hexdigest()
 RUNTIME=None
 TENSOR_LIMIT=8*1024**3
 
@@ -109,7 +109,7 @@ def register_file(value):
                 return {'asset':token,'info':asset['source'].info,'playback':asset.get('playback')}
     source=Source(path);token=uuid.uuid4().hex
     playback=None
-    if source.is_hdr:
+    if source.is_archive:
         import zipfile,shutil
         target=cache_root()/(fingerprint+'-source'+Path(source.info['playback']).suffix)
         if not target.is_file():
@@ -117,6 +117,11 @@ def register_file(value):
                 member=bundle.getinfo(source.info['playback'])
                 if member.file_size>2*1024**3:raise ValueError('Oversized playback member.')
                 with bundle.open(member) as src,target.open('wb') as dest:shutil.copyfileobj(src,dest)
+        playback=descriptor(target)
+    elif source.is_hdr:
+        from .encoded_hdr import playback_proxy
+        target=cache_root()/(fingerprint+'-'+PIPELINE_SIGNATURE[:12]+'-hdr-playback.mp4')
+        if not target.is_file():playback_proxy(source,target)
         playback=descriptor(target)
     with LOCK:
         ASSETS[token]={'source':source,'fingerprint':fingerprint,'playback':playback}
@@ -132,6 +137,10 @@ def cache_root():
 
 def prune_cache(protect=()):
     protect=set(protect)
+    for asset in list(ASSETS.values()):
+        if asset.get('playback'):
+            try:protect.add(str(resolve_file(asset['playback'])))
+            except ValueError:pass
     for job in list(JOBS.values()):protect.update(job.get('_paths',()))
     files=sorted(cache_root().glob('*'),key=lambda p:p.stat().st_mtime)
     size=sum(p.stat().st_size for p in files if p.is_file())
@@ -250,6 +259,10 @@ async def body(request):
 def install_routes():
     from server import PromptServer
     routes=PromptServer.instance.routes
+    @routes.get('/fotufilm/catalogue')
+    async def catalogue(request):
+        from .runtime_paths import stock_catalogue
+        return web.json_response(await asyncio.to_thread(stock_catalogue))
     @routes.get('/fotufilm/live')
     async def live(request):
         from .live_preview import stream

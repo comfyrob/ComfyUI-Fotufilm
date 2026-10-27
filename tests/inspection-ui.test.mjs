@@ -146,9 +146,11 @@ test('filtering looks leaves the current recipe intact and requests only the vis
   assert.deepEqual(studio.getRecipe(),before);
   assert.equal(root.querySelector('[data-look-group="mono"]').getAttribute('aria-pressed'),'true');
   const visible=[...root.querySelectorAll('[data-look]')].filter(card=>!card.hidden);
-  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver','fine-mono','classic-cinema']);
+  assert.deepEqual(visible.map(card=>card.dataset.look),['silver','noir','soft-silver','fine-mono','classic-cinema','studio-mono','grainy-night','soft-documentary']);
   await new Promise(resolve=>setTimeout(resolve,180));
-  assert.deepEqual(requests,['vision250d','trix400','trix400','trix400','acros100','doublex5222']);
+  // Without layout (jsdom), the editor requests at most the first six cards
+  // plus its pinned selection; offscreen cards do not fill the worker queue.
+  assert.deepEqual(requests,['vision250d','trix400','trix400','trix400','acros100','doublex5222','tmax100']);
   root.querySelector('[data-look="soft-silver"]').click();
   root.querySelector('[data-look-group="cinema"]').click();
   assert.equal(studio.getLookId(),'soft-silver');
@@ -214,4 +216,31 @@ test('explicit grade override survives a look with the same value, then a differ
   assert.equal(studio.getRecipe().grading.finish.exposure,.5);
   studio.element.querySelector('[data-action="reset-grade"]').click();studio.element.querySelector('[data-action="save"]').click();
   assert.equal(studio.getRecipe().grading.finish.exposure,.2);assert.deepEqual(saved,{});studio.dispose();
+});
+
+test('an already-HDR movie retains source dimensions and timing over a smaller playback proxy', async () => {
+  const source='https://comfy.test/hdr-playback.mp4';
+  const direct={asset:'encoded-hdr',info:{width:3840,height:2176,frames:409,fps:48,hdr:true,encodedHDR:true,encoding:'HLG'}};
+  const updates=[];
+  const studio=createStudio({source,asset:direct,fps:24,preview:{live:()=>({update(value){updates.push(value);},close(){}})}});
+  const root=studio.element;
+  const video=root.querySelector('video');
+  for(const [key,value] of Object.entries({videoWidth:768,videoHeight:436,duration:409/48})){
+    Object.defineProperty(video,key,{value,configurable:true});
+  }
+  video.dispatchEvent(new dom.window.Event('loadedmetadata'));
+  assert.equal(root.querySelector('.ff-file-info').textContent,'Source · 3840 × 2176 / 48 fps');
+  const slider=root.querySelector('.ff-scrubber');slider.max=String(409/48);slider.value='2';
+  slider.dispatchEvent(new dom.window.Event('input'));
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(updates.at(-1).frame,96);
+  assert.equal(root.querySelector('[data-action="source-original"]').textContent,'Original HDR');
+  assert.equal(root.querySelector('[data-action="source-original"]').getAttribute('aria-pressed'),'true');
+  assert.equal(root.querySelector('[data-action="source-hdr"]').disabled,true);
+  assert.match(root.querySelector('.ff-display').textContent,/HLG HDR source · SDR display preview/);
+  assert.equal(root.querySelector('[data-action="export"]').disabled,false);
+  studio.setAsset({...direct,asset:'re-registered'});
+  assert.equal(root.querySelector('[data-action="source-original"]').getAttribute('aria-pressed'),'true');
+  assert.equal(root.querySelector('[data-action="export"]').disabled,false);
+  studio.dispose();
 });

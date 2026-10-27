@@ -56,6 +56,9 @@ def validate_recipe(value):
 
 def render_request(recipe, seed, handle=None, time=0, edge=960):
     recipe = validate_recipe(recipe)
+    from .runtime_paths import stocks_path
+    if not (stocks_path() / (recipe['stock'] + '.json')).is_file():
+        raise ValueError(f"Film stock '{recipe['stock']}' is not installed in this Fotufilm runtime. Update the node pack and run install.py on the server.")
     request = {
         "edit": {"stock": recipe["stock"], "params": recipe["params"], "seed": seed,
                  "gradeSpace": False, "localTone": False, "halationModel": "legacy"},

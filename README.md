@@ -6,7 +6,7 @@ Open **[SDR / NVIDIA / LTX HDR → Film + Color](examples/Fotufilm%20-%20SDR%20o
 
 Film and Color expose only their settings outputs. The shared live renderer applies them to the same source; the optional export renders full-resolution pixels. Existing Studio and split-editor workflows remain supported.
 
-Film opens expanded by default. Browse **36 curated recipes** by category or customize one of **16 stock profiles**. The look library opens on **All**. The selected look remains visible above the library; selecting another category does not change it. Grading wheels remain in the separate Color node. Native video saving uses the same SDR transform as the normal preview; EXRs retain linear float values. Native batch output uses more memory than the legacy frame-by-frame exporter.
+Film opens expanded by default. Browse **54 curated recipes** by category or customize one of **28 stock profiles**. The look library opens on **All**. The selected look remains visible above the library; selecting another category does not change it. Grading wheels remain in the separate Color node. Native video saving uses the same SDR transform as the normal preview; EXRs retain linear float values. Native batch output uses more memory than the legacy frame-by-frame exporter.
 
 Film simulation and HDR video finishing custom nodes using the real [Fotufilm engine](https://github.com/DhaliwalX/fotufilm-engine). Linux CUDA is pinned to **`9242d189`** with matching profiles; the CPU/Vulkan/macOS fallback remains **v1.11 (`f602857a`)**. This is an independent integration, not an official Fotufilm product. [Engine upgrade and validation](docs/engine-9242d189.md).
 
@@ -66,11 +66,11 @@ The additive `fotufilm_image_from_rgba32f` extension accepts linear Rec.2020 flo
 
 **Balance Source** is an optional graph node that corrects the float source before Fotufilm. Studio's **Color & texture** tab refines the finished look, with visible color wheels. The controls use pinned Gear ACEScct math, adapted for wide-gamut float buffers: exposure, warmth/tint, contrast, highlights/shadows, saturation/vibrance, and lift/gamma/gain/offset wheels. There is one terminal display conversion, not a tone map before film simulation. See [Gear attribution and adaptation](vendor/README.md).
 
-Looks are complete recipes. Choosing a different film keeps the look name and marks it **Modified**. Look cards are actual first-frame film renders, loaded independently of playback, with cached results and retry on failure. Playback supports looping, frame steps, scrubbing, zoom/pan and a draggable before/after divider. The enlarged Studio and inline node share one editor implementation.
+Looks are complete recipes. Choosing a different film keeps the look name and marks it **Modified**. Look cards are actual first-frame film renders, loaded independently of playback, with cached results and retry on failure. Only on-screen cards and the pinned selection request thumbnails; playback keeps priority. The installed server catalogue disables missing stocks with an explanation instead of substituting a different profile. Playback supports looping, frame steps, scrubbing, zoom/pan and a draggable before/after divider. The enlarged Studio and inline node share one editor implementation.
 
-**24 default looks** are grouped into Cinema, Portrait, Slide, Vintage and B&W. All remain editable; filtering does not change the active look. See [look catalogue and optional output nodes](docs/looks-and-outputs.md) for the new defaults, external profile research, and native ComfyUI save-node alternatives.
+**54 default looks** are grouped into Cinema, Portrait, Slide, Vintage, B&W and Experimental. Search by look or stock name, and star favorites to keep a personal shortlist. All remain editable; filtering does not change the active look. See [look catalogue and optional output nodes](docs/looks-and-outputs.md) for the new defaults, external profile research, and native ComfyUI save-node alternatives.
 
-**Original / Enhanced HDR** selects the source for interactive finishing and Studio's **Export video**. **Before / after** compares that same source before and after grading plus film. HDR processing reads connected linear frames or a saved float EXR master; browser stills and playback use an explicitly labelled SDR display conversion. This is not a calibrated HDR monitor. Export provides MP4, ProRes 422 HQ, and eligible HLG.
+**Original / Enhanced HDR** selects the source for interactive finishing and Studio's **Export video**. **Before / after** compares that same source before and after grading plus film. HDR processing reads connected linear frames, a saved float EXR master, or a tagged HLG/PQ video; browser stills and playback use an explicitly labelled SDR display conversion. This is not a calibrated HDR monitor. Export provides MP4, ProRes 422 HQ, and eligible HLG.
 
 **Save to node** persists the recipe. Use ComfyUI’s **Run** control to queue the connected graph, including uncached upstream stages; the graph follows its wired source/master, regardless of the interactive comparison source. **Export video** directly renders the current Studio source and recipe at full resolution without rerunning LTX. The optional **Develop Video** branch can connect its `studio` input to Studio to return a graph render without an extra Return node. Existing Return to Studio workflows remain compatible.
 
@@ -91,6 +91,10 @@ Inspection copies are explicitly converted to Rec.2020, including Fotufilm's lin
 See [Nodes 2.0 integration notes](docs/nodes-2-studio.md).
 
 The pack does **not** perform neural SDR-to-HDR conversion by itself. The included LTX 2.5 workflow requires [ComfyUI-LTXVideo](https://github.com/Lightricks/ComfyUI-LTXVideo) at `3bf3ca62595f1764c47d01c35c8e5dfe47e1a88f`, the model files named in that workflow, and `colour-science==0.4.7`. Install model weights on your remote models volume, not in this repository or the container image.
+
+## Existing HDR movies
+
+Use [Fotufilm - Open HDR video.json](examples/Fotufilm%20-%20Open%20HDR%20video.json) for an already-HDR MP4/MOV. Tagged BT.2020 HLG/PQ is decoded to float for film and grading; a compatible SDR copy supplies playback/audio without replacing the processing source. No LTX pass or EXR archive is required. See [import details and limitations](docs/encoded-hdr-video.md).
 
 ## Older workflows and color
 

@@ -88,6 +88,15 @@
 .ff-tabs button:not([aria-pressed=true]){color:var(--muted)}
 .ff-panel-content{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--border) transparent;flex:1;min-height:0;padding:14px 18px 22px;scroll-padding:12px}
 .ff-intro{font-size:.75rem;color:var(--muted);margin-bottom:14px!important}
+.ff-look-search-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
+.ff-look-search{flex:1;min-width:130px;width:100%;border:1px solid var(--separator);border-radius:7px;background:var(--bg);padding:8px 10px;min-height:34px}
+.ff-look-search::placeholder{color:var(--muted)}
+.ff-look-search-row button{font-size:.75rem;border-color:var(--separator)}
+.ff-catalogue-note,.ff-look-empty{font-size:.75rem;color:var(--muted);padding:8px 0 12px}
+.ff-look-entry{position:relative;min-width:0;display:flex}
+.ff-look-entry>.ff-look{width:100%;height:100%}
+.ff-studio .ff-look-entry>.ff-favorite{position:absolute;right:11px;top:11px;width:30px;height:30px;min-height:30px;padding:0;border:1px solid #ffffff40;background:#18181cdd;color:#fff;font-size:19px;line-height:1;box-shadow:0 1px 3px #0004}
+.ff-studio .ff-look-entry>.ff-favorite[aria-pressed=true]{background:var(--selected);border-color:var(--accent);color:var(--accent)}
 .ff-look-filters{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
 .ff-look-filters button{font-size:.75rem;min-height:30px;padding:4px 8px;color:var(--muted);border-color:var(--separator)}
 .ff-look-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}

@@ -1,0 +1,191 @@
+{
+  "last_node_id": 10,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadVideo",
+      "pos": [
+        0,
+        100
+      ],
+      "size": [
+        340,
+        260
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [
+            1,
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        "input.mp4",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "FotufilmFilmEditor",
+      "pos": [
+        500,
+        100
+      ],
+      "size": [
+        1100,
+        850
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "film_settings",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmFilmEditor",
+        "fotufilm_studio_expanded": true
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"9242d189b6f8321a27c6f6a345aeb4e5991da569\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        24,
+        "linear-rec709"
+      ],
+      "title": "1 \u00b7 Film Emulation"
+    },
+    {
+      "id": 9,
+      "type": "FotufilmGradeEditor",
+      "pos": [
+        1660,
+        100
+      ],
+      "size": [
+        1100,
+        850
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 2
+        },
+        {
+          "name": "recipe_json",
+          "type": "STRING",
+          "link": 3,
+          "widget": {
+            "name": "recipe_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "finished_settings",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FotufilmGradeEditor",
+        "fotufilm_studio_expanded": true
+      },
+      "widgets_values": [
+        "{\"version\": 2, \"engine\": \"9242d189b6f8321a27c6f6a345aeb4e5991da569\", \"stock\": \"vision250d\", \"format\": \"super35\", \"medium\": \"screen\", \"digitalReference\": \"graded-print\", \"seed\": 1, \"params\": {\"ev\": 0, \"temperature\": 6504, \"tint\": 0, \"highlights\": 0, \"shadows\": 0, \"saturation\": 1, \"vibrance\": 0, \"grain\": 0.55, \"gradeShadowsWarmth\": 0, \"gradeHighlightsWarmth\": 0}, \"profile\": {\"halation\": 0, \"screenGrade\": 2, \"screenExposure\": 0}, \"sdr_output\": \"rolloff\"}",
+        "{}",
+        24,
+        "linear-rec709"
+      ],
+      "title": "2 \u00b7 Color Grade + Viewer"
+    },
+    {
+      "id": 10,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        520
+      ],
+      "size": [
+        440,
+        780
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# Open an existing HDR video\n\n1. Choose your MP4 or MOV in **Load Video**. Tagged BT.2020 HLG and PQ are detected automatically.\n2. The Film and Color editors open automatically. The first import prepares a small, compatible playback copy. No graph run or SDR-to-HDR generation is needed.\n3. Choose a look in **Film**, then adjust the result in **Color**. Before/after compares the same frame.\n4. For a lighter local test choose **640px** in Preview. This changes preview size only.\n\n**Your HDR remains the processing source.** Film and color use float values decoded from the original file. The moving monitor is an SDR view of those values, not a calibrated HDR display. The 768px playback copy drives timing/audio; the rendered preview uses the selected size.\n\n**Save to node** stores your recipe in the workflow. The editor outputs settings, not rendered video. Attach a separate export branch when ready.\n\nThis graph deliberately avoids Get Video Components: a 409-frame 4K RGB float batch would require about 38 GiB just for the source. File preview instead reads frames as needed. No LTX, NVIDIA HDR conversion, or archive is required for an already-HDR video."
+      ],
+      "title": "Using existing HDR video"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "VIDEO"
+    ],
+    [
+      2,
+      1,
+      0,
+      9,
+      0,
+      "VIDEO"
+    ],
+    [
+      3,
+      2,
+      0,
+      9,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        30,
+        0
+      ]
+    }
+  },
+  "version": 0.4
+}

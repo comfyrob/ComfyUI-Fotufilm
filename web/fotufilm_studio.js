@@ -51,12 +51,14 @@ async function registerSource(node,mode){
   }
   state.assetKeys[mode]=key;
   try{
+    state.caption.textContent='Preparing source playback…';
     const asset=await state.preview.register(file);
     if(state.assetKeys[mode]!==key||!states.has(node))return;
     state.assets[mode]=asset;
-    if(asset.playback&&!state.media?.source){setMedia(node,{...state.media,source:asset.playback});}
+    if(asset.playback&&mode==='original'){setMedia(node,{...state.media,playback:asset.playback});}
+    else if(asset.playback&&!state.media?.source){setMedia(node,{...state.media,source:asset.playback});}
     if(state.sourceMode===mode){state.editor?.setAsset(asset);if(active?.node===node)active.editor.setAsset(asset);}
-    state.caption.textContent=asset.info.hdr?'HDR master ready · Gear + Fotufilm':'Source ready · automatic film preview';
+    state.caption.textContent=asset.info.hdr?`${asset.info.encoding||'Float'} HDR source ready · Gear + Fotufilm`:'Source ready · automatic film preview';
   }catch(error){state.assetKeys[mode]=null;state.caption.textContent=error.message;}
 }
 function discoverSource(node){
@@ -126,7 +128,7 @@ function saveRecipe(node,recipe,lookId,adjustments){
 }
 function mediaOptions(node){
   const media=states.get(node)?.media||{},demo=Boolean(node.properties?.fotufilm_interface_demo);
-  return {source:viewURL(media.source)||(demo?new URL('viewer/demo/source.mp4',BASE).href:''),
+  return {source:viewURL(media.playback||media.source)||(demo?new URL('viewer/demo/source.mp4',BASE).href:''),
     rendered:viewURL(media.rendered)||(demo?new URL('viewer/demo/rendered.mp4',BASE).href:''),enhanced:viewURL(media.enhanced),
     hasHDR:Boolean(media.master||media.direct),renderedRecipe:media.rendered_recipe,recipe:readRecipe(node),lookId:node.properties?.fotufilm_studio_look,
     fps:media.fps||node.widgets?.find(w=>w.name==='fps')?.value||24,
@@ -183,10 +185,10 @@ function setMedia(node,media){
   const old=state.media;
   const sameSource=old?.source?.filename===media.source?.filename&&old?.source?.type===media.source?.type&&old?.source?.subfolder===media.source?.subfolder;
   state.media={...(sameSource?old:{}),...media,...returns.get(media.token)};
-  const current=state.media,url=viewURL(current.rendered||current.source);
+  const current=state.media,url=viewURL(current.rendered||current.playback||current.source);
   if(url&&state.video.getAttribute('src')!==url)state.video.src=url;
   state.caption.textContent=current.rendered?'Render returned · ready to review':'Source ready · choose your film recipe';
-  if(old?.rendered?.filename!==current.rendered?.filename||old?.source?.filename!==current.source?.filename){
+  if(old?.rendered?.filename!==current.rendered?.filename||old?.source?.filename!==current.source?.filename||old?.playback?.filename!==current.playback?.filename){
     const options=mediaOptions(node);state.editor?.updateMedia(options);if(active?.node===node)active.editor.updateMedia(options);
   }
 }

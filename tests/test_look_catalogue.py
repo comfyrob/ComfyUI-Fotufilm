@@ -39,5 +39,8 @@ class LookCatalogueTests(unittest.TestCase):
                         finally:worker.close()
             finally:runtime.close()
         for a,b in [('clean','chrome-road'),('print','silver-print'),('warm','soft-window'),
-                    ('slide','vivid-daylight'),('slide','cool-slide'),('silver','soft-silver')]:
+                    ('slide','vivid-daylight'),('slide','cool-slide'),('silver','soft-silver'),
+                    ('reala-dailies','seventies-print'),('dense-release','muted-thriller'),
+                    ('daylight-160','clean-beauty'),('quiet-landscape','summer-chrome'),
+                    ('studio-mono','grainy-night'),('instant-memory','phoenix-shift')]:
             self.assertGreater(float(np.abs(results[a]-results[b]).mean()),.001,(a,b))
